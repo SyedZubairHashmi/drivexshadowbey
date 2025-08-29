@@ -48,3 +48,4 @@ https://your-domain.vercel.app/api/test-connection
 ```
 
 This should return a success response if your environment variables are configured correctly.
+

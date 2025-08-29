@@ -125,3 +125,4 @@ npm run build && npm start
 - Never commit `.env` files to Git
 - Use environment variables for all sensitive data
 - MongoDB Atlas should have proper authentication and network access configured
+
