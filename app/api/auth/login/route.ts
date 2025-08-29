@@ -57,8 +57,19 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Error during login:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    // Return more specific error information for debugging
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { 
+        success: false, 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Database connection or validation error'
+      },
       { status: 500 }
     );
   }
