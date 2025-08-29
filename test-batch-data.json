@@ -1,0 +1,32 @@
+{
+  "batchNo": "BATCH-2023-001",
+  "investor": {
+    "name": "Muhammad Ali",
+    "contactNumber": "+92-300-9876543",
+    "emailAddress": "muhammad.ali@email.com",
+    "investorId": "INV-2023-001",
+    "cnic": "35202-9876543-1",
+    "investmentAmount": 10000000,
+    "percentageShare": 30,
+    "paymentDate": "2023-09-01T10:00:00.000Z",
+    "paymentMethod": "bank_transfer"
+  },
+  "supportDocuments": [
+    {
+      "documentType": "pdf",
+      "fileName": "investment_agreement_batch_001.pdf",
+      "fileUrl": "https://example.com/documents/agreement_batch_001.pdf"
+    },
+    {
+      "documentType": "image",
+      "fileName": "cnic_front_batch_001.jpg",
+      "fileUrl": "https://example.com/documents/cnic_front_batch_001.jpg"
+    }
+  ],
+  "notes": "First batch of 2023 with premium vehicles"
+}
+
+
+
+
+

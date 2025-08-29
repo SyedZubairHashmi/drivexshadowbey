@@ -1,0 +1,90 @@
+{
+  "carName": "Toyota Camry XSE",
+  "company": "TOYOTA",
+  "carType": "Sedan",
+  "carSegment": "Mid-size",
+  "engineNumber": "2.5L-ENG-2023-001",
+  "chasisNumber": "CHS-TOY-2023-001",
+  "auctionGrade": 4,
+  "importYear": 2023,
+  "manufacturingYear": 2023,
+  "assembly": "Import",
+  "engineCapacity": "2.5L",
+  "engineType": "Hybrid",
+  "interiorColor": "Black",
+  "mileage": "25,000 km",
+  "keywords": ["sedan", "automatic", "hybrid", "premium"],
+  "features": ["ABS+EBD", "Hill assist", "automatic climate control", "apple car play"],
+  "status": "warehouse",
+  "color": "Pearl White",
+  "deliveryTimeframe": "2-3 weeks",
+  "batchNo": "64f8a1b2c3d4e5f6a7b8c9d1",
+  "description": "Excellent condition Toyota Camry XSE with premium features. Low mileage and well-maintained.",
+  "financing": {
+    "originCity": "Tokyo",
+    "destinationCity": "Karachi",
+    "auctionPrice": {
+      "amount": 2500000,
+      "rate": 1,
+      "totalAmount": 2500000
+    },
+    "auctionExpenses": {
+      "amount": 125000,
+      "rate": 1,
+      "totalAmount": 125000
+    },
+    "inlandCharges": {
+      "amount": 75000,
+      "rate": 1,
+      "totalAmount": 75000
+    },
+    "loadingCharges": {
+      "amount": 50000,
+      "rate": 1,
+      "totalAmount": 50000
+    },
+    "containerCharges": {
+      "amount": 50000,
+      "rate": 1,
+      "totalAmount": 50000
+    },
+    "freightSea": {
+      "amount": 100000,
+      "rate": 1,
+      "totalAmount": 100000
+    },
+    "variantDuty": 200000,
+    "passportCharges": 30000,
+    "servicesCharges": 40000,
+    "transportCharges": 25000,
+    "repairCharges": 60000,
+    "miscellaneousCharges": 35000,
+    "vehicleValueCif": 3000000,
+    "landingCharges": 45000,
+    "customsDuty": 180000,
+    "salesTax": 150000,
+    "federalExciseDuty": 75000,
+    "incomeTax": 90000,
+    "freightAndStorageCharges": 20000,
+    "demurage": 15000,
+    "ageOfVehicle": 2
+  },
+  "images": {
+    "invoiceReceipt": "https://example.com/images/camry-invoice.jpg",
+    "coverPhoto": "https://example.com/images/camry-cover.jpg",
+    "auctionSheet": "https://example.com/documents/camry-auction.pdf",
+    "carPictures": [
+      "https://example.com/images/camry-front.jpg",
+      "https://example.com/images/camry-side.jpg",
+      "https://example.com/images/camry-back.jpg",
+      "https://example.com/images/camry-interior.jpg"
+    ]
+  },
+  "notes": "Premium sedan with advanced safety features",
+  "isFeatured": true
+}
+
+
+
+
+

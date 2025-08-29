@@ -1,0 +1,20 @@
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Source files
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# Styles
+*.css text eol=lf
+*.scss text eol=lf
+
+# Config files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Docs
+*.md text eol=lf
