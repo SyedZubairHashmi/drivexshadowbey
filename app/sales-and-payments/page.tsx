@@ -20,21 +20,165 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { customersData, getCustomerStats, type Customer } from "@/data/customers";
+// Customer interface based on MongoDB schema
+interface Customer {
+  _id: string;
+  vehicle: {
+    companyName: string;
+    model: string;
+    chassisNumber: string;
+  };
+  customer: {
+    name: string;
+    phoneNumber: string;
+    email?: string;
+    address?: string;
+  };
+  sale: {
+    saleDate: string;
+    salePrice: number;
+    paidAmount: number;
+    remainingAmount: number;
+    paymentStatus: 'Completed' | 'Pending' | 'inprogress';
+    paymentMethod: {
+      type: 'Cash' | 'Bank' | 'Cheque' | 'BankDeposit';
+      details: any;
+    };
+    note?: string;
+    document?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CustomerStats {
+  totalCustomers: number;
+  activeCustomers: number;
+  totalRevenue: number;
+  pendingPayments: number;
+  averageRevenue: number;
+  completedPayments: number;
+  inProgressPayments: number;
+  totalOutstanding: number;
+  pendingCustomers: number;
+  completedCustomers: number;
+}
 
 export default function SalesAndPaymentPage() {
   const router = useRouter();
   const [recentCustomers, setRecentCustomers] = useState<Customer[]>([]);
-  const [stats, setStats] = useState(getCustomerStats());
+  const [stats, setStats] = useState<CustomerStats>({
+    totalCustomers: 0,
+    activeCustomers: 0,
+    totalRevenue: 0,
+    pendingPayments: 0,
+    averageRevenue: 0,
+    completedPayments: 0,
+    inProgressPayments: 0,
+    totalOutstanding: 0,
+    pendingCustomers: 0,
+    completedCustomers: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Function to fetch customers from API
+  const fetchCustomers = async (limit: number = 50, page: number = 1): Promise<Customer[]> => {
+    try {
+      const response = await fetch(`/api/customers?limit=${limit}&page=${page}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch customers: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result.data || [];
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      return [];
+    }
+  };
+
+  // Function to calculate customer statistics
+  const calculateCustomerStats = (customers: Customer[]): CustomerStats => {
+    const totalCustomers = customers.length;
+    const totalRevenue = customers.reduce((sum, customer) => sum + customer.sale.salePrice, 0);
+    const pendingPayments = customers.reduce((sum, customer) => {
+      return sum + (customer.sale.remainingAmount || 0);
+    }, 0);
+
+    // Count by payment status
+    const completedPayments = customers.filter(c => c.sale.paymentStatus === 'Completed').length;
+    const inProgressPayments = customers.filter(c => c.sale.paymentStatus === 'inprogress').length;
+    const activeCustomers = customers.filter(c => c.sale.paymentStatus !== 'Completed').length;
+    const pendingCustomers = customers.filter(c => c.sale.paymentStatus === 'Pending').length;
+    const completedCustomers = customers.filter(c => c.sale.paymentStatus === 'Completed').length;
+
+    return {
+      totalCustomers,
+      activeCustomers,
+      totalRevenue,
+      pendingPayments,
+      averageRevenue: totalCustomers > 0 ? totalRevenue / totalCustomers : 0,
+      completedPayments,
+      inProgressPayments,
+      totalOutstanding: pendingPayments,
+      pendingCustomers,
+      completedCustomers
+    };
+  };
+
+  // Function to get recent customers
+  const getRecentCustomers = async (): Promise<Customer[]> => {
+    try {
+      const customers = await fetchCustomers(5, 1);
+      return customers.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } catch (error) {
+      console.error('Error getting recent customers:', error);
+      return [];
+    }
+  };
 
   useEffect(() => {
-    // Get the 5 most recent customers (based on join date)
-    const sortedCustomers = [...customersData]
-      .sort((a, b) => new Date(b.joinDate || '').getTime() - new Date(a.joinDate || '').getTime())
-      .slice(0, 5);
-    
-    setRecentCustomers(sortedCustomers);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const customers = await fetchCustomers(1000); // Get all customers for stats
+        const statsData = calculateCustomerStats(customers);
+        const recentCustomersData = await getRecentCustomers();
+        
+        setStats(statsData);
+        setRecentCustomers(recentCustomersData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="space-y-6 pt-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading sales data...</p>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   const handleNavigateToCustomers = () => {
     router.push('/sales-and-payments/customers');
@@ -194,21 +338,21 @@ export default function SalesAndPaymentPage() {
             <CardContent>
               <div className="space-y-4">
                 {recentCustomers.map((customer) => (
-                  <div key={customer.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                  <div key={customer._id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-blue-600 font-semibold text-sm">
-                          {customer.name.split(' ').map(n => n[0]).join('')}
+                          {customer.customer.name.split(' ').map((n: string) => n[0]).join('')}
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{customer.name}</p>
-                        <p className="text-xs text-gray-500">{customer.carsPurchased}</p>
+                        <p className="font-medium text-sm">{customer.customer.name}</p>
+                        <p className="text-xs text-gray-500">{customer.vehicle.companyName} {customer.vehicle.model}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">Rs {customer.totalSpend.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">{formatDate(customer.joinDate || '')}</p>
+                      <p className="text-sm font-medium">Rs {customer.sale.salePrice.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">{formatDate(customer.sale.saleDate)}</p>
                     </div>
                   </div>
                 ))}
