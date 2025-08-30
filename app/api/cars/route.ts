@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     const requiredFields = [
       'carName', 'company', 'carSegment', 'engineNumber', 'chasisNumber', 
       'auctionGrade', 'importYear', 'manufacturingYear', 'assembly', 'engineCapacity', 'engineType',
-      'interiorColor', 'mileage', 'color',
+      'interiorColor', 'mileage', 'exteriorColor',
       'batchNo', 'description', 'financing'
     ];
     

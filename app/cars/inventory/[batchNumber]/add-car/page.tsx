@@ -45,7 +45,7 @@ function AddCarContent({ params }: AddCarPageProps) {
     keywords: [],
     status: "warehouse", // Keep default status
     deliveryTimeframe: "",
-    color: "",
+    exteriorColor: "",
     selectedBatch: batchNumber, // Keep batch number
     manufacturingYear: "",
     engineType: "",
@@ -56,7 +56,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         "GPS", "ESP", "HILL ASSIST", "BLIND SPOT MONITOR", 
         "ELECTRONIC PARKING BRAKE", "DIGITAL COCKPIT", "SMART KEY ENTRY", 
         "HEADS UP DISPLAY HUD", "AUTOMATIC PARKING ASSIST APA", 
-        "NIGHT VISION", "ADAPTIVE CRUISE CONTROL"
+        "NIGHT VISION", "ADAPTIVE CRUISE CONTROL","MANY MORE"
       ],
     selectedFeatures: [],
     description: "",
@@ -120,7 +120,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           keywords: carData.keywords || prev.keywords,
           status: carData.status || prev.status,
           deliveryTimeframe: carData.deliveryTimeframe || prev.deliveryTimeframe,
-          color: carData.color || prev.color,
+          exteriorColor: carData.exteriorColor || prev.exteriorColor,
           selectedBatch: carData.batch || batchNumber,
           description: carData.description || prev.description,
           
@@ -1070,7 +1070,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             <Input
               type="text"
               placeholder="Enter Exterior Color (e.g., Sonic Red, Pearl White)"
-              value={formData.color}
+              value={formData.exteriorColor}
               onChange={(e) => handleInputChange('color', e.target.value)}
               className="placeholder-custom text-sm"
               style={{

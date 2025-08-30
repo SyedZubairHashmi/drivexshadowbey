@@ -58,7 +58,7 @@ const carSchema = new mongoose.Schema(
       enum: ["sold", "transit", "warehouse", "showroom"],
       default: "warehouse",
     },
-    color: { type: String, required: true, trim: true },
+    exteriorColor: { type: String, required: true, trim: true },
     deliveryTimeframe: { type: String, required: false, trim: true },
     batchNo: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
