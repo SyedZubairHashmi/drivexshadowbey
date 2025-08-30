@@ -124,7 +124,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               </div>
               <Button
                 onClick={handleEdit}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white text-black hover:bg-gray-100"
                 style={{
                   display: 'flex',
                   height: '50px',
@@ -134,7 +134,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   alignItems: 'center',
                   gap: '10px',
                   borderRadius: '50px',
-                  border: '1px solid rgba(0, 0, 0, 0.24)'
+                  border: '1px solid #0000003D',
                 }}
               >
                 <Edit className="h-4 w-4" />
@@ -158,7 +158,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               >
                 {car.carName}
               </h1>
-              <p className="text-lg text-gray-600 mt-1">{car.engineType}Hybrid</p>
+              <p className="text-lg text-gray-600 mt-1">{car.engineType}</p>
             </div>
             <div>
              <p>price</p>
@@ -179,177 +179,115 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
 
           {/* Car Icons and Details */}
           <div className="flex justify-between">
-
-
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <Gauge className="h-6 w-6 text-[#00674F]" />
-              <span className="text-gray-700">{car.mileage}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Settings className="h-6 w-6 text-[#00674F]" />
-              <span className="text-gray-700">{car.engineCapacity}2.2</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="h-6 w-6 text-[#00674F]" />
-              <span className="text-gray-700">{car.engineType}2.3g</span>
-            </div>
-          </div>
-
-          {/* Batch and Delivery Time */}
-          <div className="flex items-center gap-4">
-            <div 
-              className="flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-black text-white"
-        
-            >
-              <span className="text-sm font-medium">Batch {car.batchNo}</span>
-            </div>
-            <div 
-              className="flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-gray-200 "
-             
-            >
-              <span className="text-sm font-medium">Delivery: {car.deliveryTimeframe}</span>
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2">
+                <Gauge className="h-6 w-6 text-[#00674F]" />
+                <span className="text-gray-700">{car.mileage}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Settings className="h-6 w-6 text-[#00674F]" />
+                <span className="text-gray-700">{car.engineCapacity}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-6 w-6 text-[#00674F]" />
+                <span className="text-gray-700">{car.engineType}</span>
+              </div>
             </div>
           </div>
+
+          {/* Car Information Section */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Car Information</h2>
+              <Button
+                className="flex items-center justify-center text-gray-500 bg-white transition-all duration-200 ease-in-out hover:scale-110"
+                variant="ghost"
+                onClick={() => setCarInfoExpanded(!carInfoExpanded)}
+                style={{
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "100%",
+                  opacity: 0.4
+                }}
+              >
+                {carInfoExpanded ? (
+                  <i className="fa-solid fa-circle-minus transition-transform duration-200 ease-in-out" style={{ fontSize: "20px" }}></i>
+                ) : (
+                  <i className="fa-solid fa-circle-plus transition-transform duration-200 ease-in-out" style={{ fontSize: "20px" }}></i>
+                )}
+              </Button>
+            </div>
+
+            {carInfoExpanded && (
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                  <p className="text-lg">{car.company}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                  <p className="text-lg">{car.carName}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Chassis Number</label>
+                  <p className="text-lg">{car.chassisNumber}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Engine Number</label>
+                  <p className="text-lg">{car.engineNumber}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Car Segment</label>
+                  <p className="text-lg">{car.carSegment}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Auction Grade</label>
+                  <p className="text-lg">{car.auctionGrade}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Import Year</label>
+                  <p className="text-lg">{car.importYear}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Manufacturing Year</label>
+                  <p className="text-lg">{car.manufacturingYear}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Engine Type</label>
+                  <p className="text-lg">{car.engineType}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Assembly</label>
+                  <p className="text-lg">{car.assembly}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Engine Capacity</label>
+                  <p className="text-lg">{car.engineCapacity}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mileage</label>
+                  <p className="text-lg">{car.mileage}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Interior Color</label>
+                  <p className="text-lg">{car.interiorColor}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Exterior Color</label>
+                  <p className="text-lg">{car.color}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <p className="text-lg capitalize">{car.status}</p>
+                </div>
+              </div>
+            )}
           </div>
-
-                     {/* Car Information Section */}
-           <div className="space-y-6">
-             <div className="flex justify-between items-center">
-               <h2 
-                 className="text-2xl font-semibold"
-               >
-                 Car Information
-               </h2>
-               <Button
-                 className="flex items-center justify-center text-gray-500 bg-white transition-all duration-200 ease-in-out hover:scale-110"
-                 variant="ghost"
-                 onClick={() => setCarInfoExpanded(!carInfoExpanded)}
-                 style={{
-                   width: "34px",
-                   height: "34px",
-                   borderRadius: "100%",
-                   opacity: 0.4
-                 }}
-               >
-                 {carInfoExpanded ? (
-                   <i className="fa-solid fa-circle-minus transition-transform duration-200 ease-in-out" style={{ fontSize: "20px" }}></i>
-                 ) : (
-                   <i className="fa-solid fa-circle-plus transition-transform duration-200 ease-in-out" style={{ fontSize: "20px" }}></i>
-                 )}
-               </Button>
-             </div>
-
-             {/* Border line */}
-             <div 
-               style={{
-                 width: '100%',
-                 height: '1px',
-                 background: 'rgba(0, 0, 0, 0.24)'
-               }}
-             />
-
-             {carInfoExpanded && (
-               <div className="flex justify-between w-full">
-                 <div 
-                   style={{
-                     display: 'flex',
-                     width:'500px',
-                     flexDirection: 'column',
-                     alignItems: 'flex-start',
-                     gap: '18px'
-                   }}
-                 >
-                      <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Engine
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.engineNumber}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Manufacturer Year
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.manufacturingYear}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Chassis
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.chasisNumber}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Mileage
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.mileage}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Interior Color
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.interiorColor}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Engine Capacity
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.engineCapacity}</span>
-                    </div>
-                 </div>
-                 
-                                   <div 
-                    style={{
-                      display: 'flex',
-                      width:'500px',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '18px'
-                    }}
-                  >
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Engine Type
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.engineType}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Auction grade
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.auctionGrade}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Imported Year
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.importYear}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Color
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.color}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Assembly
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{car.assembly}</span>
-                    </div>
-                  </div>
-               </div>
-             )}
-           </div>
 
           {/* Financial Information Section */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 
-                className="text-2xl font-semibold"
-              >
-                Financial Information
-              </h2>
+              <h2 className="text-2xl font-semibold">Financial Information</h2>
               <Button
                 className="flex items-center justify-center text-gray-500 bg-white transition-all duration-200 ease-in-out hover:scale-110"
                 variant="ghost"
@@ -369,98 +307,40 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               </Button>
             </div>
 
-                         {/* Border line */}
-             <div 
-               style={{
-                 width: '100%',
-                 height: '1px',
-                 background: 'rgba(0, 0, 0, 0.24)'
-               }}
-             />
-
-             {financeInfoExpanded && (
-               <div className="flex justify-between w-full">
-                 <div 
-                   style={{
-                     display: 'flex',
-                     width:'500px',
-                     flexDirection: 'column',
-                     alignItems: 'flex-start',
-                     gap: '18px'
-                   }}
-                 >
-                                       <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Auction Price
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.auctionPrice.totalAmount)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Auction Expenses
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.auctionExpenses.totalAmount)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Inland Charges
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.inlandCharges.totalAmount)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Loading Charges
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.loadingCharges.totalAmount)}</span>
-                    </div>
-                 </div>
-                 
-                 <div 
-                   style={{
-                     display: 'flex',
-                     width:'500px',
-                     flexDirection: 'column',
-                     alignItems: 'flex-start',
-                     gap: '18px'
-                   }}
-                 >
-                                       <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Container Charges
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.containerCharges.totalAmount)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Freight Sea
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.freightSea.totalAmount)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Variant Duty
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.financing.variantDuty)}</span>
-                    </div>
-                    <div className="flex items-center gap-[100px] justify-between">
-                      <span className="w-[200px]" style={{ fontSize: '18px', fontWeight: 700, color: '#000000' }}>
-                        Total Cost
-                      </span>
-                      <span style={{ fontSize: '18px', fontWeight: 500, color: '#000000' }}>{formatPrice(car.totalCost || 0)}</span>
-                    </div>
-                 </div>
-               </div>
-             )}
+            {financeInfoExpanded && (
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Auction Price</label>
+                  <p className="text-lg">{formatPrice(car.financing.auctionPrice.totalAmount)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Inland Charges</label>
+                  <p className="text-lg">{formatPrice(car.financing.inlandCharges.totalAmount)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Container Charges</label>
+                  <p className="text-lg">{formatPrice(car.financing.containerCharges.totalAmount)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Auction Expenses</label>
+                  <p className="text-lg">{formatPrice(car.financing.auctionExpenses.totalAmount)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Loading Charges</label>
+                  <p className="text-lg">{formatPrice(car.financing.loadingCharges.totalAmount)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Freight Sea</label>
+                  <p className="text-lg">{formatPrice(car.financing.freightSea.totalAmount)}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description Section */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 
-                className="text-2xl font-semibold"
-              >
-                Description
-              </h2>
+              <h2 className="text-2xl font-semibold">Description</h2>
               <Button
                 className="flex items-center justify-center text-gray-500 bg-white transition-all duration-200 ease-in-out hover:scale-110"
                 variant="ghost"
@@ -481,77 +361,83 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             </div>
 
             {descriptionExpanded && (
-              <div className="space-y-4">
+              <div>
                 <p className="text-gray-700 leading-relaxed">{car.description}</p>
-                
-                {/* Invoice and Receipt */}
-                <div className="flex gap-4">
-                  <div 
-                    className="flex flex-col justify-center items-start gap-6 p-3 rounded-xl border"
-                    style={{
-                      display: 'flex',
-                      width: '388px',
-                      padding: '16px 12px',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'flex-start',
-                      gap: '24px',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(0, 0, 0, 0.12)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Download className="h-4 w-4" />
-                      <span className="text-sm font-medium">Invoice</span>
-                    </div>
-                    {car.images.invoiceReceipt && (
-                      <img 
-                        src={car.images.invoiceReceipt} 
-                        alt="Invoice" 
-                        className="w-full h-32 object-cover rounded"
-                      />
-                    )}
-                  </div>
-                  
-                  <div 
-                    className="flex flex-col justify-center items-start gap-6 p-3 rounded-xl border"
-                    style={{
-                      display: 'flex',
-                      width: '388px',
-                      padding: '16px 12px',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'flex-start',
-                      gap: '24px',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(0, 0, 0, 0.12)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Download className="h-4 w-4" />
-                      <span className="text-sm font-medium">Receipt</span>
-                    </div>
-                    {car.images.auctionSheet && (
-                      <img 
-                        src={car.images.auctionSheet} 
-                        alt="Receipt" 
-                        className="w-full h-32 object-cover rounded"
-                      />
-                    )}
-                  </div>
-                </div>
               </div>
             )}
+          </div>
+
+          {/* Documents Section */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Documents</h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Invoice Receipt */}
+              {car.images.invoiceReceipt && (
+                <div 
+                  className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                  style={{
+                    display: 'flex',
+                    padding: '16px 12px',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    gap: '24px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)'
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    <span className="text-sm font-medium">Invoice</span>
+                  </div>
+                  {car.images.invoiceReceipt && (
+                    <img 
+                      src={car.images.invoiceReceipt} 
+                      alt="Invoice" 
+                      className="w-full h-32 object-cover rounded"
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Auction Sheet */}
+              {car.images.auctionSheet && (
+                <div 
+                  className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                  style={{
+                    display: 'flex',
+                    padding: '16px 12px',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    gap: '24px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)'
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    <span className="text-sm font-medium">Receipt</span>
+                  </div>
+                  {car.images.auctionSheet && (
+                    <img 
+                      src={car.images.auctionSheet} 
+                      alt="Receipt" 
+                      className="w-full h-32 object-cover rounded"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Car Pictures Section */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 
-                className="text-2xl font-semibold"
-              >
-                Car Pictures
-              </h2>
+              <h2 className="text-2xl font-semibold">Car Pictures</h2>
               <Button
                 className="flex items-center justify-center text-gray-500 bg-white transition-all duration-200 ease-in-out hover:scale-110"
                 variant="ghost"

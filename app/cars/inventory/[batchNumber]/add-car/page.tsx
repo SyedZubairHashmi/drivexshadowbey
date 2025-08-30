@@ -438,7 +438,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         <div>
           <h2 style={{
             color: 'var(--Black-black-500, #000)',
-            fontFamily: 'Serotiva',
+            // fontFamily: 'Serotiva',
             fontSize: '18px',
             fontStyle: 'normal',
             fontWeight: '500',
@@ -463,7 +463,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -481,7 +481,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -546,7 +546,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-                      <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>
+          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>
               Chassis Number (VIN) <span className="text-red-500">*</span>
               <span className="text-xs text-gray-500 ml-2">(Must be unique)</span>
             </label>
@@ -562,7 +562,7 @@ function AddCarContent({ params }: AddCarPageProps) {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -588,7 +588,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -605,7 +605,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -644,7 +644,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -681,7 +681,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -717,7 +717,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -797,7 +797,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -836,7 +836,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -848,7 +848,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Interior Color</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Interior Color</label>
             <Input
               type="text"
               placeholder="Enter Interior Color (e.g., Black Leather, Beige)"
@@ -861,7 +861,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -870,7 +870,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Mileage</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Mileage</label>
             <Input
               type="text"
               placeholder="Enter Mileage (e.g., 14k, 50,000 km)"
@@ -883,7 +883,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -894,7 +894,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-          <label className="block text-sm font-semibold text-black mb-2" >Keywords</label>
+          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Keywords</label>
           <div className="relative">
             <Input
               type="text"
@@ -917,7 +917,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -973,7 +973,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
         <div className="grid grid-cols-2 gap-6 w-full">
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Select Status</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Select Status</label>
             <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -981,7 +981,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1008,7 +1008,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
           {formData.status === 'transit' && (
             <div>
-              <label className="block text-sm font-semibold text-black mb-2" >Delivery timeframe</label>
+              <label className="block text-sm font-medium text-black mb-2" >Delivery timeframe</label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -1022,7 +1022,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                     borderRadius: '8px',
                     opacity: 1,
                     gap: '12px',
-                    borderWidth: '1px',
+                    border: '1px solid #0000003D',
                     paddingTop: '10px',
                     paddingRight: '12px',
                     paddingBottom: '10px',
@@ -1036,7 +1036,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
           {formData.status !== 'transit' && (
             <div>
-              <label className="block text-sm font-semibold text-black mb-2 opacity-50" >Delivery timeframe</label>
+              <label className="block text-sm font-medium text-black mb-2 opacity-50" >Delivery timeframe</label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -1051,7 +1051,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                     borderRadius: '8px',
                     opacity: 0.5,
                     gap: '12px',
-                    borderWidth: '1px',
+                    border: '1px solid #0000003D',
                     paddingTop: '10px',
                     paddingRight: '12px',
                     paddingBottom: '10px',
@@ -1066,7 +1066,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Color</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Color</label>
             <Input
               type="text"
               placeholder="Enter Exterior Color (e.g., Sonic Red, Pearl White)"
@@ -1079,7 +1079,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',  
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1089,7 +1089,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Select Batch</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Select Batch</label>
             <Input
               type="text"
               placeholder="Enter Batch Number"
@@ -1102,7 +1102,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1113,7 +1113,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-          <label className="block text-sm font-semibold text-black mb-2" >Car description</label>
+          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Car description</label>
           <Textarea
             placeholder="Enter detailed car description..."
             value={formData.description}
@@ -1122,7 +1122,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             style={{
               minHeight: '100px',
               borderRadius: '8px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               padding: '12px',
               resize: 'vertical'
             }}
@@ -1133,7 +1133,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-          <label className="block text-sm font-semibold text-black mb-2" >Features ({formData.features.length} available)</label>
+          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Features ({formData.features.length} available)</label>
           <div style={{
             display: 'flex',
             width: '100%',
@@ -1202,7 +1202,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         <div className="flex justify-between items-center w-full">
           <h2 style={{
             color: 'var(--Black-black-500, #000)',
-            fontFamily: 'Serotiva',
+            // fontFamily: 'Serotiva',
             fontSize: '18px',
             fontStyle: 'normal',
             fontWeight: '500',
@@ -1230,7 +1230,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             alignSelf: 'stretch'
           }}>
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Auction price</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Auction price</label>
 
               <div
                 style={{
@@ -1240,7 +1240,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   padding: "10px 12px",
                   alignItems: "center",
                   gap: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: '1px solid #0000003D',
                   borderRadius: "8px",
                   backgroundColor: "#fff",
                 }}
@@ -1254,7 +1254,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',  
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1280,7 +1280,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',  
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1316,7 +1316,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             </div>
 
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Inland charges</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Inland charges</label>
               <div style={{
                 display: 'flex',
                 width: '100%',
@@ -1324,7 +1324,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 padding: '10px 12px',
                 alignItems: 'center',
                 gap: '12px',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
+                border: '1px solid #0000003D',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
@@ -1337,7 +1337,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1363,7 +1363,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',  
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1398,7 +1398,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             </div>
 
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Container Charges (Inland)</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Container Charges (Inland)</label>
               <div style={{
                 display: 'flex',
                 width: '100%',
@@ -1406,7 +1406,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 padding: '10px 12px',
                 alignItems: 'center',
                 gap: '12px',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
+                border: '1px solid #0000003D',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
@@ -1419,7 +1419,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1445,7 +1445,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1489,7 +1489,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             alignSelf: 'stretch'
           }}>
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Auction expenses/taxes</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Auction expenses/taxes</label>
               <div style={{
                 display: 'flex',
                 width: '100%',
@@ -1497,7 +1497,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 padding: '10px 12px',
                 alignItems: 'center',
                 gap: '12px',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
+                border: '1px solid #0000003D',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
@@ -1510,7 +1510,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1536,7 +1536,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1571,7 +1571,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             </div>
 
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Loading charges (inland)</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Loading charges (inland)</label>
               <div style={{
                 display: 'flex',
                 width: '100%',
@@ -1579,7 +1579,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 padding: '10px 12px',
                 alignItems: 'center',
                 gap: '12px',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
+                border: '1px solid #0000003D',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
@@ -1592,7 +1592,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1618,7 +1618,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1653,7 +1653,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             </div>
 
             <div className="w-full">
-              <label className="block text-sm font-semibold text-black mb-2">Freight Sea</label>
+              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Freight Sea</label>
               <div style={{
                 display: 'flex',
                 width: '100%',
@@ -1661,7 +1661,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 padding: '10px 12px',
                 alignItems: 'center',
                 gap: '12px',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
+                border: '1px solid #0000003D',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
@@ -1674,7 +1674,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1700,7 +1700,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                   }
                   style={{
                     minWidth: "40px",
-                    border: "0.6px solid rgba(0, 0, 0, 0.24)",
+                    border: '1px solid #0000003D',
                     borderRadius: "5px",
                     backgroundColor: "#fff",
                     padding: "0 8px",
@@ -1739,7 +1739,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         {/* Other Charges and Details */}
         <div className="grid grid-cols-2 gap-6 w-full">
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Origin City</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Origin City</label>
             <Input
               type="text"
               placeholder="Enter origin city"
@@ -1752,7 +1752,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1762,7 +1762,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Destination City</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Destination City</label>
             <Input
               type="text"
               placeholder="Enter destination city"
@@ -1775,7 +1775,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1785,7 +1785,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Varient duty</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Varient duty</label>
             <Input
               type="number"
               placeholder="0"
@@ -1798,7 +1798,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1808,7 +1808,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Passport charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Passport charges</label>
             <Input
               type="number"
               placeholder="0"
@@ -1821,7 +1821,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1831,7 +1831,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Services charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Services charges</label>
             <Input
               type="number"
               placeholder="0"
@@ -1844,7 +1844,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1854,7 +1854,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Transport charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Transport charges</label>
             <Input
               type="number"
               placeholder="0"
@@ -1867,7 +1867,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1877,7 +1877,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Repair charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Repair charges</label>
             <Input
               type="number"
               placeholder="0"
@@ -1890,7 +1890,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1899,7 +1899,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             />
           </div>
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Vehicle Value CIF</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Vehicle Value CIF</label>
             <Input
               type="number"
               placeholder="Enter vehicle value CIF"
@@ -1912,7 +1912,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1922,7 +1922,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Landing charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Landing charges</label>
             <Input
               type="number"
               placeholder="Enter landing charges"
@@ -1935,7 +1935,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1945,7 +1945,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Customs duty</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Customs duty</label>
             <Input
               type="number"
               placeholder="Enter customs duty"
@@ -1958,7 +1958,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1968,7 +1968,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Sales tax</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Sales tax</label>
             <Input
               type="number"
               placeholder="Enter sales tax"
@@ -1981,7 +1981,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -1991,7 +1991,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Federal excise duty</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Federal excise duty</label>
             <Input
               type="number"
               placeholder="Enter federal excise duty"
@@ -2004,7 +2004,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2014,7 +2014,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Income tax</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Income tax</label>
             <Input
               type="number"
               placeholder="Enter income tax"
@@ -2027,7 +2027,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2037,7 +2037,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Freight and storage charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Freight and storage charges</label>
             <Input
               type="number"
               placeholder="Enter freight and storage charges"
@@ -2050,7 +2050,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2060,7 +2060,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Demurage</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Demurage</label>
             <Input
               type="number"
               placeholder="Enter demurage"
@@ -2073,7 +2073,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2083,7 +2083,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-semibold text-black mb-2">Age of the vehicle</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Age of the vehicle</label>
             <Input
               type="number"
               placeholder="Enter age of vehicle"
@@ -2096,7 +2096,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2106,7 +2106,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
         </div>
           <div className="w-full">
-                          <label className="block text-sm font-semibold text-black mb-2">Miscellaneous charges</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Miscellaneous charges</label>
             <Input
               type="number"
               placeholder="Enter miscellaneous charges"
@@ -2119,7 +2119,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -2150,7 +2150,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         <div>
           <h3 style={{
             color: 'var(--Black-black-500, #000)',
-            fontFamily: 'Serotiva',
+            
             fontSize: '18px',
             fontStyle: 'normal',
             fontWeight: '500',

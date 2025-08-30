@@ -221,7 +221,7 @@ export default function RemainingBalancePage() {
                   placeholder="Search customers..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none text-sm"
+                  className="flex-1 bg-transparent border-none outline-none text-sm search-input"
                   style={{
                     color: "#374151"
                   }}

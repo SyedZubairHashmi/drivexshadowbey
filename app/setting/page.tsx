@@ -448,7 +448,7 @@ export default function ProfileSettings() {
         {/* Debug Info */}
         {userId && (
           <div className="text-xs text-gray-500">
-            User ID: {userId}
+            {/* User ID: {userId} */}
           </div>
         )}
 
@@ -461,7 +461,7 @@ export default function ProfileSettings() {
 
                 <div className="flex flex-col items-center text-center">
                   <div className="relative mb-4">
-                    <Avatar className="w-28 h28 border-0 shadow-none">
+                    <Avatar className="w-28 h-28 border-0 shadow-none">
                       <AvatarImage
                         src={user?.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/setting.PNG-ITZDSniVv3RJYHvsUU1aKz6igsT5NP.png"}
                         alt="Profile"

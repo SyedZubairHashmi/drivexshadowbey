@@ -2,68 +2,224 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== Local Raleway Font Definitions ========== */
-@font-face {
-  font-family: 'Serotiva';
-  src: url('/serotiva/Serotiva-SemiBold-BF663985088d9b0.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+/* Basic fallback styles in case Tailwind fails */
+* {
+  box-sizing: border-box;
 }
 
-@font-face {
-  font-family: 'Serotiva';
-  src: url('/serotiva/Serotiva-SemiBold-BF663985088d9b0.otf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ========== Global font usage ========== */
 body {
-  font-family: 'Serotiva', sans-serif;
   margin: 0;
   padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #ffffff;
   color: #000000;
 }
 
-/* Heading styles */
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Serotiva', sans-serif;
-  font-weight: 700;
-  font-style: normal;
-  margin: 0;
+/* Ensure basic layout works */
+.flex {
+  display: flex;
 }
 
-/* Paragraphs and spans */
-p, span {
-  font-family: 'Serotiva', sans-serif;
-  font-weight: 300;
-  font-style: normal;
+.flex-1 {
+  flex: 1;
 }
 
-/* Labels */
-label {
-  font-family: 'Serotiva', sans-serif;
-  font-weight: 400;
-  font-style: normal;
+.h-screen {
+  height: 100vh;
 }
 
-/* Tailwind Utilities can override */
-.raleway-100 { font-family: 'Serotiva', sans-serif; font-weight: 100; }
-.raleway-200 { font-family: 'Serotiva', sans-serif; font-weight: 200; }
-.raleway-300 { font-family: 'Serotiva', sans-serif; font-weight: 300; }
-.raleway-400 { font-family: 'Serotiva', sans-serif; font-weight: 400; }
-.raleway-500 { font-family: 'Serotiva', sans-serif; font-weight: 500; }
-.raleway-600 { font-family: 'Serotiva', sans-serif; font-weight: 600; }
-.raleway-700 { font-family: 'Serotiva', sans-serif; font-weight: 700; }
-.raleway-800 { font-family: 'Serotiva', sans-serif; font-weight: 800; }
-.raleway-900 { font-family: 'Serotiva', sans-serif; font-weight: 900; }
+.bg-white {
+  background-color: #ffffff;
+}
 
-/* Tailwind base and custom styles */
+.text-black {
+  color: #000000;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
 @layer base {
-  /* your custom base styles here, if needed */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Custom placeholder styles */
+  input::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  input::-webkit-input-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  input::-moz-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  input:-ms-input-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Search input placeholder styles */
+  .search-input::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .search-input::-webkit-input-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .search-input::-moz-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .search-input:-ms-input-placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /* Custom dropdown styles */
+  select {
+    border-radius: 8px !important;
+    border-width: 1px !important;
+  }
+  
+  select:focus {
+    border-color: black !important;
+  }
+  
+  select:hover {
+    border-color: #4B5563 !important; /* gray-600 */
+  }
+  
+  /* Dropdown options styling */
+  select option {
+    padding: 8px 12px !important;
+    background-color: white !important;
+    color: black !important;
+    border-radius: 4px !important;
+    margin: 2px 0 !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+  
+  select option:hover {
+    background-color: #F3F4F6 !important; /* gray-100 */
+    cursor: pointer !important;
+  }
+  
+  select option:checked {
+    background-color: #E5E7EB !important; /* gray-200 */
+    font-weight: 500 !important;
+  }
+  
+  /* Dropdown list container styling */
+  select:focus {
+    border-color: black !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Ensure dropdown list has proper styling */
+  select:not([size]) {
+    background-image: none !important;
+  }
+  
+  /* Remove gray border from Select component */
+  [data-radix-select-trigger] {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+  }
+  
+  [data-radix-select-trigger]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+  }
+  
+  [data-radix-select-trigger]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+  }
+  
+  /* Remove any additional borders or outlines */
+  [data-radix-select-trigger]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Target the specific Select component */
+  .w-full.border.border-black[data-radix-select-trigger] {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+  }
 }
