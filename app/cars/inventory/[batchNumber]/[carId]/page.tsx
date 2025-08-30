@@ -370,121 +370,121 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 <div style={{ width: '410px' }}>
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Auction Price</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.auctionPrice.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.auctionPrice?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Auction Expenses</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.auctionExpenses.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.auctionExpenses?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Inland Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.inlandCharges.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.inlandCharges?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Loading Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.loadingCharges.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.loadingCharges?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Container Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.containerCharges.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.containerCharges?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Freight Sea</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.freightSea.totalAmount)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.freightSea?.totalAmount || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Variant Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.variantDuty)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.variantDuty || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Passport Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.passportCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.passportCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Services Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.servicesCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.servicesCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Transport Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.transportCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.transportCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Repair Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.repairCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.repairCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Miscellaneous</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.miscellaneousCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.miscellaneousCharges || 0)}</span>
                   </div>
                 </div>
 
                                 {/* Right Column */}
                 <div style={{ width: '410px' }}>
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
+                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Vehicle Value CIF</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.vehicleValueCif)}</span>
-                  </div> 
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.vehicleValueCif || 0)}</span>
+                  </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Landing Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.landingCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.landingCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Customs Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.customsDuty)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.customsDuty || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Sales Tax</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.salesTax)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.salesTax || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Federal Excise Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.federalExciseDuty)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.federalExciseDuty || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Income Tax</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.incomeTax)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.incomeTax || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Freight & Storage</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.freightAndStorageCharges)}</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.freightAndStorageCharges || 0)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Demurage</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing.demurage)}</span>
-                </div>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.demurage || 0)}</span>
+                  </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Age of Vehicle</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing.ageOfVehicle} years</span>
-                </div>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.ageOfVehicle || 0} years</span>
+                  </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Origin City</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing.originCity}</span>
-                </div>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.originCity || 'N/A'}</span>
+                  </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Destination City</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing.destinationCity}</span>
-                </div>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.destinationCity || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -565,7 +565,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               </Button>
             </div>
 
-            {invoiceReceiptExpanded && car.images.invoiceReceipt && (
+            {invoiceReceiptExpanded && (
               <div 
                 style={{
                   width: '388px',
@@ -617,10 +617,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <div style={{ fontSize: '14px', fontWeight: '500', color: '#333333' }}>
-                    Vitara Invoice Receipt.pdf
+                    {car.images?.invoiceReceipt ? 'Invoice Receipt.pdf' : 'No invoice available'}
                   </div>
                   <div style={{ fontSize: '12px', color: '#666666' }}>
-                    525KB • 100% uploaded
+                    {car.images?.invoiceReceipt ? '525KB • 100% uploaded' : 'File not uploaded'}
                   </div>
                 </div>
 
@@ -630,20 +630,20 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                     width: '32px',
                     height: '32px',
                     gap: '8px',
-                    opacity: 1,
+                    opacity: car.images?.invoiceReceipt ? 1 : 0.5,
                     borderRadius: '19.2px',
                     padding: '6.4px',
-                    backgroundColor: '#00AC0B1F',
+                    backgroundColor: car.images?.invoiceReceipt ? '#00AC0B1F' : '#CCCCCC',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: 'pointer'
+                    cursor: car.images?.invoiceReceipt ? 'pointer' : 'not-allowed'
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V3" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 10L12 15L17 10" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 15V3" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
               </div>
@@ -673,7 +673,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               </Button>
             </div>
 
-            {auctionSheetExpanded && car.images.auctionSheet && (
+            {auctionSheetExpanded && (
               <div 
                 style={{
                   width: '388px',
@@ -725,10 +725,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <div style={{ fontSize: '14px', fontWeight: '500', color: '#333333' }}>
-                    Vitara Auction Sheet.pdf
+                    {car.images?.auctionSheet ? 'Auction Sheet.pdf' : 'No auction sheet available'}
                   </div>
                   <div style={{ fontSize: '12px', color: '#666666' }}>
-                    234KB • 100% uploaded
+                    {car.images?.auctionSheet ? '234KB • 100% uploaded' : 'File not uploaded'}
                   </div>
                 </div>
 
@@ -738,20 +738,20 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                     width: '32px',
                     height: '32px',
                     gap: '8px',
-                    opacity: 1,
+                    opacity: car.images?.auctionSheet ? 1 : 0.5,
                     borderRadius: '19.2px',
                     padding: '6.4px',
-                    backgroundColor: '#00AC0B1F',
+                    backgroundColor: car.images?.auctionSheet ? '#00AC0B1F' : '#CCCCCC',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: 'pointer'
+                    cursor: car.images?.auctionSheet ? 'pointer' : 'not-allowed'
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V3" stroke="#29A403" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 10L12 15L17 10" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 15V3" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
               </div>
