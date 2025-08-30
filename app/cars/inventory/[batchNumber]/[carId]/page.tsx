@@ -61,14 +61,14 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
     router.push(`/cars/inventory/${batchNumber}/add-car?edit=true&carData=${carData}`);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-PKR', {
-      style: 'currency',
-      currency: 'PKR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+      const formatPrice = (price: number) => {
+      return new Intl.NumberFormat('en-PK', {
+        style: 'currency',
+        currency: 'PKR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(price);
+    };
 
   if (loading) {
     return (
