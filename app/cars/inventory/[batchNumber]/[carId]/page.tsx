@@ -195,6 +195,56 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 <span className="text-gray-700">{car.engineType}</span>
               </div>
             </div>
+            
+            {/* Batch and Transit Tags */}
+            <div className="flex items-center gap-4">
+              {/* Batch Tag */}
+              <div style={{
+                width: '73px',
+                height: '25px',
+                borderRadius: '1000px',
+                padding: '4px 10px',
+                gap: '10px',
+                opacity: 1,
+                backgroundColor: '#000000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span style={{
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  Batch {car.batchNo}
+                </span>
+              </div>
+              
+              {/* Transit Tag */}
+              <div style={{
+                width: '148px',
+                height: '25px',
+                borderRadius: '1000px',
+                padding: '4px 10px',
+                gap: '10px',
+                opacity: 1,
+                backgroundColor: '#FA1A1B1F',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span style={{
+                  color: '#FA1A1B',
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  {car.status === 'transit' ? `In Transit - ${car.deliveryTimeframe || '24 Weeks'}` : 
+                   car.status === 'warehouse' ? 'In Warehouse' :
+                   car.status === 'showroom' ? 'In Showroom' :
+                   car.status === 'sold' ? 'Sold' : 'Available'}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Car Information Section */}
@@ -485,6 +535,78 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Destination City</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.destinationCity || 'N/A'}</span>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Batch and Delivery Info Row */}
+            {financeInfoExpanded && (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginTop: '20px',
+                padding: '16px 0'
+              }}>
+                {/* Left side - Batch Number */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px' 
+                }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: '#000000',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: 'white', fontSize: '12px', fontWeight: '600' }}>B</span>
+                  </div>
+                  <span style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    backgroundColor: '#000000',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '20px'
+                  }}>
+                    Batch {car.batchNo}
+                  </span>
+                </div>
+
+                {/* Right side - Delivery Timeframe */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px' 
+                }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: '#FF6B6B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: 'white', fontSize: '12px', fontWeight: '600' }}>T</span>
+                  </div>
+                  <span style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: '#FF6B6B',
+                    backgroundColor: '#FFE5E5',
+                    padding: '8px 16px',
+                    borderRadius: '20px'
+                  }}>
+                    {car.status === 'transit' ? `In Transit - ${car.deliveryTimeframe || '24 Weeks'}` : 
+                     car.status === 'warehouse' ? 'In Warehouse' :
+                     car.status === 'showroom' ? 'In Showroom' :
+                     car.status === 'sold' ? 'Sold' : 'Available'}
+                  </span>
                 </div>
               </div>
             )}
