@@ -192,13 +192,13 @@ export default function AllInvestorsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="font-medium text-gray-900">S.No</TableHead>
-                  <TableHead className="font-medium text-gray-900">Investor Name</TableHead>
-                  <TableHead className="font-medium text-gray-900">Invested Amount</TableHead>
-                  <TableHead className="font-medium text-gray-900">Profit %</TableHead>
-                  <TableHead className="font-medium text-gray-900">Profit Share</TableHead>
-                  <TableHead className="font-medium text-gray-900">Payment Status</TableHead>
-                  <TableHead className="font-medium text-gray-900">Actions</TableHead>
+                  <TableHead>S.No</TableHead>
+                  <TableHead >Investor Name</TableHead>
+                  <TableHead >Invested Amount</TableHead>
+                  <TableHead >Profit %</TableHead>
+                  <TableHead >Profit Share</TableHead>
+                  <TableHead >Payment Status</TableHead>
+                  <TableHead >Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -226,11 +226,11 @@ export default function AllInvestorsPage() {
                 ) : (
                   filteredInvestors.map((investor: Investor, index: number) => (
                     <TableRow key={investor._id} style={{ height: '49px' }}>
-                      <TableCell className="text-gray-600">{index + 1}</TableCell>
-                      <TableCell className="font-medium text-gray-900">{investor.name}</TableCell>
-                      <TableCell className="text-gray-600">PKR {investor.investAmount.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-600">{investor.percentageShare}%</TableCell>
-                      <TableCell className="text-gray-600">PKR {(investor.investAmount * investor.percentageShare / 100).toLocaleString()}</TableCell>
+                      <TableCell className="text-black-500">{index + 1}</TableCell>
+                      <TableCell className="font-medium text-black-500">{investor.name}</TableCell>
+                      <TableCell className="text-black-500">PKR {investor.investAmount.toLocaleString()}</TableCell>
+                      <TableCell className="text-black-500">{investor.percentageShare}%</TableCell>
+                      <TableCell className="text-black-500">PKR {(investor.investAmount * investor.percentageShare / 100).toLocaleString()}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(investor.paymentMethod.type)}`}>
                           {investor.paymentMethod.type.charAt(0).toUpperCase() + investor.paymentMethod.type.slice(1)}

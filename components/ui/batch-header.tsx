@@ -292,10 +292,10 @@ export function BatchHeader({
                   opacity: 1
                 }}
               >
-                <SelectItem value="all" style={{ fontWeight: "500" }}>All Grades</SelectItem>
-                <SelectItem value="5" style={{ fontWeight: "500" }}>5</SelectItem>
-                <SelectItem value="4" style={{ fontWeight: "500" }}>4</SelectItem>
-                <SelectItem value="3" style={{ fontWeight: "500" }}>3</SelectItem>
+                <SelectItem value="all" >All Grades</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="4" >4</SelectItem>
+                <SelectItem value="3" >3</SelectItem>
               </SelectContent>
             </Select>
 
@@ -326,12 +326,12 @@ export function BatchHeader({
                   opacity: 1
                 }}
               >
-                <SelectItem value="all" style={{ fontWeight: "500" }}>All Years</SelectItem>
-                <SelectItem value="2024" style={{ fontWeight: "500" }}>2024</SelectItem>
-                <SelectItem value="2023" style={{ fontWeight: "500" }}>2023</SelectItem>
-                <SelectItem value="2022" style={{ fontWeight: "500" }}>2022</SelectItem>
-                <SelectItem value="2021" style={{ fontWeight: "500" }}>2021</SelectItem>
-                <SelectItem value="2020" style={{ fontWeight: "500" }}>2020</SelectItem>
+                <SelectItem value="all" >All Years</SelectItem>
+                <SelectItem value="2024" >2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+                <SelectItem value="2022" >2022</SelectItem>
+                <SelectItem value="2021" >2021</SelectItem>
+                <SelectItem value="2020" >2020</SelectItem>
               </SelectContent>
             </Select>
 
@@ -362,11 +362,11 @@ export function BatchHeader({
                   opacity: 1
                 }}
               >
-                <SelectItem value="all" style={{ fontWeight: "500" }}>All Status</SelectItem>
-                <SelectItem value="sold" style={{ fontWeight: "500" }}>Sold</SelectItem>
-                <SelectItem value="transit" style={{ fontWeight: "500" }}>In Transit</SelectItem>
-                <SelectItem value="warehouse" style={{ fontWeight: "500" }}>Warehouse</SelectItem>
-                <SelectItem value="showroom" style={{ fontWeight: "500" }}>Showroom</SelectItem>
+                <SelectItem value="all" >All Status</SelectItem>
+                <SelectItem value="sold" >Sold</SelectItem>
+                <SelectItem value="transit" >In Transit</SelectItem>
+                <SelectItem value="warehouse" >Warehouse</SelectItem>
+                <SelectItem value="showroom" >Showroom</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -198,15 +198,15 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="font-medium text-gray-900">S.No</TableHead>
-                  <TableHead className="font-medium text-gray-900">Investor Name</TableHead>
-                  <TableHead className="font-medium text-gray-900">Total Invest Amount</TableHead>
-                  <TableHead className="font-medium text-gray-900">% Share</TableHead>
-                  <TableHead className="font-medium text-gray-900">Amount Invested</TableHead>
-                  <TableHead className="font-medium text-gray-900">Remaining Amount</TableHead>
-                  <TableHead className="font-medium text-gray-900">Share (Expected)</TableHead>
-                  <TableHead className="font-medium text-gray-900">Payment Status</TableHead>
-                  <TableHead className="font-medium text-gray-900">Actions</TableHead>
+                  <TableHead >S.No</TableHead>
+                  <TableHead >Investor Name</TableHead>
+                  <TableHead >Total Invest Amount</TableHead>
+                  <TableHead >% Share</TableHead>
+                  <TableHead >Amount Invested</TableHead>
+                  <TableHead >Remaining Amount</TableHead>
+                  <TableHead >Share (Expected)</TableHead>
+                  <TableHead >Payment Status</TableHead>
+                  <TableHead >Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -234,13 +234,13 @@ export default function PaymentHistoryPage() {
                 ) : (
                   filteredPayments.map((payment: PaymentHistory, index: number) => (
                     <TableRow key={payment._id} style={{ height: '49px' }}>
-                    <TableCell className="text-gray-600">{index + 1}</TableCell>
-                      <TableCell className="font-medium text-gray-900">{payment.name}</TableCell>
-                      <TableCell className="text-gray-600">PKR {payment.investAmount.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-600">{payment.percentageShare}%</TableCell>
-                      <TableCell className="text-gray-600">PKR {payment.amountPaid.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-600">PKR {payment.remainingAmount.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-600">PKR {(payment.investAmount * payment.percentageShare / 100).toLocaleString()}</TableCell>
+                    <TableCell className="text-black-500">{index + 1}</TableCell>
+                      <TableCell className="font-medium text-blakc-500">{payment.name}</TableCell>
+                      <TableCell className="text-black-500">PKR {payment.investAmount.toLocaleString()}</TableCell>
+                      <TableCell className="text-black-500">{payment.percentageShare}%</TableCell>
+                      <TableCell className="text-black-500">PKR {payment.amountPaid.toLocaleString()}</TableCell>
+                      <TableCell className="text-black-500">PKR {payment.remainingAmount.toLocaleString()}</TableCell>
+                      <TableCell className="text-black-500">PKR {(payment.investAmount * payment.percentageShare / 100).toLocaleString()}</TableCell>
                     <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.paymentMethod.type)}`}>
                           {payment.paymentMethod.type.charAt(0).toUpperCase() + payment.paymentMethod.type.slice(1)}

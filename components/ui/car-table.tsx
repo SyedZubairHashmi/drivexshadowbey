@@ -19,7 +19,7 @@ export function CarTable({ cars, batchNumber, onDelete }: CarTableProps) {
     <div className="bg-white rounded-lg border border-gray-200">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow >
             <TableHead className="w-16 py-2">S.no</TableHead>
             <TableHead className="py-2">Car</TableHead>
             <TableHead className="py-2">Company</TableHead>
@@ -51,7 +51,7 @@ export function CarTable({ cars, batchNumber, onDelete }: CarTableProps) {
               <TableCell className="py-2">{car.importYear}</TableCell>
               <TableCell className="py-2">{car.manufacturingYear}</TableCell>
               <TableCell className="py-2">
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                <span className="px-2 py-1 bg-gray-100  text-gray-700 rounded-xl ext-sm">
                   {car.batchNo || batchNumber}
                 </span>
               </TableCell>
