@@ -365,18 +365,24 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
   const tableHeaders = [
     "S.No",
     "Company",
-    "Variant",
-    "Model",
-    "Color",
+    "Car Name",
+    "Manufacturing Year",
+    "Exterior Color",
     "Mileage",
     "Chassis",
+    "Auction Price",
     "Origin City",
     "Destination City",
     "Inland Transport",
     "Loading Charges",
     "Container",
     "Freight Sea",
-    "Auction Price"
+    "Variant Duty",
+    "Passport Charges",
+    "Services Charges",
+    "Transport Charges",
+    "Repair Charges",
+    "Miscellaneous Charges"
   ];
 
   // Calculate dynamic table width and column widths
@@ -506,16 +512,21 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
                     switch (header) {
                       case "Company":
                         return car.company || "N/A";
-                      case "Variant":
-                        return car.carModel || "N/A";
-                      case "Model":
-                        return car.carType || "N/A";
-                      case "Color":
-                        return car.color || "N/A";
+                      case "Car Name":
+                        return car.carName || "N/A";
+                      case "Manufacturing Year":
+                        return car.manufacturingYear || "N/A";
+                      case "Exterior Color":
+                        return car.exteriorColor || "N/A";
                       case "Mileage":
                         return car.mileage ? `${car.mileage} Km` : "N/A";
                       case "Chassis":
                         return car.chasisNumber || "N/A";
+                      case "Auction Price":
+                        const auction = car.financing?.auctionPrice;
+                        return auction?.amount && auction?.rate && auction?.totalAmount && typeof auction.totalAmount === 'number'
+                          ? `${auction.amount} x ${auction.rate} =\n${auction.totalAmount.toLocaleString()} PKR`
+                          : "N/A";
                       case "Origin City":
                         return car.financing?.originCity || "N/A";
                       case "Destination City":
@@ -540,11 +551,18 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
                         return freight?.amount && freight?.rate && freight?.totalAmount && typeof freight.totalAmount === 'number'
                           ? `${freight.amount} x ${freight.rate} =\n${freight.totalAmount.toLocaleString()} PKR`
                           : "N/A";
-                      case "Auction Price":
-                        const auction = car.financing?.auctionPrice;
-                        return auction?.amount && auction?.rate && auction?.totalAmount && typeof auction.totalAmount === 'number'
-                          ? `${auction.amount} x ${auction.rate} =\n${auction.totalAmount.toLocaleString()} PKR`
-                          : "N/A";
+                      case "Variant Duty":
+                        return car.financing?.variantDuty ? `${car.financing.variantDuty.toLocaleString()} PKR` : "N/A";
+                      case "Passport Charges":
+                        return car.financing?.passportCharges ? `${car.financing.passportCharges.toLocaleString()} PKR` : "N/A";
+                      case "Services Charges":
+                        return car.financing?.servicesCharges ? `${car.financing.servicesCharges.toLocaleString()} PKR` : "N/A";
+                      case "Transport Charges":
+                        return car.financing?.transportCharges ? `${car.financing.transportCharges.toLocaleString()} PKR` : "N/A";
+                      case "Repair Charges":
+                        return car.financing?.repairCharges ? `${car.financing.repairCharges.toLocaleString()} PKR` : "N/A";
+                      case "Miscellaneous Charges":
+                        return car.financing?.miscellaneousCharges ? `${car.financing.miscellaneousCharges.toLocaleString()} PKR` : "N/A";
                       default:
                         return "N/A";
                     }
