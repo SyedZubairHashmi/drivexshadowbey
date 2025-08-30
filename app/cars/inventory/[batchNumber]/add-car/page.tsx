@@ -450,7 +450,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
         <div className="grid grid-cols-2 gap-5 w-full">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Car Name</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Car Name</label>
             <Input
               type="text"
               placeholder="Enter Car Name"
@@ -473,7 +473,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Company</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Company</label>
             <Select value={formData.company} onValueChange={(value) => handleInputChange('company', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -489,7 +489,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Company" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 {/* Japanese Brands */}
                 <SelectItem value="TOYOTA">TOYOTA</SelectItem>
                 <SelectItem value="HONDA">HONDA</SelectItem>
@@ -538,10 +546,10 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-          <label className="block text-sm font-medium text-black mb-2">
-            Chassis Number (VIN) <span className="text-red-500">*</span>
-            <span className="text-xs text-gray-500 ml-2">(Must be unique)</span>
-          </label>
+                      <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>
+              Chassis Number (VIN) <span className="text-red-500">*</span>
+              <span className="text-xs text-gray-500 ml-2">(Must be unique)</span>
+            </label>
           <Input
             type="text"
             placeholder="Enter Chassis Number"
@@ -567,7 +575,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Engine Number</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Engine Number</label>
             <Input
               type="text"
               placeholder="Enter Engine Number"
@@ -589,7 +597,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Car Segment</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Car Segment</label>
             <Select value={formData.carSegment} onValueChange={(value) => handleInputChange('carSegment', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -605,7 +613,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Car Segment" style={{ opacity: 0.5 }} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="SUV">SUV</SelectItem>
                 <SelectItem value="Sedan">Sedan</SelectItem>
                 <SelectItem value="Hatchback">Hatchback</SelectItem>
@@ -620,7 +636,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Auction Grade</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Auction Grade</label>
             <Select value={formData.auctionGrade} onValueChange={(value) => handleInputChange('auctionGrade', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -636,7 +652,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Auction Grade" style={{ opacity: 0.5 }} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="3">3</SelectItem>
                 <SelectItem value="3.5">3.5</SelectItem>
                 <SelectItem value="4">4</SelectItem>
@@ -649,7 +673,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Import Year</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Import Year</label>
             <Select value={formData.importYear} onValueChange={(value) => handleInputChange('importYear', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -665,7 +689,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Import Year" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="2024">2024</SelectItem>
                 <SelectItem value="2023">2023</SelectItem>
                 <SelectItem value="2022">2022</SelectItem>
@@ -677,7 +709,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Manufacturing Year</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Manufacturing Year</label>
             <Select value={formData.manufacturingYear} onValueChange={(value) => handleInputChange('manufacturingYear', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -693,7 +725,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Manufacturing Year" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="2024">2024</SelectItem>
                 <SelectItem value="2023">2023</SelectItem>
                 <SelectItem value="2022">2022</SelectItem>
@@ -709,7 +749,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Engine Type</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Engine Type</label>
             <Select value={formData.engineType} onValueChange={(value) => handleInputChange('engineType', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -725,7 +765,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Engine Type" style={{ opacity: 0.5 }} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="Petrol">Petrol</SelectItem>
                 <SelectItem value="Diesel">Diesel</SelectItem>
                 <SelectItem value="Hybrid">Hybrid</SelectItem>
@@ -741,7 +789,7 @@ function AddCarContent({ params }: AddCarPageProps) {
          
 
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Assembly</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Assembly</label>
             <Select value={formData.assembly} onValueChange={(value) => handleInputChange('assembly', value)}>
               <SelectTrigger className="placeholder-custom text-sm" style={{
                 width: '100%',
@@ -757,7 +805,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Assembly"  />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="Import">Import</SelectItem>
                 <SelectItem value="Local">Local</SelectItem>
                 <SelectItem value="CKD">CKD</SelectItem>
@@ -767,7 +823,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             </Select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-black mb-2" >Engine Capacity</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Engine Capacity</label>
             <Input
               type="text"
               placeholder="Enter Engine Capacity (e.g., 1600 cc, 2.0L)"
@@ -933,7 +989,15 @@ function AddCarContent({ params }: AddCarPageProps) {
               }}>
                 <SelectValue placeholder="Select Status" style={{ opacity: 0.5 }} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="warehouse">Warehouse</SelectItem>
                 <SelectItem value="transit">Transit</SelectItem>
                 <SelectItem value="showroom">Showroom</SelectItem>

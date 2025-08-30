@@ -19,9 +19,13 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none  ",
+      "flex h-10 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none",
       className
     )}
+    style={{
+      border: "1px solid rgba(0, 0, 0, 0.24)",
+      color: "#00000099"
+    }}
     {...props}
   >
     {children}
@@ -80,6 +84,13 @@ const SelectContent = React.forwardRef<
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className
       )}
+      style={{
+        backgroundColor: "white",
+        border: "1px solid rgba(0, 0, 0, 0.24)",
+        borderRadius: "12px",
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        opacity: 1
+      }}
       position={position}
       {...props}
     >
@@ -121,6 +132,9 @@ const SelectItem = React.forwardRef<
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none",
       className
     )}
+    style={{
+      color: "#00000099"
+    }}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">

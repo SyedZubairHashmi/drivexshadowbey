@@ -1,20 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 
-// GET /api/test-connection - Test MongoDB connection
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    console.log('Testing MongoDB connection...');
-    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
-    
+    // Test MongoDB connection
     await connectDB();
     
     return NextResponse.json({
       success: true,
-      message: 'MongoDB connection successful',
+      message: 'MongoDB coection successful',
       timestamp: new Date().toISOString()
     });
-
   } catch (error: any) {
     console.error('MongoDB connection test failed:', error);
     

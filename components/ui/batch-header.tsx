@@ -134,7 +134,25 @@ export function BatchHeader({
 
           <Button
             onClick={handleSeeDetail}
-            className="w-[83px] h-[33px] border border-gray-100 rounded-[12px] gap-2 opacity-100 pt-2 pr-[10px] pb-2 pl-[10px] text-grey-100 no-underline bg-white hover:bg-grey-300">
+            style={{
+              width: '83px',
+              height: '33px',
+              border: '1px solid #D1D5DB',
+              borderRadius: '12px',
+              gap: '8px',
+              opacity: 1,
+              paddingTop: '8px',
+              paddingRight: '10px',
+              paddingBottom: '8px',
+              paddingLeft: '10px',
+              color: '#00000099',
+              textDecoration: 'none',
+              backgroundColor: 'white',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+            className="hover:bg-gray-100"
+          >
             See Detail
           </Button>
         </div>
@@ -173,7 +191,7 @@ export function BatchHeader({
                 width: "300px",
                 height: "41px",
                 borderRadius: "12px",
-                border: "1px solid #D1D5DB",
+                border: "1px solid rgba(0, 0, 0, 0.24)",
                 backgroundColor: "white",
                 padding: "0 12px",
                 gap: "10px"
@@ -186,7 +204,8 @@ export function BatchHeader({
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 className="flex-1 bg-transparent border-none outline-none text-sm"
                 style={{
-                  color: "#374151"
+                  color: "#00000099",
+                  fontWeight: "500"
                 }}
               />
             </div>
@@ -200,7 +219,9 @@ export function BatchHeader({
                 gap: "10px",
                 padding: "12px",
                 borderWidth: "1px",
-                color: "#00000099"
+                border: "1px solid rgba(0, 0, 0, 0.24)",
+                color: "#00000099",
+                fontWeight: "500"
               }}
             >
               <Filter className="h-4 w-4 mr-2" />
@@ -217,21 +238,30 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
                   background: "#FFF",
                   width: "128px",
                   height: "41px",
-                  color: "#00000099"
+                  color: "#00000099",
+                  
                 }}
               >
-                <SelectValue placeholder="Company" />
+                <SelectValue placeholder="Company" style={{ color: "#00000099", fontWeight: "500" }} />
               </SelectTrigger>
 
-              <SelectContent>
+              <SelectContent 
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
                 <SelectItem value="all">All Companies</SelectItem>
                 <SelectItem value="Honda">Honda</SelectItem>
                 <SelectItem value="Toyota">Toyota</SelectItem>
-                <SelectItem value="Nissan">Nissan</SelectItem>
+                <SelectItem value="Nissan" >Nissan</SelectItem>
               </SelectContent>
             </Select>
 
@@ -243,20 +273,29 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
                   background: "#FFF",
                   width: "96px",
                   height: "41px",
-                  color: "#00000099"
+                  color: "#00000099",
+                  fontWeight: "500"
                 }}
               >
-                <SelectValue placeholder="Grade" />
+                <SelectValue placeholder="Grade" style={{ color: "#00000099", fontWeight: "500" }} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Grades</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="3">3</SelectItem>
+              <SelectContent 
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
+                <SelectItem value="all" style={{ fontWeight: "500" }}>All Grades</SelectItem>
+                <SelectItem value="5" style={{ fontWeight: "500" }}>5</SelectItem>
+                <SelectItem value="4" style={{ fontWeight: "500" }}>4</SelectItem>
+                <SelectItem value="3" style={{ fontWeight: "500" }}>3</SelectItem>
               </SelectContent>
             </Select>
 
@@ -268,22 +307,31 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
                   background: "#FFF",
                   width: "128px",
                   height: "41px",
-                  color: "#00000099"
+                  color: "#00000099",
+                  fontWeight: "500"
                 }}
               >
-                <SelectValue placeholder="Import Year" />
+                <SelectValue placeholder="Import Year" style={{ color: "#00000099", fontWeight: "500" }} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2022">2022</SelectItem>
-                <SelectItem value="2021">2021</SelectItem>
-                <SelectItem value="2020">2020</SelectItem>
+              <SelectContent 
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
+                <SelectItem value="all" style={{ fontWeight: "500" }}>All Years</SelectItem>
+                <SelectItem value="2024" style={{ fontWeight: "500" }}>2024</SelectItem>
+                <SelectItem value="2023" style={{ fontWeight: "500" }}>2023</SelectItem>
+                <SelectItem value="2022" style={{ fontWeight: "500" }}>2022</SelectItem>
+                <SelectItem value="2021" style={{ fontWeight: "500" }}>2021</SelectItem>
+                <SelectItem value="2020" style={{ fontWeight: "500" }}>2020</SelectItem>
               </SelectContent>
             </Select>
 
@@ -295,21 +343,30 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
                   background: "#FFF",
                   width: "112px",
                   height: "41px",
-                  color: "#00000099"
+                  color: "#00000099",
+                  fontWeight: "500"
                 }}
               >
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Status" style={{ color: "#00000099", fontWeight: "500" }} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="sold">Sold</SelectItem>
-                <SelectItem value="transit">In Transit</SelectItem>
-                <SelectItem value="warehouse">Warehouse</SelectItem>
-                <SelectItem value="showroom">Showroom</SelectItem>
+              <SelectContent 
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  opacity: 1
+                }}
+              >
+                <SelectItem value="all" style={{ fontWeight: "500" }}>All Status</SelectItem>
+                <SelectItem value="sold" style={{ fontWeight: "500" }}>Sold</SelectItem>
+                <SelectItem value="transit" style={{ fontWeight: "500" }}>In Transit</SelectItem>
+                <SelectItem value="warehouse" style={{ fontWeight: "500" }}>Warehouse</SelectItem>
+                <SelectItem value="showroom" style={{ fontWeight: "500" }}>Showroom</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -126,3 +126,4 @@ npm run build && npm start
 - Use environment variables for all sensitive data
 - MongoDB Atlas should have proper authentication and network access configured
 
+

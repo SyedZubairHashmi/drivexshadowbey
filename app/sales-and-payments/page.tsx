@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-// Customer interface based on MongoDB schema
+
+// Define Customer interface based on the API model
 interface Customer {
   _id: string;
   vehicle: {
@@ -39,11 +40,11 @@ interface Customer {
     salePrice: number;
     paidAmount: number;
     remainingAmount: number;
-    paymentStatus: 'Completed' | 'Pending' | 'inprogress';
     paymentMethod: {
-      type: 'Cash' | 'Bank' | 'Cheque' | 'BankDeposit';
+      type: "Cash" | "Bank" | "Cheque" | "BankDeposit";
       details: any;
     };
+    paymentStatus: "Completed" | "Pending" | "inprogress";
     note?: string;
     document?: string;
   };
@@ -51,17 +52,13 @@ interface Customer {
   updatedAt: string;
 }
 
+// Define stats interface
 interface CustomerStats {
   totalCustomers: number;
-  activeCustomers: number;
   totalRevenue: number;
-  pendingPayments: number;
-  averageRevenue: number;
-  completedPayments: number;
-  inProgressPayments: number;
   totalOutstanding: number;
-  pendingCustomers: number;
   completedCustomers: number;
+  pendingCustomers: number;
 }
 
 export default function SalesAndPaymentPage() {
@@ -69,116 +66,54 @@ export default function SalesAndPaymentPage() {
   const [recentCustomers, setRecentCustomers] = useState<Customer[]>([]);
   const [stats, setStats] = useState<CustomerStats>({
     totalCustomers: 0,
-    activeCustomers: 0,
     totalRevenue: 0,
-    pendingPayments: 0,
-    averageRevenue: 0,
-    completedPayments: 0,
-    inProgressPayments: 0,
     totalOutstanding: 0,
-    pendingCustomers: 0,
-    completedCustomers: 0
+    completedCustomers: 0,
+    pendingCustomers: 0
   });
   const [loading, setLoading] = useState(true);
 
   // Function to fetch customers from API
-  const fetchCustomers = async (limit: number = 50, page: number = 1): Promise<Customer[]> => {
+  const fetchCustomers = async () => {
     try {
-      const response = await fetch(`/api/customers?limit=${limit}&page=${page}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch('/api/customers?limit=100');
+      const data = await response.json();
+      
+      if (data.success) {
+        const customers = data.data;
+        
+        // Calculate stats
+        const totalCustomers = customers.length;
+        const totalRevenue = customers.reduce((sum: number, customer: Customer) => sum + customer.sale.salePrice, 0);
+        const totalOutstanding = customers.reduce((sum: number, customer: Customer) => sum + customer.sale.remainingAmount, 0);
+        const completedCustomers = customers.filter((customer: Customer) => customer.sale.paymentStatus === 'Completed').length;
+        const pendingCustomers = customers.filter((customer: Customer) => customer.sale.paymentStatus === 'Pending').length;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch customers: ${response.statusText}`);
+        setStats({
+          totalCustomers,
+          totalRevenue,
+          totalOutstanding,
+          completedCustomers,
+          pendingCustomers
+        });
+
+        // Get the 5 most recent customers
+        const sortedCustomers = customers
+          .sort((a: Customer, b: Customer) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5);
+        
+        setRecentCustomers(sortedCustomers);
       }
-
-      const result = await response.json();
-      return result.data || [];
     } catch (error) {
       console.error('Error fetching customers:', error);
-      return [];
-    }
-  };
-
-  // Function to calculate customer statistics
-  const calculateCustomerStats = (customers: Customer[]): CustomerStats => {
-    const totalCustomers = customers.length;
-    const totalRevenue = customers.reduce((sum, customer) => sum + customer.sale.salePrice, 0);
-    const pendingPayments = customers.reduce((sum, customer) => {
-      return sum + (customer.sale.remainingAmount || 0);
-    }, 0);
-
-    // Count by payment status
-    const completedPayments = customers.filter(c => c.sale.paymentStatus === 'Completed').length;
-    const inProgressPayments = customers.filter(c => c.sale.paymentStatus === 'inprogress').length;
-    const activeCustomers = customers.filter(c => c.sale.paymentStatus !== 'Completed').length;
-    const pendingCustomers = customers.filter(c => c.sale.paymentStatus === 'Pending').length;
-    const completedCustomers = customers.filter(c => c.sale.paymentStatus === 'Completed').length;
-
-    return {
-      totalCustomers,
-      activeCustomers,
-      totalRevenue,
-      pendingPayments,
-      averageRevenue: totalCustomers > 0 ? totalRevenue / totalCustomers : 0,
-      completedPayments,
-      inProgressPayments,
-      totalOutstanding: pendingPayments,
-      pendingCustomers,
-      completedCustomers
-    };
-  };
-
-  // Function to get recent customers
-  const getRecentCustomers = async (): Promise<Customer[]> => {
-    try {
-      const customers = await fetchCustomers(5, 1);
-      return customers.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    } catch (error) {
-      console.error('Error getting recent customers:', error);
-      return [];
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const customers = await fetchCustomers(1000); // Get all customers for stats
-        const statsData = calculateCustomerStats(customers);
-        const recentCustomersData = await getRecentCustomers();
-        
-        setStats(statsData);
-        setRecentCustomers(recentCustomersData);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    fetchCustomers();
   }, []);
-
-  if (loading) {
-    return (
-      <MainLayout>
-        <div className="space-y-6 pt-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading sales data...</p>
-            </div>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
 
   const handleNavigateToCustomers = () => {
     router.push('/sales-and-payments/customers');
@@ -204,6 +139,16 @@ export default function SalesAndPaymentPage() {
     });
   };
 
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6 pt-6">
@@ -225,7 +170,7 @@ export default function SalesAndPaymentPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalCustomers}</div>
               <p className="text-xs text-muted-foreground">
-                +{stats.totalCustomers - 10} from last month
+                +{Math.max(0, stats.totalCustomers - 10)} from last month
               </p>
             </CardContent>
           </Card>
@@ -264,7 +209,7 @@ export default function SalesAndPaymentPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.completedCustomers}</div>
               <p className="text-xs text-muted-foreground">
-                {Math.round((stats.completedCustomers / stats.totalCustomers) * 100)}% completion rate
+                {stats.totalCustomers > 0 ? Math.round((stats.completedCustomers / stats.totalCustomers) * 100) : 0}% completion rate
               </p>
             </CardContent>
           </Card>
@@ -352,7 +297,7 @@ export default function SalesAndPaymentPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">Rs {customer.sale.salePrice.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">{formatDate(customer.sale.saleDate)}</p>
+                      <p className="text-xs text-gray-500">{formatDate(customer.createdAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -386,7 +331,7 @@ export default function SalesAndPaymentPage() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-green-600">{stats.completedCustomers}</p>
                     <p className="text-xs text-gray-500">
-                      {Math.round((stats.completedCustomers / stats.totalCustomers) * 100)}%
+                      {stats.totalCustomers > 0 ? Math.round((stats.completedCustomers / stats.totalCustomers) * 100) : 0}%
                     </p>
                   </div>
                 </div>
@@ -399,7 +344,7 @@ export default function SalesAndPaymentPage() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-yellow-600">{stats.pendingCustomers}</p>
                     <p className="text-xs text-gray-500">
-                      {Math.round((stats.pendingCustomers / stats.totalCustomers) * 100)}%
+                      {stats.totalCustomers > 0 ? Math.round((stats.pendingCustomers / stats.totalCustomers) * 100) : 0}%
                     </p>
                   </div>
                 </div>
@@ -424,7 +369,7 @@ export default function SalesAndPaymentPage() {
                 <div className="flex items-center justify-between text-sm mt-1">
                   <span>Average per Customer</span>
                   <span className="font-bold">
-                    Rs {Math.round(stats.totalRevenue / stats.totalCustomers).toLocaleString()}
+                    Rs {stats.totalCustomers > 0 ? Math.round(stats.totalRevenue / stats.totalCustomers).toLocaleString() : 0}
                   </span>
                 </div>
               </div>
