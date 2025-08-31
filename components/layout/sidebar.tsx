@@ -353,7 +353,8 @@ export function Sidebar() {
           alignItems: 'center',
           gap: '15px',
           alignSelf:'flex-start',
-          marginLeft:'10px'
+          marginLeft:'10px',
+          marginBottom: '20px'
         }}
       >
         <div 
