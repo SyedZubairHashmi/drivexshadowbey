@@ -155,11 +155,13 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-2 h-screen overflow-hidden pt-6 ">
+      <div className="space-y-5 h-screen overflow-hidden  ">
+        <div className="spacey-2">
+
         <Header/>
         
         {/* Header Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ">
           <HeaderStatCard
             title="Total Cars Sold"
             value={stats.totalCarsSold}
@@ -187,6 +189,7 @@ export default function DashboardPage() {
             value={`Rs ${stats.pendingPayments.toLocaleString()}`}
           />
         </div>
+        </div>
 
         {/* Latest Batch Section - Fixed height, no scrolling */}
         {loading ? (
@@ -209,7 +212,7 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : batches.length > 0 ? (
-          <div className="flex-1 overflow-hidden ">
+          <div className="flex-1 overflow-hidden mt-4 ">
             <BatchCarsSection
               key={batches[0]._id}
               batchTitle={`Batch ${batches[0].batchNo}`}
