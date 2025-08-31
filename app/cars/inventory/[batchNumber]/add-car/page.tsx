@@ -269,7 +269,7 @@ function AddCarContent({ params }: AddCarPageProps) {
               if (currentStep === 1) {
           const requiredFields = [
             'carName', 'company', 'chassisNumber','carSegment', 'engineNumber', 'auctionGrade', 'importYear',
-            'assembly', 'engineCapacity', 'interiorColor', 'mileage', 'color',
+            'assembly', 'engineCapacity', 'interiorColor', 'mileage', 'exteriorColor',
             'description'
           ];
 
@@ -328,7 +328,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           mileage: formData.mileage.trim(),
           keywords: Array.isArray(formData.keywords) ? formData.keywords : [],
                       status: formData.status,
-          color: formData.color.trim(),
+          exteriorColor: formData.exteriorColor.trim(),
                       ...(formData.status === 'transit' && { deliveryTimeframe: formData.deliveryTimeframe.trim() }),
           batchNo: formData.selectedBatch,
           description: formData.description.trim(),
