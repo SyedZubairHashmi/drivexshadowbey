@@ -36,7 +36,13 @@ export function ActionMenu({ car, batchNumber, onDelete, onGenerateInvoice }: Ac
   }
 
   const handleView = () => {
-    router.push(`/cars/inventory/${batchNumber}/${car.id}`)
+    // Use _id for MongoDB documents, fallback to id for other cases
+    const carId = car._id || car.id;
+    if (!carId) {
+      console.error('No car ID found for viewing:', car);
+      return;
+    }
+    router.push(`/cars/inventory/${batchNumber}/${carId}`)
   }
 
   const handleGenerateInvoice = () => {
@@ -44,7 +50,12 @@ export function ActionMenu({ car, batchNumber, onDelete, onGenerateInvoice }: Ac
       onGenerateInvoice()
     } else {
       // Default behavior - navigate to invoice generation page
-      router.push(`/sales-and-payments/invoice?carId=${car.id}&batchNumber=${batchNumber}`)
+      const carId = car._id || car.id;
+      if (!carId) {
+        console.error('No car ID found for invoice generation:', car);
+        return;
+      }
+      router.push(`/sales-and-payments/invoice?carId=${carId}&batchNumber=${batchNumber}`)
     }
   }
 
