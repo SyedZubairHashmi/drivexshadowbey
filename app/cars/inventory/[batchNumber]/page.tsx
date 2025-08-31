@@ -104,6 +104,12 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
     setCurrentPage(page);
   };
 
+  const handleGenerateInvoice = (car: any) => {
+    console.log("Generate invoice for car:", car);
+    // Navigate to invoice generation page
+    router.push(`/sales-and-payments/invoice?carId=${car.id}&batchNumber=${batchNumber}`);
+  };
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -193,7 +199,7 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
               <CarTable
                 cars={currentCars}
                 batchNumber={batchNumber}
-                onDelete={handleDeleteCar}
+                onGenerateInvoice={handleGenerateInvoice}
               />
             </div>
           </div>

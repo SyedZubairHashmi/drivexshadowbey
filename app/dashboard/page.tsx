@@ -155,7 +155,7 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-5 h-screen overflow-hidden  ">
+      <div className="space-y-8 h-screen overflow-hidden  ">
         <div className="spacey-2">
 
         <Header/>

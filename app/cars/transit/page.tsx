@@ -156,7 +156,7 @@ export default function TransitPage() {
                 letterSpacing: '0%'
               }}
             >
-              Vhicles In Transit 
+              Vehicles In Transit 
             </h1>
             <Button 
               onClick={handleAddNewCar}

@@ -52,12 +52,10 @@ export function BatchCarsSection({
     console.log("Edit car:", car);
   };
 
-  const handleDeleteCar = (car: CarType) => {
-    console.log("Delete car:", car);
-  };
-
-  const handleViewCar = (car: CarType) => {
-    router.push(`/cars/inventory/${batchNumber}/${car._id || car.id}`);
+  const handleGenerateInvoice = (car: CarType) => {
+    console.log("Generate invoice for car:", car);
+    // Navigate to invoice generation page
+    router.push(`/sales-and-payments/invoice?carId=${car.id}&batchNumber=${batchNumber}`);
   };
 
   return (
@@ -84,8 +82,7 @@ export function BatchCarsSection({
           <CarTable
             cars={filteredCars}
             batchNumber={batchNumber}
-            onDelete={handleDeleteCar}
-            onView={handleViewCar}
+            onGenerateInvoice={handleGenerateInvoice}
           />
         </div>
       </div>

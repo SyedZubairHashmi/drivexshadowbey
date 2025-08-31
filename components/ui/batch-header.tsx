@@ -243,10 +243,12 @@ export function BatchHeader({
                   width: "128px",
                   height: "41px",
                   color: "#00000099",
-                  
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
                 }}
               >
-                <SelectValue placeholder="Company" style={{ color: "#00000099", fontWeight: "500" }} />
+                <SelectValue placeholder="Company" style={{ color: "#00000099", fontWeight: "500", whiteSpace: "nowrap" }} />
               </SelectTrigger>
 
               <SelectContent 
@@ -278,10 +280,13 @@ export function BatchHeader({
                   width: "96px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500"
+                  fontWeight: "500",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
                 }}
               >
-                <SelectValue placeholder="Grade" style={{ color: "#00000099", fontWeight: "500" }} />
+                <SelectValue placeholder="Grade" style={{ color: "#00000099", fontWeight: "500", whiteSpace: "nowrap" }} />
               </SelectTrigger>
               <SelectContent 
                 style={{
@@ -312,10 +317,13 @@ export function BatchHeader({
                   width: "128px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500"
+                  fontWeight: "500",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
                 }}
               >
-                <SelectValue placeholder="Import Year" style={{ color: "#00000099", fontWeight: "500" }} />
+                <SelectValue placeholder="Import Year" style={{ color: "#00000099", fontWeight: "500", whiteSpace: "nowrap" }} />
               </SelectTrigger>
               <SelectContent 
                 style={{
@@ -348,10 +356,13 @@ export function BatchHeader({
                   width: "112px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500"
+                  fontWeight: "500",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
                 }}
               >
-                <SelectValue placeholder="Status" style={{ color: "#00000099", fontWeight: "500" }} />
+                <SelectValue placeholder="Status" style={{ color: "#00000099", fontWeight: "500", whiteSpace: "nowrap" }} />
               </SelectTrigger>
               <SelectContent 
                 style={{

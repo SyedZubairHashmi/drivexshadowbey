@@ -234,9 +234,12 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 justifyContent: 'center'
               }}>
                 <span style={{
-                  color: '#FA1A1B',
+                  color: car.status === 'transit' ? '#FA1A1B' : '#000000',
                   fontSize: '12px',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  backgroundColor: car.status === 'transit' ? '#FA1A1B1F' : 'transparent',
+                  padding: car.status === 'transit' ? '4px 8px' : '0',
+                  borderRadius: car.status === 'transit' ? '4px' : '0'
                 }}>
                   {car.status === 'transit' ? `In Transit - ${car.deliveryTimeframe || '24 Weeks'}` : 
                    car.status === 'warehouse' ? 'In Warehouse' :

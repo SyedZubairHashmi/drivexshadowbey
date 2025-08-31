@@ -11,13 +11,13 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   
   const variants: { [key: string]: string } = {
     sold: "bg-green-100 text-green-800",
-    transit: "bg-blue-100 text-blue-800",
+    transit: "bg-[#FA1A1B1F] text-[#FA1A1B]",
     warehouse: "bg-yellow-100 text-yellow-800",
     showroom: "bg-purple-100 text-purple-800",
     pending: "bg-orange-100 text-orange-800",
     completed: "bg-green-100 text-green-800",
-    inprogress: "bg-blue-100 text-blue-800",
-    "in progress": "bg-blue-100 text-blue-800",
+    inprogress: "bg-[#FA1A1B1F] text-[#FA1A1B]",
+    "in progress": "bg-[#FA1A1B1F] text-[#FA1A1B]",
     overdue: "bg-red-100 text-red-800",
     active: "bg-green-100 text-green-800",
     inactive: "bg-gray-100 text-gray-800",

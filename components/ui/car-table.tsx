@@ -8,10 +8,10 @@ import type { Car } from "@/types"
 interface CarTableProps {
   cars: Car[]
   batchNumber: string
-  onDelete?: (car: Car) => void
+  onGenerateInvoice?: (car: Car) => void
 }
 
-export function CarTable({ cars, batchNumber, onDelete }: CarTableProps) {
+export function CarTable({ cars, batchNumber, onGenerateInvoice }: CarTableProps) {
   console.log("CarTable received cars:", cars);
   console.log("CarTable received batchNumber:", batchNumber);
   
@@ -62,7 +62,7 @@ export function CarTable({ cars, batchNumber, onDelete }: CarTableProps) {
                 <ActionMenu
                   car={car}
                   batchNumber={batchNumber}
-                  onDelete={() => onDelete?.(car)}
+                  onGenerateInvoice={() => onGenerateInvoice?.(car)}
                 />
               </TableCell>
             </TableRow>

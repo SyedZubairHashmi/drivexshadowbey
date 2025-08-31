@@ -24,7 +24,10 @@ const SelectTrigger = React.forwardRef<
     )}
     style={{
       border: "1px solid rgba(0, 0, 0, 0.24)",
-      color: "#00000099"
+      color: "#00000099",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis"
     }}
     {...props}
   >

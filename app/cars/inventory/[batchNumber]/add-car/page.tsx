@@ -42,7 +42,7 @@ function AddCarContent({ params }: AddCarPageProps) {
     assembly: "",
     mileage: "",
     interiorColor: "",
-    keywords: [],
+    keywords: [] as string[],
     status: "warehouse", // Keep default status
     deliveryTimeframe: "",
     exteriorColor: "",
@@ -58,7 +58,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         "HEADS UP DISPLAY HUD", "AUTOMATIC PARKING ASSIST APA", 
         "NIGHT VISION", "ADAPTIVE CRUISE CONTROL","MANY MORE"
       ],
-    selectedFeatures: [],
+    selectedFeatures: [] as string[],
     description: "",
 
     // Step 2: Financial Information
@@ -81,7 +81,16 @@ function AddCarContent({ params }: AddCarPageProps) {
     servicesCharges: "",
     transportCharges: "",
     repairCharges: "",
-    miscellaneousCharges: ""
+    miscellaneousCharges: "",
+    vehicleValueCif: "",
+    landingCharges: "",
+    customsDuty: "",
+    salesTax: "",
+    federalExciseDuty: "",
+    incomeTax: "",
+    freightAndStorageCharges: "",
+    demurage: "",
+    ageOfVehicle: ""
   });
 
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
@@ -104,33 +113,39 @@ function AddCarContent({ params }: AddCarPageProps) {
     if (isEditMode && carDataParam) {
       try {
         const carData = JSON.parse(decodeURIComponent(carDataParam));
+        console.log('Car data for editing:', carData);
+        
         setFormData(prev => ({
           ...prev,
-          carName: carData.name || carData.carName || prev.carName,
+          // Car Information - Step 1
+          carName: carData.carName || carData.name || prev.carName,
           company: carData.company || prev.company,
-          carSegment: carData.carSegment || prev.carSegment,
-          chassisNumber: carData.chassisNumber || carData.chasisNumber || prev.chassisNumber,
+          carSegment: carData.carSegment || carData.carType || prev.carSegment,
+          chassisNumber: carData.chasisNumber || carData.chassisNumber || prev.chassisNumber,
           engineNumber: carData.engineNumber || prev.engineNumber,
           mileage: carData.mileage || prev.mileage,
-          auctionGrade: carData.grade?.toString() || carData.auctionGrade || prev.auctionGrade,
+          auctionGrade: carData.auctionGrade?.toString() || carData.grade?.toString() || prev.auctionGrade,
           importYear: carData.importYear?.toString() || prev.importYear,
+          manufacturingYear: carData.manufacturingYear?.toString() || prev.manufacturingYear,
           assembly: carData.assembly || prev.assembly,
           engineCapacity: carData.engineCapacity || prev.engineCapacity,
+          engineType: carData.engineType || prev.engineType,
           interiorColor: carData.interiorColor || prev.interiorColor,
           keywords: carData.keywords || prev.keywords,
           status: carData.status || prev.status,
           deliveryTimeframe: carData.deliveryTimeframe || prev.deliveryTimeframe,
-          exteriorColor: carData.exteriorColor || prev.exteriorColor,
-          selectedBatch: carData.batch || batchNumber,
+          exteriorColor: carData.exteriorColor || carData.color || prev.exteriorColor,
+          selectedBatch: carData.batchNo || carData.batch || batchNumber,
           description: carData.description || prev.description,
+          selectedFeatures: carData.features || prev.selectedFeatures,
           
-          // Financial data - handle both old and new format
+          // Financial Information - Step 2
           originCity: carData.financing?.originCity || prev.originCity,
           destinationCity: carData.financing?.destinationCity || prev.destinationCity,
           auctionPrice: carData.financing?.auctionPrice?.amount?.toString() || carData.financing?.auctionPrice?.toString() || prev.auctionPrice,
           auctionPriceRate: carData.financing?.auctionPrice?.rate?.toString() || carData.financing?.auctionPriceRate?.toString() || prev.auctionPriceRate,
-          auctionExpenses: carData.financing?.auctionTaxes?.amount?.toString() || carData.financing?.auctionExpenses?.toString() || prev.auctionExpenses,
-          auctionExpensesRate: carData.financing?.auctionTaxes?.rate?.toString() || carData.financing?.auctionExpensesRate?.toString() || prev.auctionExpensesRate,
+          auctionExpenses: carData.financing?.auctionExpenses?.amount?.toString() || carData.financing?.auctionTaxes?.amount?.toString() || carData.financing?.auctionExpenses?.toString() || prev.auctionExpenses,
+          auctionExpensesRate: carData.financing?.auctionExpenses?.rate?.toString() || carData.financing?.auctionTaxes?.rate?.toString() || carData.financing?.auctionExpensesRate?.toString() || prev.auctionExpensesRate,
           inlandCharges: carData.financing?.inlandCharges?.amount?.toString() || carData.financing?.inlandCharges?.toString() || prev.inlandCharges,
           inlandChargesRate: carData.financing?.inlandCharges?.rate?.toString() || carData.financing?.inlandChargesRate?.toString() || prev.inlandChargesRate,
           loadingCharges: carData.financing?.loadingCharges?.amount?.toString() || carData.financing?.loadingCharges?.toString() || prev.loadingCharges,
@@ -141,11 +156,32 @@ function AddCarContent({ params }: AddCarPageProps) {
           freightSeaRate: carData.financing?.freightSea?.rate?.toString() || carData.financing?.freightSeaRate?.toString() || prev.freightSeaRate,
           variantDuty: carData.financing?.variantDuty?.toString() || prev.variantDuty,
           passportCharges: carData.financing?.passportCharges?.toString() || prev.passportCharges,
-          servicesCharges: carData.financing?.serviceCharges?.toString() || prev.servicesCharges,
+          servicesCharges: carData.financing?.servicesCharges?.toString() || carData.financing?.serviceCharges?.toString() || prev.servicesCharges,
           transportCharges: carData.financing?.transportCharges?.toString() || prev.transportCharges,
           repairCharges: carData.financing?.repairCharges?.toString() || prev.repairCharges,
           miscellaneousCharges: carData.financing?.miscellaneousCharges?.toString() || prev.miscellaneousCharges,
+          vehicleValueCif: carData.financing?.vehicleValueCif?.toString() || prev.vehicleValueCif,
+          landingCharges: carData.financing?.landingCharges?.toString() || prev.landingCharges,
+          customsDuty: carData.financing?.customsDuty?.toString() || prev.customsDuty,
+          salesTax: carData.financing?.salesTax?.toString() || prev.salesTax,
+          federalExciseDuty: carData.financing?.federalExciseDuty?.toString() || prev.federalExciseDuty,
+          incomeTax: carData.financing?.incomeTax?.toString() || prev.incomeTax,
+          freightAndStorageCharges: carData.financing?.freightAndStorageCharges?.toString() || prev.freightAndStorageCharges,
+          demurage: carData.financing?.demurage?.toString() || prev.demurage,
+          ageOfVehicle: carData.financing?.ageOfVehicle?.toString() || prev.ageOfVehicle,
         }));
+
+        // Set keyword input if keywords exist
+        if (carData.keywords && carData.keywords.length > 0) {
+          setKeywordInput('');
+        }
+
+        // Set selected country based on financing data if available
+        if (carData.financing?.auctionPrice?.rate) {
+          const rate = carData.financing.auctionPrice.rate;
+          // You can add logic here to set the appropriate country based on the rate
+          // For now, we'll keep the default
+        }
       } catch (error) {
         console.error('Error parsing car data:', error);
       }
@@ -154,6 +190,10 @@ function AddCarContent({ params }: AddCarPageProps) {
 
   const handleInputChange = (field: string, value: string) => {
     setIsCalculating(true);
+    
+    // Prevent negative numbers for all number fields
+    if (value.startsWith('-')) return;
+    
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -445,7 +485,17 @@ function AddCarContent({ params }: AddCarPageProps) {
             lineHeight: '120%',
             textTransform: 'capitalize'
           }}>Car Information</h2>
-
+          
+          {isEditMode && (
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium text-blue-800">
+                  Edit Mode - All car data has been pre-filled. You can modify any field as needed.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-5 w-full">
@@ -1218,10 +1268,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.auctionPrice}
-                  onChange={(e) =>
-                    setFormData({ ...formData, auctionPrice: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, auctionPrice: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',  
@@ -1244,10 +1299,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.auctionPriceRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, auctionPriceRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, auctionPriceRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',  
@@ -1301,10 +1361,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.inlandCharges}
-                  onChange={(e) =>
-                    setFormData({ ...formData, inlandCharges: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, inlandCharges: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1327,10 +1392,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.inlandChargesRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, inlandChargesRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, inlandChargesRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',  
@@ -1383,10 +1453,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.containerCharges}
-                  onChange={(e) =>
-                    setFormData({ ...formData, containerCharges: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, containerCharges: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1409,10 +1484,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.containerChargesRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, containerChargesRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, containerChargesRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1474,10 +1554,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.auctionExpenses}
-                  onChange={(e) =>
-                    setFormData({ ...formData, auctionExpenses: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, auctionExpenses: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1500,10 +1585,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.auctionExpensesRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, auctionExpensesRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, auctionExpensesRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1556,10 +1646,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.loadingCharges}
-                  onChange={(e) =>
-                    setFormData({ ...formData, loadingCharges: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, loadingCharges: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1582,10 +1677,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.loadingChargesRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, loadingChargesRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, loadingChargesRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1638,10 +1738,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Amount input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.freightSea}
-                  onChange={(e) =>
-                    setFormData({ ...formData, freightSea: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, freightSea: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1664,10 +1769,15 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input (auto width, no arrows) */}
                 <input
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.freightSeaRate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, freightSeaRate: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Prevent negative numbers
+                    if (value.startsWith('-')) return;
+                    setFormData({ ...formData, freightSeaRate: value });
+                  }}
                   style={{
                     minWidth: "40px",
                     border: '1px solid #0000003D',
@@ -1714,7 +1824,11 @@ function AddCarContent({ params }: AddCarPageProps) {
               type="text"
               placeholder="Enter origin city"
               value={formData.originCity}
-              onChange={(e) => handleInputChange('originCity', e.target.value)}
+              onChange={(e) => {
+                // Only allow letters, spaces, and common city name characters
+                const value = e.target.value.replace(/[0-9]/g, '');
+                handleInputChange('originCity', value);
+              }}
               className="placeholder-custom text-sm"
               style={{
                 width: '100%',
@@ -1737,7 +1851,11 @@ function AddCarContent({ params }: AddCarPageProps) {
               type="text"
               placeholder="Enter destination city"
               value={formData.destinationCity}
-              onChange={(e) => handleInputChange('destinationCity', e.target.value)}
+              onChange={(e) => {
+                // Only allow letters, spaces, and common city name characters
+                const value = e.target.value.replace(/[0-9]/g, '');
+                handleInputChange('destinationCity', value);
+              }}
               className="placeholder-custom text-sm"
               style={{
                 width: '100%',
@@ -1758,6 +1876,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Varient duty</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="0"
               value={formData.variantDuty}
               onChange={(e) => handleInputChange('variantDuty', e.target.value)}
@@ -1781,6 +1901,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Passport charges</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="0"
               value={formData.passportCharges}
               onChange={(e) => handleInputChange('passportCharges', e.target.value)}
@@ -1804,6 +1926,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Services charges</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="0"
               value={formData.servicesCharges}
               onChange={(e) => handleInputChange('servicesCharges', e.target.value)}
@@ -1827,6 +1951,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Transport charges</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="0"
               value={formData.transportCharges}
               onChange={(e) => handleInputChange('transportCharges', e.target.value)}
@@ -1850,6 +1976,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Repair charges</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="0"
               value={formData.repairCharges}
               onChange={(e) => handleInputChange('repairCharges', e.target.value)}
@@ -1872,6 +2000,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                           <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Vehicle Value CIF</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               placeholder="Enter vehicle value CIF"
               value={formData.vehicleValueCif}
               onChange={(e) => handleInputChange('vehicleValueCif', e.target.value)}

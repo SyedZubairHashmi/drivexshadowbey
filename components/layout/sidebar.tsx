@@ -40,7 +40,7 @@ const navigation = [
     submenu: [
       { name: "Inventory", href: "/cars/inventory" },
       { name: "Batch Insights", href: "/cars/batch-insight" },
-      { name: "Car Transit", href: "/cars/transit" },
+      { name: "Vehicles in  Transit", href: "/cars/transit" },
       { name: "Sold Cars", href: "/cars/sold" },
     ],
   },
