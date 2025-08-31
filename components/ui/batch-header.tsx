@@ -261,9 +261,48 @@ export function BatchHeader({
                 }}
               >
                 <SelectItem value="all">All Companies</SelectItem>
-                <SelectItem value="Honda">Honda</SelectItem>
-                <SelectItem value="Toyota">Toyota</SelectItem>
-                <SelectItem value="Nissan" >Nissan</SelectItem>
+                {/* Japanese Brands */}
+                <SelectItem value="TOYOTA">TOYOTA</SelectItem>
+                <SelectItem value="HONDA">HONDA</SelectItem>
+                <SelectItem value="SUZUKI">SUZUKI</SelectItem>
+                <SelectItem value="DAIHATSU">DAIHATSU</SelectItem>
+                <SelectItem value="NISSAN">NISSAN</SelectItem>
+                <SelectItem value="MAZDA">MAZDA</SelectItem>
+                <SelectItem value="ISUZU">ISUZU</SelectItem>
+                <SelectItem value="MITSUBISHI">MITSUBISHI</SelectItem>
+                
+                {/* German Luxury Brands */}
+                <SelectItem value="MERCEDES-BENZ">MERCEDES-BENZ</SelectItem>
+                <SelectItem value="BMW">BMW</SelectItem>
+                <SelectItem value="AUDI">AUDI</SelectItem>
+                
+                {/* Japanese Luxury Brands */}
+                <SelectItem value="LEXUS">LEXUS</SelectItem>
+                <SelectItem value="ACURA">ACURA</SelectItem>
+                
+                {/* Korean Brands */}
+                <SelectItem value="KIA">KIA</SelectItem>
+                <SelectItem value="HYUNDAI">HYUNDAI</SelectItem>
+                
+                {/* Chinese Brands */}
+                <SelectItem value="GWM">GWM</SelectItem>
+                <SelectItem value="BYD">BYD</SelectItem>
+                <SelectItem value="CHANGAN">CHANGAN</SelectItem>
+                <SelectItem value="CHERY">CHERY</SelectItem>
+                <SelectItem value="FAW">FAW</SelectItem>
+                
+                {/* American Brands */}
+                <SelectItem value="TESLA">TESLA</SelectItem>
+                <SelectItem value="FORD">FORD</SelectItem>
+                <SelectItem value="CADILLAC">CADILLAC</SelectItem>
+                <SelectItem value="CHRYSLER">CHRYSLER</SelectItem>
+                <SelectItem value="CHEVROLET">CHEVROLET</SelectItem>
+                <SelectItem value="GMC">GMC</SelectItem>
+                <SelectItem value="JEEP">JEEP</SelectItem>
+                
+                {/* British Brands */}
+                <SelectItem value="LAND ROVER">LAND ROVER</SelectItem>
+                <SelectItem value="MG">MG</SelectItem>
               </SelectContent>
             </Select>
 
@@ -298,9 +337,14 @@ export function BatchHeader({
                 }}
               >
                 <SelectItem value="all" >All Grades</SelectItem>
+                <SelectItem value="5.5">5.5</SelectItem>
                 <SelectItem value="5">5</SelectItem>
+                <SelectItem value="4.5">4.5</SelectItem>
                 <SelectItem value="4" >4</SelectItem>
+                <SelectItem value="3.5">3.5</SelectItem>
                 <SelectItem value="3" >3</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="1">1</SelectItem>
               </SelectContent>
             </Select>
 
