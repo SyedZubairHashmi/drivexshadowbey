@@ -194,10 +194,30 @@ function AddCarContent({ params }: AddCarPageProps) {
     // Prevent negative numbers for all number fields
     if (value.startsWith('-')) return;
     
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // Check if this is a rate field that should sync with other rate fields
+    const rateFields = [
+      'auctionPriceRate', 'inlandChargesRate', 'containerChargesRate', 
+      'auctionExpensesRate', 'loadingChargesRate', 'freightSeaRate'
+    ];
+    
+    if (rateFields.includes(field)) {
+      // Auto-sync all rate fields when any rate field is updated
+      setFormData(prev => ({
+        ...prev,
+        auctionPriceRate: value,
+        inlandChargesRate: value,
+        containerChargesRate: value,
+        auctionExpensesRate: value,
+        loadingChargesRate: value,
+        freightSeaRate: value
+      }));
+    } else {
+      // Normal field update
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
     
     // Clear calculating status after a short delay
     setTimeout(() => {
@@ -224,9 +244,34 @@ function AddCarContent({ params }: AddCarPageProps) {
   // Handle currency change
   const handleCurrencyChange = (country: { name: string; flag: string; code: string; rate: number }) => {
     setSelectedCountry(country);
-    // Update all rates to the new currency rate
+    // Clear all finance inputs and set new rates when currency changes
     setFormData(prev => ({
       ...prev,
+      // Clear all finance amount inputs
+      auctionPrice: "",
+      inlandCharges: "",
+      containerCharges: "",
+      auctionExpenses: "",
+      loadingCharges: "",
+      freightSea: "",
+      originCity: "",
+      destinationCity: "",
+      variantDuty: "",
+      passportCharges: "",
+      servicesCharges: "",
+      transportCharges: "",
+      repairCharges: "",
+      miscellaneousCharges: "",
+      vehicleValueCif: "",
+      landingCharges: "",
+      customsDuty: "",
+      salesTax: "",
+      federalExciseDuty: "",
+      incomeTax: "",
+      freightAndStorageCharges: "",
+      demurage: "",
+      ageOfVehicle: "",
+      // Update all rates to the new currency rate
       auctionPriceRate: country.rate.toString(),
       inlandChargesRate: country.rate.toString(),
       containerChargesRate: country.rate.toString(),
