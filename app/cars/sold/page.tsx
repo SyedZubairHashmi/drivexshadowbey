@@ -144,28 +144,28 @@ function SoldCarsContent() {
     }
 
     // Apply company filter
-    if (companyFilter) {
+    if (companyFilter && companyFilter !== 'all') {
       filtered = filtered.filter((car: any) => 
         car.company === companyFilter
       );
     }
 
     // Apply grade filter
-    if (gradeFilter) {
+    if (gradeFilter && gradeFilter !== 'all') {
       filtered = filtered.filter((car: any) => 
         car.auctionGrade?.toString() === gradeFilter
       );
     }
 
     // Apply import year filter
-    if (importYearFilter) {
+    if (importYearFilter && importYearFilter !== 'all') {
       filtered = filtered.filter((car: any) => 
         car.importYear?.toString() === importYearFilter
       );
     }
 
     // Apply payment status filter
-    if (paymentStatusFilter) {
+    if (paymentStatusFilter && paymentStatusFilter !== 'all') {
       filtered = filtered.filter((car: any) => 
         car.saleInfo?.paymentStatus === paymentStatusFilter
       );
@@ -1265,7 +1265,7 @@ function SoldCarsContent() {
                   <SelectValue placeholder="Company" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Companies</SelectItem>
+                  <SelectItem value="all">All Companies</SelectItem>
                   {/* Japanese Brands */}
                   <SelectItem value="TOYOTA">TOYOTA</SelectItem>
                   <SelectItem value="Honda">Honda</SelectItem>
@@ -1331,7 +1331,7 @@ function SoldCarsContent() {
                   <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Grades</SelectItem>
+                  <SelectItem value="all">All Grades</SelectItem>
                   <SelectItem value="5">5</SelectItem>
                   <SelectItem value="4.5">4.5</SelectItem>
                   <SelectItem value="4">4</SelectItem>
@@ -1360,7 +1360,7 @@ function SoldCarsContent() {
                   <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Years</SelectItem>
+                  <SelectItem value="all">All Years</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="2022">2022</SelectItem>
@@ -1391,7 +1391,7 @@ function SoldCarsContent() {
                   <SelectValue placeholder="Payment Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="In Progress">In Progress</SelectItem>

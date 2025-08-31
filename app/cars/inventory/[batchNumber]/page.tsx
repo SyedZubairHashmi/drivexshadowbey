@@ -166,28 +166,13 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
     <MainLayout>
       <div className="flex min-h-screen">
         <div className="flex-1 flex flex-col space-y-4 p-2">
-          {/* Navigation Breadcrumb */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">All Inventory</span>
-            <i className="fas fa-chevron-right text-gray-400 text-sm"></i>
-            <span className="font-medium">Batch {batchNumber}</span>
-          </div>
-
-          {/* Header Section with Page Name and Add Button */}
+          {/* Navigation Breadcrumb with Add Button */}
           <div className="flex items-center justify-between">
-            <h1 
-              className="text-gray-900 font-semibold"
-              style={{
-                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                fontWeight: 600,
-                fontStyle: 'normal',
-                fontSize: '22px',
-                lineHeight: '30px',
-                letterSpacing: '0%'
-              }}
-            >
-              Batch {batchNumber} - Inventory
-            </h1>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">All Inventory</span>
+              <i className="fas fa-chevron-right text-gray-400 text-sm"></i>
+              <span className="font-medium">Batch {batchNumber}</span>
+            </div>
             <Button 
               onClick={handleAddNewCar}
               className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
