@@ -674,8 +674,13 @@ function AddCarContent({ params }: AddCarPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Import Year</label>
-            <Select value={formData.importYear} onValueChange={(value) => handleInputChange('importYear', value)}>
-              <SelectTrigger className="placeholder-custom text-sm" style={{
+            <Input
+              type="number"
+              value={formData.importYear}
+              onChange={(e) => handleInputChange('importYear', e.target.value)}
+              placeholder="Enter Import Year"
+              className="placeholder-custom text-sm"
+              style={{
                 width: '100%',
                 height: '42px',
                 borderRadius: '8px',
@@ -686,32 +691,19 @@ function AddCarContent({ params }: AddCarPageProps) {
                 paddingRight: '12px',
                 paddingBottom: '10px',
                 paddingLeft: '12px'
-              }}>
-                <SelectValue placeholder="Select Import Year" />
-              </SelectTrigger>
-              <SelectContent
-                style={{
-                  backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                  opacity: 1
-                }}
-              >
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2022">2022</SelectItem>
-                <SelectItem value="2021">2021</SelectItem>
-                <SelectItem value="2020">2020</SelectItem>
-                <SelectItem value="2019">2019</SelectItem>
-              </SelectContent>
-            </Select>
+              }}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Manufacturing Year</label>
-            <Select value={formData.manufacturingYear} onValueChange={(value) => handleInputChange('manufacturingYear', value)}>
-              <SelectTrigger className="placeholder-custom text-sm" style={{
+            <Input
+              type="number"
+              value={formData.manufacturingYear}
+              onChange={(e) => handleInputChange('manufacturingYear', e.target.value)}
+              placeholder="Enter Manufacturing Year"
+              className="placeholder-custom text-sm"
+              style={{
                 width: '100%',
                 height: '42px',
                 borderRadius: '8px',
@@ -722,30 +714,8 @@ function AddCarContent({ params }: AddCarPageProps) {
                 paddingRight: '12px',
                 paddingBottom: '10px',
                 paddingLeft: '12px'
-              }}>
-                <SelectValue placeholder="Select Manufacturing Year" />
-              </SelectTrigger>
-              <SelectContent
-                style={{
-                  backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                  opacity: 1
-                }}
-              >
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2022">2022</SelectItem>
-                <SelectItem value="2021">2021</SelectItem>
-                <SelectItem value="2020">2020</SelectItem>
-                <SelectItem value="2019">2019</SelectItem>
-                <SelectItem value="2018">2018</SelectItem>
-                <SelectItem value="2017">2017</SelectItem>
-                <SelectItem value="2016">2016</SelectItem>
-                <SelectItem value="2015">2015</SelectItem>
-              </SelectContent>
-            </Select>
+              }}
+            />
           </div>
 
           <div>
@@ -1066,12 +1036,12 @@ function AddCarContent({ params }: AddCarPageProps) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Color</label>
+            <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Exterior Color</label>
             <Input
               type="text"
               placeholder="Enter Exterior Color (e.g., Sonic Red, Pearl White)"
               value={formData.exteriorColor}
-              onChange={(e) => handleInputChange('color', e.target.value)}
+              onChange={(e) => handleInputChange('exteriorColor', e.target.value)}
               className="placeholder-custom text-sm"
               style={{
                 width: '100%',

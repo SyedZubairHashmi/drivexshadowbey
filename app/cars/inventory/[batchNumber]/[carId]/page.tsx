@@ -333,10 +333,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.importYear}</span>
                 </div>
                   
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Color</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.color}</span>
-                </div>
+                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Exterior Color</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.exteriorColor}</span>
+                  </div>
                   
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Assembly</span>

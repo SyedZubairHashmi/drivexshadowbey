@@ -378,7 +378,15 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
     "Container",
     "Freight Sea",
     "Variant Duty",
+    "Landing Charges",
+    "Vehicle Value CIF",
+    "Customs Duty",
+    "Federal Excise Duty",
+    "Sales Tax",
+    "Freight & Storage Charges",
+    "Age of Vehicle",
     "Passport Charges",
+    "Demurage Charges",
     "Services Charges",
     "Transport Charges",
     "Repair Charges",
@@ -553,8 +561,24 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
                           : "N/A";
                       case "Variant Duty":
                         return car.financing?.variantDuty ? `${car.financing.variantDuty.toLocaleString()} PKR` : "N/A";
+                      case "Landing Charges":
+                        return car.financing?.landingCharges ? `${car.financing.landingCharges.toLocaleString()} PKR` : "N/A";
+                      case "Vehicle Value CIF":
+                        return car.financing?.vehicleValueCif ? `${car.financing.vehicleValueCif.toLocaleString()} PKR` : "N/A";
+                      case "Customs Duty":
+                        return car.financing?.customsDuty ? `${car.financing.customsDuty.toLocaleString()} PKR` : "N/A";
+                      case "Federal Excise Duty":
+                        return car.financing?.federalExciseDuty ? `${car.financing.federalExciseDuty.toLocaleString()} PKR` : "N/A";
+                      case "Sales Tax":
+                        return car.financing?.salesTax ? `${car.financing.salesTax.toLocaleString()} PKR` : "N/A";
+                      case "Freight & Storage Charges":
+                        return car.financing?.freightAndStorageCharges ? `${car.financing.freightAndStorageCharges.toLocaleString()} PKR` : "N/A";
+                      case "Age of Vehicle":
+                        return car.financing?.ageOfVehicle ? `${car.financing.ageOfVehicle} years` : "N/A";
                       case "Passport Charges":
                         return car.financing?.passportCharges ? `${car.financing.passportCharges.toLocaleString()} PKR` : "N/A";
+                      case "Demurage Charges":
+                        return car.financing?.demurage ? `${car.financing.demurage.toLocaleString()} PKR` : "N/A";
                       case "Services Charges":
                         return car.financing?.servicesCharges ? `${car.financing.servicesCharges.toLocaleString()} PKR` : "N/A";
                       case "Transport Charges":

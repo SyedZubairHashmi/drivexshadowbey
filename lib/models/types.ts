@@ -31,7 +31,7 @@ export interface ICar extends Document {
   keywords: string[];
   features: string[];
   status: 'sold' | 'transit' | 'warehouse' | 'showroom';
-  color: string;
+  exteriorColor: string;
   deliveryTimeframe: string;
   batchNo: string;
   description: string;
