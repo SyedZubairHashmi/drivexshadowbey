@@ -194,6 +194,12 @@ function AddCarContent({ params }: AddCarPageProps) {
     // Prevent negative numbers for all number fields
     if (value.startsWith('-')) return;
     
+    // Auto-capitalize first letter for car name field
+    let processedValue = value;
+    if (field === 'carName' && value.length > 0) {
+      processedValue = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+    
     // Check if this is a rate field that should sync with other rate fields
     const rateFields = [
       'auctionPriceRate', 'inlandChargesRate', 'containerChargesRate', 
@@ -204,18 +210,18 @@ function AddCarContent({ params }: AddCarPageProps) {
       // Auto-sync all rate fields when any rate field is updated
       setFormData(prev => ({
         ...prev,
-        auctionPriceRate: value,
-        inlandChargesRate: value,
-        containerChargesRate: value,
-        auctionExpensesRate: value,
-        loadingChargesRate: value,
-        freightSeaRate: value
+        auctionPriceRate: processedValue,
+        inlandChargesRate: processedValue,
+        containerChargesRate: processedValue,
+        auctionExpensesRate: processedValue,
+        loadingChargesRate: processedValue,
+        freightSeaRate: processedValue
       }));
     } else {
       // Normal field update
       setFormData(prev => ({
         ...prev,
-        [field]: value
+        [field]: processedValue
       }));
     }
     

@@ -47,7 +47,13 @@ export function AddCarModal({ trigger, onSubmit }: AddCarModalProps) {
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    // Auto-capitalize first letter for car name field
+    let processedValue = value;
+    if (field === "name" && value.length > 0) {
+      processedValue = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+    
+    setFormData((prev) => ({ ...prev, [field]: processedValue }))
   }
 
   return (
