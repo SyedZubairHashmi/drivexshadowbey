@@ -173,6 +173,42 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
             <span className="font-medium">Batch {batchNumber}</span>
           </div>
 
+          {/* Header Section with Page Name and Add Button */}
+          <div className="flex items-center justify-between">
+            <h1 
+              className="text-gray-900 font-semibold"
+              style={{
+                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+                fontWeight: 600,
+                fontStyle: 'normal',
+                fontSize: '22px',
+                lineHeight: '30px',
+                letterSpacing: '0%'
+              }}
+            >
+              Batch {batchNumber} - Inventory
+            </h1>
+            <Button 
+              onClick={handleAddNewCar}
+              className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+              style={{
+                width: '148px',
+                height: '50px',
+                borderRadius: '50px',
+                paddingTop: '10px',
+                paddingRight: '10px',
+                paddingBottom: '10px',
+                paddingLeft: '10px',
+                gap: '5px',
+                borderWidth: '1px',
+                opacity: 1
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add New Car
+            </Button>
+          </div>
+
           {/* Batch Header with Filters */}
           <BatchHeader
             title={`Batch ${batchNumber}`}

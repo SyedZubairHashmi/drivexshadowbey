@@ -58,8 +58,16 @@ function SoldCarsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [soldCars, setSoldCars] = useState<any[]>([]);
+  const [filteredSoldCars, setFilteredSoldCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [companyFilter, setCompanyFilter] = useState('');
+  const [gradeFilter, setGradeFilter] = useState('');
+  const [importYearFilter, setImportYearFilter] = useState('');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -112,6 +120,59 @@ function SoldCarsContent() {
     fetchSoldCars();
     fetchAvailableCars();
   }, []);
+
+  // Filter sold cars when search term or filters change
+  useEffect(() => {
+    filterSoldCars();
+  }, [searchTerm, companyFilter, gradeFilter, importYearFilter, paymentStatusFilter, soldCars]);
+
+  const filterSoldCars = () => {
+    let filtered = soldCars;
+
+    // Apply search term filter
+    if (searchTerm) {
+      filtered = filtered.filter((car: any) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          car.carName?.toLowerCase().includes(searchLower) ||
+          car.company?.toLowerCase().includes(searchLower) ||
+          car.chassisNumber?.toLowerCase().includes(searchLower) ||
+          car.engineNumber?.toLowerCase().includes(searchLower) ||
+          car.saleInfo?.buyerInfo?.name?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    // Apply company filter
+    if (companyFilter) {
+      filtered = filtered.filter((car: any) => 
+        car.company === companyFilter
+      );
+    }
+
+    // Apply grade filter
+    if (gradeFilter) {
+      filtered = filtered.filter((car: any) => 
+        car.auctionGrade?.toString() === gradeFilter
+      );
+    }
+
+    // Apply import year filter
+    if (importYearFilter) {
+      filtered = filtered.filter((car: any) => 
+        car.importYear?.toString() === importYearFilter
+      );
+    }
+
+    // Apply payment status filter
+    if (paymentStatusFilter) {
+      filtered = filtered.filter((car: any) => 
+        car.saleInfo?.paymentStatus === paymentStatusFilter
+      );
+    }
+
+    setFilteredSoldCars(filtered);
+  };
 
   // Check for modal parameter and open modal if needed
   useEffect(() => {
@@ -237,6 +298,7 @@ function SoldCarsContent() {
       
       if (response.success) {
         setSoldCars(response.data);
+        setFilteredSoldCars(response.data); // Initialize filtered data
       } else {
         setError(response.error || "Failed to fetch sold cars");
       }
@@ -1156,6 +1218,8 @@ function SoldCarsContent() {
                 <Search className="text-gray-400 h-4 w-4 flex-shrink-0" />
                 <input 
                   placeholder="Search sold cars..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="flex-1 bg-transparent border-none outline-none text-sm"
                   style={{
                     color: "#374151"
@@ -1181,7 +1245,7 @@ function SoldCarsContent() {
             </div>
 
             <div className="flex gap-2">
-              <Select>
+              <Select value={companyFilter} onValueChange={setCompanyFilter}>
                 <SelectTrigger 
                   className="w-32"
                   style={{
@@ -1192,14 +1256,18 @@ function SoldCarsContent() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder="Company" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">All Companies</SelectItem>
                   {/* Japanese Brands */}
-                  <SelectItem value="Toyota">Toyota</SelectItem>
+                  <SelectItem value="TOYOTA">TOYOTA</SelectItem>
                   <SelectItem value="Honda">Honda</SelectItem>
                   <SelectItem value="Suzuki">Suzuki</SelectItem>
                   <SelectItem value="Daihatsu">Daihatsu</SelectItem>
@@ -1243,7 +1311,7 @@ function SoldCarsContent() {
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select value={gradeFilter} onValueChange={setGradeFilter}>
                 <SelectTrigger 
                   className="w-24"
                   style={{
@@ -1254,19 +1322,25 @@ function SoldCarsContent() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Grade" />
+                  <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">All Grades</SelectItem>
                   <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="4.5">4.5</SelectItem>
                   <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="3.5">3.5</SelectItem>
                   <SelectItem value="3">3</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select value={importYearFilter} onValueChange={setImportYearFilter}>
                 <SelectTrigger 
                   className="w-32"
                   style={{
@@ -1277,19 +1351,27 @@ function SoldCarsContent() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Import Year" />
+                  <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">All Years</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="2022">2022</SelectItem>
                   <SelectItem value="2021">2021</SelectItem>
+                  <SelectItem value="2020">2020</SelectItem>
+                  <SelectItem value="2019">2019</SelectItem>
+                  <SelectItem value="2018">2018</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
                 <SelectTrigger 
                   className="w-28"
                   style={{
@@ -1300,22 +1382,26 @@ function SoldCarsContent() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Payment Status" />
+                  <SelectValue placeholder="Payment Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="mt-6">
-            <CarTable cars={soldCars} batchNumber="sold" />
+            <CarTable cars={filteredSoldCars} batchNumber="sold" />
           </div>
         </div>
       </div>
