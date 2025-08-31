@@ -354,7 +354,7 @@ export function Sidebar() {
           gap: '15px',
           alignSelf:'flex-start',
           marginLeft:'10px',
-          marginBottom: '20px'
+          marginBottom: '45px'
         }}
       >
         <div 
