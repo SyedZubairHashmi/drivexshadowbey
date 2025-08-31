@@ -262,10 +262,13 @@ export default function InvoicePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder="Company" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Companies</SelectItem>
@@ -325,10 +328,13 @@ export default function InvoicePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Grade" />
+                  <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Grades</SelectItem>
@@ -349,10 +355,13 @@ export default function InvoicePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Import Year" />
+                  <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
@@ -373,10 +382,13 @@ export default function InvoicePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder="Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>

@@ -37,14 +37,14 @@ export function CarTable({ cars, batchNumber, onGenerateInvoice }: CarTableProps
         <TableBody>
           {cars.map((car: any, index) => (
             <TableRow key={car._id || car.id || index}>
-              <TableCell className="font-medium py-2">{index + 1}</TableCell>
-              <TableCell className="font-medium py-2">{car.carName || car.name}</TableCell>
+              <TableCell className="py-2">{index + 1}</TableCell>
+              <TableCell className="py-2">{car.carName || car.name}</TableCell>
               <TableCell className="py-2">{car.company}</TableCell>
-              <TableCell className="font-mono text-sm py-2">{car.engineNumber}</TableCell>
+              <TableCell className="py-2">{car.engineNumber}</TableCell>
               <TableCell className="py-2">{car.engineType}</TableCell>
               <TableCell className="py-2">{car.mileage}</TableCell>
               <TableCell className="py-2">
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-sm">
                   {car.auctionGrade || car.grade}
                 </div>
               </TableCell>

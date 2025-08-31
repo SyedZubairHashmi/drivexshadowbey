@@ -143,10 +143,13 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 borderRadius: "12px",
                 border: "1px solid rgba(0, 0, 0, 0.12)",
                 background: "#FFF",
-                color: "#00000099"
+                color: "#00000099",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}
             >
-              <SelectValue placeholder="Company" />
+              <SelectValue placeholder="Company" style={{ whiteSpace: "nowrap" }} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Companies</SelectItem>
@@ -206,10 +209,13 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 borderRadius: "12px",
                 border: "1px solid rgba(0, 0, 0, 0.12)",
                 background: "#FFF",
-                color: "#00000099"
+                color: "#00000099",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}
             >
-              <SelectValue placeholder="Grade" />
+              <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Grades</SelectItem>
@@ -230,10 +236,13 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 borderRadius: "12px",
                 border: "1px solid rgba(0, 0, 0, 0.12)",
                 background: "#FFF",
-                color: "#00000099"
+                color: "#00000099",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}
             >
-              <SelectValue placeholder="Import Year" />
+              <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="2026">2026</SelectItem>
@@ -253,10 +262,13 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 borderRadius: "12px",
                 border: "1px solid rgba(0, 0, 0, 0.12)",
                 background: "#FFF",
-                color: "#00000099"
+                color: "#00000099",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}
             >
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Status" style={{ whiteSpace: "nowrap" }} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
@@ -287,10 +299,10 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
           <TableBody>
             {filteredCustomers.map((customer, index) => (
               <TableRow key={customer._id} style={{ height: '40px' }}>
-                <TableCell className="font-medium" style={{ height: '40px', padding: '8px 16px' }}>
+                <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   {String(index + 1).padStart(2, '0')}
                 </TableCell>
-                <TableCell className="font-medium" style={{ height: '40px', padding: '8px 16px' }}>
+                <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   {customer.customer.name || 'N/A'}
                 </TableCell>
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>
@@ -305,10 +317,10 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   {customer.sale.saleDate ? new Date(customer.sale.saleDate).toLocaleDateString() : 'N/A'}
                 </TableCell>
-                <TableCell className="font-semibold" style={{ height: '40px', padding: '8px 16px' }}>
+                <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                    Rs {(customer.sale.salePrice || 0).toLocaleString()}
                 </TableCell>
-                <TableCell className="font-semibold" style={{ height: '40px', padding: '8px 16px' }}>
+                <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   Rs {(customer.sale.remainingAmount || 0).toLocaleString()}
                 </TableCell>
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>

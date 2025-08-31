@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { customerAPI } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 interface Customer {
   _id: string;
@@ -56,6 +57,7 @@ interface Customer {
 }
 
 export default function RemainingBalancePage() {
+  const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,8 +97,9 @@ export default function RemainingBalancePage() {
   };
 
   const handleAddNewCustomer = () => {
-    console.log("Add new customer clicked");
-    // TODO: Implement add new customer functionality
+    console.log("Add new customer clicked - navigating to sold cars page with modal open");
+    // Navigate to sold cars page with modal open and track source
+    router.push('/cars/sold?modal=open&from=remaining-balance');
   };
 
   // Filter customers based on search and filter criteria
@@ -257,10 +260,13 @@ export default function RemainingBalancePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder="Company" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Companies</SelectItem>
@@ -320,10 +326,13 @@ export default function RemainingBalancePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Grade" />
+                  <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Grades</SelectItem>
@@ -344,10 +353,13 @@ export default function RemainingBalancePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Import Year" />
+                  <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
@@ -368,10 +380,13 @@ export default function RemainingBalancePage() {
                     borderRadius: "12px",
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     background: "#FFF",
-                    color: "#00000099"
+                    color: "#00000099",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder="Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
