@@ -16,39 +16,40 @@ const Navbar = () => {
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [carsOpen, setCarsOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
-
   const [scrolled, setScrolled] = useState(false);
 
-  // Check if we are on car detail page (adjust route check as needed)
+  // Page detection
   const isCarDetailPage = pathname.includes("/car/");
+  const isContactPage = pathname === "/contact";
 
+  // Detect scroll to toggle background and text
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = (scrollY / docHeight) * 100;
 
-      if (scrollPercent > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(scrollPercent > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Determine navbar color theme
+  const isScrolledNavbar = scrolled;
+  const isLightPage = isContactPage || isCarDetailPage;
+  const useWhiteIcon = isScrolledNavbar || !isLightPage;
 
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 py-3 px-4 md:px-12 flex items-center justify-between transition-colors duration-300
         ${scrolled ? "bg-black/90" : ""}
-        ${isCarDetailPage ? "text-black" : "text-white"}
+        ${useWhiteIcon ? "text-white" : "text-black"}
       `}
     >
-      {/* Logo with black bg when on car detail page */}
-      <div className={`${isCarDetailPage ? "bg-black p-1 rounded" : ""}`}>
+      {/* Logo */}
+      <div className={`${!useWhiteIcon ? "bg-black p-1 rounded" : ""}`}>
         <Logo />
       </div>
 
@@ -58,12 +59,12 @@ const Navbar = () => {
         setCarsOpen={setCarsOpen}
         productsOpen={productsOpen}
         setProductsOpen={setProductsOpen}
-        textColor={isCarDetailPage ? "text-black" : "text-white"}
+        textColor={useWhiteIcon ? "text-white" : "text-black"}
       />
 
       {/* CTA Button */}
       <div className="hidden md:block">
-        <CallToActionButton isBlackTheme={isCarDetailPage} />
+        <CallToActionButton isBlackTheme={!useWhiteIcon} />
       </div>
 
       {/* Mobile Menu Button */}
@@ -73,9 +74,9 @@ const Navbar = () => {
           className={`
             transition-colors duration-300 px-2 py-1 rounded
             ${
-              isCarDetailPage
-                ? "text-white hover:text-black hover:bg-white"
-                : "text-white hover:text-black hover:bg-transparent"
+              useWhiteIcon
+                ? "text-white hover:text-black"
+                : "text-black hover:text-white"
             }
           `}
           aria-label="Toggle mobile menu"
@@ -92,7 +93,7 @@ const Navbar = () => {
         setMobileCarsOpen={setMobileCarsOpen}
         mobileProductsOpen={mobileProductsOpen}
         setMobileProductsOpen={setMobileProductsOpen}
-        textColor={isCarDetailPage ? "text-black" : "text-white"}
+        textColor={useWhiteIcon ? "text-white" : "text-black"}
       />
     </nav>
   );

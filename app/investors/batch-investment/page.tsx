@@ -105,11 +105,48 @@ export default function InvestorsPage() {
     depositBankName: '',
     slipNo: ''
   });
-
+  // CNIC validation function
+  const validateCNIC = (cnic: string) => {
+    // CNIC format: XXXXX-XXXXXXX-X (5 digits, hyphen, 7 digits, hyphen, 1 digit)
+    const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
+    return cnicRegex.test(cnic);
+  };
 
   useEffect(() => {
     fetchBatches();
   }, []);
+
+  // Handle click outside for payment method dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showPaymentMethodDropdown && !target.closest('.payment-method-dropdown')) {
+        setShowPaymentMethodDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showPaymentMethodDropdown]);
+
+  // Handle click outside for batch dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showBatchDropdown && !target.closest('.batch-dropdown')) {
+        setShowBatchDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showBatchDropdown]);
+
+
 
   const fetchBatches = async () => {
     try {
@@ -147,12 +184,34 @@ export default function InvestorsPage() {
 
   const handleInputChange = (field: keyof InvestorFormData, value: string) => {
     setFormData(prev => {
-      const newData = { ...prev, [field]: value };
+      let newValue = value;
+      
+      // Auto-format CNIC field
+      if (field === 'investorId') {
+        // Remove all non-digits first
+        const digitsOnly = value.replace(/\D/g, '');
+        
+        // Limit to 13 digits maximum
+        if (digitsOnly.length > 13) {
+          return prev; // Don't update if more than 13 digits
+        }
+        
+        // Auto-format with hyphens
+        if (digitsOnly.length <= 5) {
+          newValue = digitsOnly;
+        } else if (digitsOnly.length <= 12) {
+          newValue = digitsOnly.slice(0, 5) + '-' + digitsOnly.slice(5);
+        } else {
+          newValue = digitsOnly.slice(0, 5) + '-' + digitsOnly.slice(5, 12) + '-' + digitsOnly.slice(12);
+        }
+      }
+      
+      const newData = { ...prev, [field]: newValue };
       
       // Auto-calculate remaining amount when investment amount or amount paid changes
       if (field === 'investmentAmount' || field === 'amountPaid') {
-        const investmentAmount = field === 'investmentAmount' ? parseFloat(value) || 0 : parseFloat(prev.investmentAmount) || 0;
-        const amountPaid = field === 'amountPaid' ? parseFloat(value) || 0 : parseFloat(prev.amountPaid) || 0;
+        const investmentAmount = field === 'investmentAmount' ? parseFloat(newValue) || 0 : parseFloat(prev.investmentAmount) || 0;
+        const amountPaid = field === 'amountPaid' ? parseFloat(newValue) || 0 : parseFloat(prev.amountPaid) || 0;
         const remainingAmount = Math.max(0, investmentAmount - amountPaid);
         newData.remainingPaid = remainingAmount.toString();
       }
@@ -180,6 +239,12 @@ export default function InvestorsPage() {
           alert(`Please fill in all required fields. Missing: ${field}`);
           return;
         }
+      }
+
+      // Validate CNIC format
+      if (!validateCNIC(formData.investorId)) {
+        alert('Please enter a valid CNIC in format: XXXXX-XXXXXXX-X');
+        return;
       }
 
       // Map payment method to API expected format
@@ -273,7 +338,11 @@ export default function InvestorsPage() {
       if (responseData.success) {
         console.log('Investor saved successfully:', responseData.data);
         alert('Investor saved successfully!');
-        setCurrentStep(2);
+        // Reset form and close modal after successful submission
+        resetForm();
+        setShowModal(false);
+        // Refresh the batches to show the new investor
+        fetchBatches();
       } else {
         console.error('Failed to save investor:', responseData);
         alert('Failed to save investor: ' + (responseData.error || 'Unknown error'));
@@ -288,11 +357,7 @@ export default function InvestorsPage() {
     setCurrentStep(1);
   };
 
-  const handleClose = () => {
-    setShowModal(false);
-    setCurrentStep(1);
-    setShowPaymentMethodDropdown(false);
-    setShowBatchDropdown(false);
+  const resetForm = () => {
     setFormData({
       investorName: '',
       contactNumber: '',
@@ -302,7 +367,7 @@ export default function InvestorsPage() {
       percentageShare: '',
       amountPaid: '',
       remainingPaid: '',
-      paymentDate: '',
+      paymentDate: new Date().toISOString().split('T')[0], // Reset to today's date
       paymentMethod: '',
       selectedBatch: '',
       // Bank fields
@@ -316,6 +381,14 @@ export default function InvestorsPage() {
       depositBankName: '',
       slipNo: ''
     });
+    setCurrentStep(1);
+    setShowPaymentMethodDropdown(false);
+    setShowBatchDropdown(false);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    resetForm();
   };
 
   const filteredBatches = batches.filter(batch => {
@@ -473,7 +546,7 @@ export default function InvestorsPage() {
           <div className="space-y-1">
             <Label className="text-sm font-medium text-gray-700">ID/CNIC</Label>
             <Input
-              placeholder="Enter ID/CNIC"
+              placeholder="54303-5476210-3"
               value={formData.investorId}
               onChange={(e) => handleInputChange('investorId', e.target.value)}
               style={{
@@ -598,7 +671,7 @@ export default function InvestorsPage() {
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               
               {showPaymentMethodDropdown && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="payment-method-dropdown absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                   {paymentMethods.map((method) => (
                     <div
                       key={method.value}
@@ -684,7 +757,7 @@ export default function InvestorsPage() {
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   
                   {showBatchDropdown && (
-                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                    <div className="batch-dropdown absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                       {batches.map((batch) => (
                         <div
                           key={batch._id}
@@ -796,7 +869,7 @@ export default function InvestorsPage() {
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               
               {showBatchDropdown && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                <div className="batch-dropdown absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                   {batches.map((batch) => (
                     <div
                       key={batch._id}
@@ -1009,7 +1082,10 @@ export default function InvestorsPage() {
               Batch Investors
             </h1>
             <Button
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                resetForm();
+                setShowModal(true);
+              }}
               className="flex items-center  border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
                 width: '170px',

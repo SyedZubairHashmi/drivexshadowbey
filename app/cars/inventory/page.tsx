@@ -5,7 +5,7 @@ import { BatchCarsSection } from "@/components/batch/BatchCarsSection";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { BatchModal } from "@/components/ui/batch-modal";
+import BatchModal from "@/components/ui/batch-modal";
 import { useState, useEffect } from "react";
 import { batchAPI, carAPI } from "@/lib/api";
 import type { Car } from "@/types";

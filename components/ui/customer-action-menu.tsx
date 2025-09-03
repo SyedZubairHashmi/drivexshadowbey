@@ -5,6 +5,7 @@ import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { StatusChangeModal } from "./status-change-modal"
+import SuccessPopupCard from "./success-popup-card"
 
 interface Customer {
   _id: string;
@@ -54,6 +55,7 @@ interface CustomerActionMenuProps {
 
 export function CustomerActionMenu({ customer, onGenerateInvoice, onChangeStatus, onEdit }: CustomerActionMenuProps) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const handleGenerateInvoice = () => {
     console.log("Generate invoice for customer:", customer);
@@ -103,8 +105,9 @@ export function CustomerActionMenu({ customer, onGenerateInvoice, onChangeStatus
       if (result.success === true) {
         console.log("Status updated successfully:", result);
         
-        // Call the parent callback
-        onChangeStatus?.(newStatus);
+        // Don't call onChangeStatus here - let StatusChangeModal handle the success first
+        // The StatusChangeModal will call onClose which will trigger a refresh
+        console.log("Returning true for success");
         return true; // Return true to indicate success
       } else {
         console.error('API returned success: false', result);
@@ -118,6 +121,18 @@ export function CustomerActionMenu({ customer, onGenerateInvoice, onChangeStatus
       return false; // Return false to indicate error
     }
   };
+
+  const handleStatusModalClose = () => {
+    setIsStatusModalOpen(false)
+    // Show success popup after modal closes
+    setShowSuccess(true)
+    // Auto-hide success popup after 3 seconds
+    setTimeout(() => {
+      setShowSuccess(false)
+      // Refresh the data after success popup closes
+      onChangeStatus?.(customer.sale.paymentStatus)
+    }, 3000)
+  }
 
   return (
     <>
@@ -151,10 +166,18 @@ export function CustomerActionMenu({ customer, onGenerateInvoice, onChangeStatus
 
       <StatusChangeModal
         isOpen={isStatusModalOpen}
-        onClose={() => setIsStatusModalOpen(false)}
+        onClose={handleStatusModalClose}
         currentStatus={customer.sale.paymentStatus}
         onStatusChange={handleStatusChange}
         customerName={customer.customer.name}
+      />
+
+      {/* Success Popup Card - Rendered independently of modal */}
+      <SuccessPopupCard
+        heading="Status Updated"
+        message="The status has been updated"
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
       />
     </>
   )

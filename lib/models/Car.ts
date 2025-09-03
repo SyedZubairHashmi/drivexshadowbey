@@ -91,8 +91,11 @@ const carSchema = new mongoose.Schema(
       federalExciseDuty: { type: Number, required: true, min: 0 },
       incomeTax: { type: Number, required: true, min: 0 },
       freightAndStorageCharges: { type: Number, required: true, min: 0 },
-      demurage: { type: Number, required: true, min: 0 },
+      demurrage: { type: Number, required: true, min: 0 },
       ageOfVehicle: { type: Number, required: true, min: 0 },
+      
+      // Finance Total Amount
+      financeTotalAmount: { type: Number, required: true, min: 0, default: 0 },
     },
 
     // Sale Info
@@ -147,7 +150,7 @@ carSchema.virtual("totalCost").get(function () {
     f.federalExciseDuty + // New field
     f.incomeTax + // New field
     f.freightAndStorageCharges + // New field
-    f.demurage + // New field
+    f.demurrage + // New field
     f.ageOfVehicle // New field
   );
 });

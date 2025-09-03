@@ -1,9 +1,9 @@
 // components/productSection/productData.ts
 
 import car1_img1 from "@/public/car1.png";
-import car1_img2 from "@/public/car1.png";
-import car1_img3 from "@/public/car1.png";
-import car1_img4 from "@/public/car1.png";
+import car1_img2 from "@/public/heroCar.png";
+import car1_img3 from "@/public/white_car.jpg";
+import car1_img4 from "@/public/toyota-camry-2020.png";
 import car1_img5 from "@/public/car1.png";
 
 import car2_img1 from "@/public/car1.png";

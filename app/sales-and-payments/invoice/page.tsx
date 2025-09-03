@@ -2,7 +2,7 @@
 
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical, Eye, MoreHorizontal } from "lucide-react";
+import { Plus,MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -187,11 +187,11 @@ export default function InvoicePage() {
               onClick={handleAddNewInvoice}
               className="flex items-center border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
-                width: '150px',
+                width: '180px',
                 height: '50px',
                 borderRadius: '50px',
                 paddingTop: '10px',
-                paddingRight: '10px',
+                paddingRight: '15px',
                 paddingBottom: '10px',
                 paddingLeft: '10px',
                 gap: '10px',
@@ -199,7 +199,7 @@ export default function InvoicePage() {
                 opacity: 1
               }}
             >
-             
+              <Plus className="h-4 w-4" />
               Generate Invoices
             </Button>
           </div>
@@ -401,7 +401,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Invoice Table with fixed height and pagination */}
-            <div className="bg-white rounded-lg border border-gray-200">
+            <div className="bg-white rounded-lg border  border-gray-200">
           <div style={{ overflow: 'hidden' }}>
             <div className="[&_.relative]:overflow-hidden ">
               <Table>

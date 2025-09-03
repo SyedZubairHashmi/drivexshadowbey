@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SuccessPopupCard from "./success-popup-card";
 
 // --- Flag SVG Components --- //
 const FlagJP = () => (
@@ -110,21 +111,21 @@ interface ValidationErrors {
   [key: string]: string;
 }
 
-export function BatchModal({ isOpen, onClose }: BatchModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [successMessage, setSuccessMessage] = useState("");
-  const [showSuccessCard, setShowSuccessCard] = useState(false);
-  const [createdBatchNumber, setCreatedBatchNumber] = useState("");
+export default function BatchModal({ isOpen, onClose }: BatchModalProps) {
   const [batchData, setBatchData] = useState<BatchData>({
     batchNumber: "",
     countryOfOrigin: "",
     flagImage: "",
   });
   const [nextBatchNumber, setNextBatchNumber] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [flagDropdownOpen, setFlagDropdownOpen] = useState(false);
   const [flagHighlight, setFlagHighlight] = useState(0);
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [createdBatchNumber, setCreatedBatchNumber] = useState("");
   const flagListRef = useRef<HTMLDivElement>(null);
   const flagBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -292,252 +293,194 @@ export function BatchModal({ isOpen, onClose }: BatchModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "#000000CC" }}>
-      {/* Main Modal */}
-      <div 
-        className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mx-4"
-        style={{
-          width: "520px",
-          maxHeight: "90vh",
-          overflowY: "auto",
-        }}
-      >
-        {/* Header with X button */}
-        <div className="flex items-center justify-between mb-6">
-            <div className="items-center gap-2">
-              <h1 style={{
-                fontWeight: 500,
-                fontStyle: "Medium",
-                fontSize: "24px",
-                lineHeight: "120%",
-                letterSpacing: "0%",
-                verticalAlign: "middle",
-              }}>Batch Detail</h1>
-              <span style={{
-                fontWeight: 400,
-                fontStyle: "Regular",
-                fontSize: "14px",
-                lineHeight: "100%",
-                letterSpacing: "2%",
-              }}>You New Batch number is available</span>
-          </div>
-          <button
-            onClick={handleClose}
-            style={{
-              width: "35px",
-              height: "35px",
-              left: "437px",
-              borderRadius: "50px",
-              opacity: 1,
-              backgroundColor: "#00000014",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <X className="h-4 w-4 text-black-700" />
-          </button>
-        </div>
-
-        {/* Success Message */}
-        {successMessage && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-green-800 text-sm">{successMessage}</span>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {errors.general && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <span className="text-red-800 text-sm">{errors.general}</span>
-          </div>
-        )}
-
-        {/* Batch Creation Form */}
-        <div className="space-y-4">
-          {/* Batch Number */}
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
-              Batch Number 
-            </label>
-            <input
-              type="text"
-              value={batchData.batchNumber}
-              readOnly
-              disabled
-              className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
-            />
-
-          </div>
-
-          {/* Country of Origin */}
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
-              Country of Origin 
-            </label>
-            <div className="relative" onKeyDown={onFlagKeyDown}>
-              <button
-                ref={flagBtnRef}
-                aria-haspopup="listbox"
-                aria-expanded={flagDropdownOpen}
-                onClick={() => setFlagDropdownOpen((v) => !v)}
-                className={`w-full inline-flex items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2 text-left shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent h-10 ${
-                  errors.countryOfOrigin ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <span className="inline-flex items-center gap-3">
-                  <selectedCountry.Flag />
-                  <span className="text-gray-900 font-medium">{selectedCountry.name}</span>
-                </span>
-                <ChevronDown className={classNames("h-4 w-4 transition", flagDropdownOpen && "rotate-180")} />
-              </button>
-
-              {flagDropdownOpen && (
-                <div
-                  ref={flagListRef}
-                  role="listbox"
-                  aria-activedescendant={`opt-${COUNTRIES[flagHighlight].code}`}
-                  className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg focus:outline-none"
-                >
-                  {COUNTRIES.map((c, i) => (
-                    <button
-                      key={c.code}
-                      id={`opt-${c.code}`}
-                      role="option"
-                      aria-selected={selectedCountry.code === c.code}
-                      onMouseEnter={() => setFlagHighlight(i)}
-                      onClick={() => handleCountrySelect(c)}
-                      className={classNames(
-                        "w-full flex items-center gap-3 px-3 py-2 text-left focus:outline-none h-10",
-                        i === flagHighlight ? "bg-gray-50" : "",
-                        selectedCountry.code === c.code ? "font-semibold" : ""
-                      )}
-                    >
-                      <c.Flag />
-                      <span className="text-gray-900">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {errors.countryOfOrigin && (
-              <p className="text-red-500 text-xs mt-1">{errors.countryOfOrigin}</p>
-            )}
-          </div>
-
-          {/* Flag Display */}
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
-              Flag 
-            </label>
-            <div className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
-              {batchData.flagImage ? (
-                <div className="flex items-center gap-2">
-                  {(() => {
-                    const country = COUNTRIES.find(c => c.code === batchData.flagImage);
-                    return country ? <country.Flag /> : <span className="text-gray-500">No flag selected</span>;
-                  })()}
-                </div>
-              ) : (
-                <span className="text-gray-500">Select a country to see the flag</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-6">
-          <button
-            onClick={handleCreateBatch}
-            disabled={isLoading}
-            className={`w-full h-11 rounded-xl text-white text-sm font-medium border-none flex items-center justify-center transition-colors ${
-              isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
-            }`}
-            style={{
-              backgroundColor: "#00674F",
-            }}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Save and Close"
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Success Card Overlay */}
-      {showSuccessCard && (
+    <>
+      <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "#000000CC" }}>
+        {/* Main Modal */}
         <div 
-          className="fixed inset-0 flex items-center justify-center z-60" 
-          style={{ backgroundColor: "#000000CC" }}
+          className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mx-4"
+          style={{
+            width: "520px",
+            maxHeight: "90vh",
+            overflowY: "auto",
+          }}
         >
-          <div 
-            style={{
-              width: "496px",
-              height: "320px",
-              borderRadius: "12px",
-              borderWidth: "1px",
-              borderColor: "#E5E7EB",
-              padding: "24px",
-              gap: "40px",
-              backgroundColor: "white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {/* Success Icon */}
-            <div className="mb-6">
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="32" r="32" fill="#F3F4F6"/>
-                <path d="M32 16C23.164 16 16 23.164 16 32C16 40.836 23.164 48 32 48C40.836 48 48 40.836 48 32C48 23.164 40.836 16 32 16ZM28 38L22 32L24.586 29.414L28 32.828L39.414 21.414L42 24L28 38Z" fill="#10B981"/>
-              </svg>
+          {/* Header with X button */}
+          <div className="flex items-center justify-between mb-6">
+              <div className="items-center gap-2">
+                <h1 style={{
+                  fontWeight: 500,
+                  fontStyle: "Medium",
+                  fontSize: "24px",
+                  lineHeight: "120%",
+                  letterSpacing: "0%",
+                  verticalAlign: "middle",
+                }}>Batch Detail</h1>
+                <span style={{
+                  fontWeight: 400,
+                  fontStyle: "Regular",
+                  fontSize: "14px",
+                  lineHeight: "100%",
+                  letterSpacing: "2%",
+                }}>You New Batch number is available</span>
             </div>
-
-            {/* Heading */}
-            <div 
+            <button
+              onClick={handleClose}
               style={{
-                width: "448px",
-                height: "54px",
-                gap: "4px",
+                width: "35px",
+                height: "35px",
+                left: "437px",
+                borderRadius: "50px",
+                opacity: 1,
+                backgroundColor: "#00000014",
+                border: "none",
+                cursor: "pointer",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <h2 style={{
-                fontWeight: 500,
-                fontStyle: "Medium",
-                fontSize: "24px",
-                lineHeight: "120%",
-                letterSpacing: "0%",
-                verticalAlign: "middle",
-                color: "#111827",
-                margin: 0,
-              }}>
-                Batch {createdBatchNumber} Created
-              </h2>
-              <span style={{
-                fontWeight: 400,
-                fontSize: "14px",
-                color: "#6B7280",
-                marginTop: "4px",
-              }}>
-                You have successfully created new batch
-              </span>
+              <X className="h-4 w-4 text-black-700" />
+            </button>
+          </div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-green-800 text-sm">{successMessage}</span>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <span className="text-red-800 text-sm">{errors.general}</span>
+            </div>
+          )}
+
+          {/* Batch Creation Form */}
+          <div className="space-y-4">
+            {/* Batch Number */}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
+                Batch Number 
+              </label>
+              <input
+                type="text"
+                value={batchData.batchNumber}
+                readOnly
+                disabled
+                className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              />
+            </div>
+
+            {/* Country of Origin */}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
+                Country of Origin 
+              </label>
+              <div className="relative" onKeyDown={onFlagKeyDown}>
+                <button
+                  ref={flagBtnRef}
+                  aria-haspopup="listbox"
+                  aria-expanded={flagDropdownOpen}
+                  onClick={() => setFlagDropdownOpen((v) => !v)}
+                  className={`w-full inline-flex items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2 text-left shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent h-10 ${
+                    errors.countryOfOrigin ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-3">
+                    <selectedCountry.Flag />
+                    <span className="text-gray-900 font-medium">{selectedCountry.name}</span>
+                  </span>
+                  <ChevronDown className={classNames("h-4 w-4 transition", flagDropdownOpen && "rotate-180")} />
+                </button>
+
+                {flagDropdownOpen && (
+                  <div
+                    ref={flagListRef}
+                    role="listbox"
+                    aria-activedescendant={`opt-${COUNTRIES[flagHighlight].code}`}
+                    className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg focus:outline-none"
+                  >
+                    {COUNTRIES.map((c, i) => (
+                      <button
+                        key={c.code}
+                        id={`opt-${c.code}`}
+                        role="option"
+                        aria-selected={selectedCountry.code === c.code}
+                        onMouseEnter={() => setFlagHighlight(i)}
+                        onClick={() => handleCountrySelect(c)}
+                        className={classNames(
+                          "w-full flex items-center gap-3 px-3 py-2 text-left focus:outline-none h-10",
+                          i === flagHighlight ? "bg-gray-50" : "",
+                          selectedCountry.code === c.code ? "font-semibold" : ""
+                        )}
+                      >
+                        <c.Flag />
+                        <span className="text-gray-900">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {errors.countryOfOrigin && (
+                <p className="text-red-500 text-xs mt-1">{errors.countryOfOrigin}</p>
+              )}
+            </div>
+
+            {/* Flag Display */}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: "#111827" }}>
+                Flag 
+              </label>
+              <div className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
+                {batchData.flagImage ? (
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const country = COUNTRIES.find(c => c.code === batchData.flagImage);
+                      return country ? <country.Flag /> : <span className="text-gray-500">No flag selected</span>;
+                    })()}
+                  </div>
+                ) : (
+                  <span className="text-gray-500">Select a country to see the flag</span>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Action Button */}
+          <div className="mt-6">
+            <button
+              onClick={handleCreateBatch}
+              disabled={isLoading}
+              className={`w-full h-11 rounded-xl text-white text-sm font-medium border-none flex items-center justify-center transition-colors ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
+              }`}
+              style={{
+                backgroundColor: "#00674F",
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Save and Close"
+              )}
+            </button>
+          </div>
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* Success Popup Card */}
+      <SuccessPopupCard
+        heading={`Batch ${createdBatchNumber} Created`}
+        message="You have successfully created new batch"
+        isOpen={showSuccessCard}
+        onClose={() => setShowSuccessCard(false)}
+      />
+    </>
   );
 }

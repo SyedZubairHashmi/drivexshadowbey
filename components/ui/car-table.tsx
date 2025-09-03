@@ -31,6 +31,7 @@ export function CarTable({ cars, batchNumber, onGenerateInvoice }: CarTableProps
             <TableHead className="py-2">Manufacturing Year</TableHead>
             <TableHead className="py-2">Batch</TableHead>
             <TableHead className="py-2">Status</TableHead>
+            <TableHead className="py-2">Total Finance</TableHead>
             <TableHead className="w-20 py-2">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -57,6 +58,14 @@ export function CarTable({ cars, batchNumber, onGenerateInvoice }: CarTableProps
               </TableCell>
               <TableCell className="py-2">
                 <StatusBadge status={car.status} />
+              </TableCell>
+              <TableCell className="py-2">
+                <span className="font-medium text-green-600">
+                  {car.financing?.financeTotalAmount 
+                    ? `${car.financing.financeTotalAmount.toLocaleString()} PKR`
+                    : 'N/A'
+                  }
+                </span>
               </TableCell>
               <TableCell className="py-2">
                 <ActionMenu

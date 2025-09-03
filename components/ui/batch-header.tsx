@@ -20,7 +20,6 @@ interface BatchHeaderProps {
   onToggle?: () => void;
   batchNumber?: string;
   isLatestBatch?: boolean;
-  deliveryTimeframe?: string;
   // Filter props
   searchTerm?: string;
   onSearchChange?: (value: string) => void;
@@ -42,7 +41,6 @@ export function BatchHeader({
   onToggle,
   batchNumber,
   isLatestBatch,
-  deliveryTimeframe,
   // Filter props
   searchTerm = '',
   onSearchChange,
@@ -82,7 +80,8 @@ export function BatchHeader({
                 <div className="flex gap-6">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
 
-          {deliveryTimeframe && (
+          {/* Transit Status Badge - Show if title contains "Transit" */}
+          {title.includes('Transit') && (
             <div
               style={{
                 width: '85px',
@@ -103,7 +102,7 @@ export function BatchHeader({
                 fontWeight: '500'
               }}
             >
-              {deliveryTimeframe} 
+              Transit
             </div>
           )}
 
@@ -191,7 +190,7 @@ export function BatchHeader({
                 width: "300px",
                 height: "41px",
                 borderRadius: "12px",
-                border: "1px solid rgba(0, 0, 0, 0.24)",
+                border: "1px solid #0000001F",
                 backgroundColor: "white",
                 padding: "0 12px",
                 gap: "10px"
@@ -219,7 +218,7 @@ export function BatchHeader({
                 gap: "10px",
                 padding: "12px",
                 borderWidth: "1px",
-                border: "1px solid rgba(0, 0, 0, 0.24)",
+                border: "1px solid #0000001F",
                 color: "#00000099",
                 fontWeight: "500"
               }}
@@ -238,7 +237,7 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   background: "#FFF",
                   width: "128px",
                   height: "41px",
@@ -254,7 +253,7 @@ export function BatchHeader({
               <SelectContent 
                 style={{
                   backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   borderRadius: "12px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   opacity: 1
@@ -314,7 +313,7 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   background: "#FFF",
                   width: "96px",
                   height: "41px",
@@ -330,7 +329,7 @@ export function BatchHeader({
               <SelectContent 
                 style={{
                   backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   borderRadius: "12px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   opacity: 1
@@ -356,7 +355,7 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   background: "#FFF",
                   width: "128px",
                   height: "41px",
@@ -372,7 +371,7 @@ export function BatchHeader({
               <SelectContent 
                 style={{
                   backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   borderRadius: "12px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   opacity: 1
@@ -395,7 +394,7 @@ export function BatchHeader({
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   background: "#FFF",
                   width: "112px",
                   height: "41px",
@@ -411,7 +410,7 @@ export function BatchHeader({
               <SelectContent 
                 style={{
                   backgroundColor: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #0000001F",
                   borderRadius: "12px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   opacity: 1

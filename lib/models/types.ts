@@ -81,8 +81,11 @@ export interface ICar extends Document {
     federalExciseDuty: number;
     incomeTax: number;
     freightAndStorageCharges: number;
-    demurage: number;
+    demurrage: number;
     ageOfVehicle: number;
+    
+    // Finance Total Amount
+    financeTotalAmount: number;
   };
   saleInfo?: {
     soldPrice?: number;
@@ -120,7 +123,6 @@ export interface CreateBatchInput {
 export interface CreateCarInput {
   carName: string;
   company: string;
-  carType: 'SUV' | 'Sedan' | 'Hatchback' | 'Truck' | 'Van' | 'Kei' | 'Other';
   carSegment: string;
   engineNumber: string;
   chasisNumber: string;
@@ -135,7 +137,7 @@ export interface CreateCarInput {
   keywords?: string[];
   features?: string[];
   status?: 'sold' | 'transit' | 'warehouse' | 'showroom';
-  color: string;
+  exteriorColor: string;
   deliveryTimeframe: string;
   batchNo: string;
   description: string;
@@ -185,8 +187,11 @@ export interface CreateCarInput {
     federalExciseDuty: number;
     incomeTax: number;
     freightAndStorageCharges: number;
-    demurage: number;
+    demurrage: number;
     ageOfVehicle: number;
+    
+    // Finance Total Amount
+    financeTotalAmount: number;
   };
   images: {
     invoiceReceipt: string;

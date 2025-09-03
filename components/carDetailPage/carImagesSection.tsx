@@ -47,7 +47,7 @@ const CarImagesSection = ({ images, title }: CarImagesSectionProps) => {
       </div>
 
       <div className="flex justify-center mt-6">
-        <button className="bg-green-600 w-full text-white px-6 py-2 rounded-lg font-semibold shadow-sm hover:bg-green-700 transition">
+        <button className="bg-green-600 w-full text-white px-6 py-2 rounded-xl font-semibold shadow-sm hover:bg-green-700 transition">
           Contact Now
         </button>
       </div>

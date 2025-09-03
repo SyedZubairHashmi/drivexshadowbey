@@ -6,6 +6,7 @@ import { CarTable } from "@/components/ui/car-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SuccessPopupCard from "@/components/ui/success-popup-card";
 import { useEffect, useState, Suspense } from "react";
 import { carAPI, customerAPI } from "@/lib/api";
 import { Plus, X, ArrowLeft, Upload, FileText, ChevronDown, Search, Filter } from "lucide-react";
@@ -72,6 +73,8 @@ function SoldCarsContent() {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<SoldCarFormData>({
     companyName: '',
     model: '',
@@ -354,6 +357,7 @@ function SoldCarsContent() {
 
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true); // Start loading
       console.log('Form submitted:', formData);
       
       // First, find the car by chassis number and update its status to 'sold'
@@ -421,18 +425,23 @@ function SoldCarsContent() {
       
       if (response.success) {
         console.log('Customer saved successfully:', response.data);
-        alert('Sold car data saved successfully!');
+        // Show success popup instead of alert
+        setShowSuccess(true);
         handleCloseModal();
         
-        // Check if user came from customer page and navigate back
-        const sourcePage = sessionStorage.getItem('soldCarFormSource');
-        if (sourcePage === 'customer') {
-          sessionStorage.removeItem('soldCarFormSource'); // Clean up
-          router.push('/sales-and-payments/customers');
-        } else {
-          // Refresh the sold cars list if not from customer page
-        fetchSoldCars();
-        }
+        // Auto-hide success popup after 8 seconds (longer than car add popup)
+        setTimeout(() => {
+          setShowSuccess(false);
+          // Check if user came from customer page and navigate back
+          const sourcePage = sessionStorage.getItem('soldCarFormSource');
+          if (sourcePage === 'customer') {
+            sessionStorage.removeItem('soldCarFormSource'); // Clean up
+            router.push('/sales-and-payments/customers');
+          } else {
+            // Refresh the sold cars list if not from customer page
+            fetchSoldCars();
+          }
+        }, 8000);
       } else {
         console.error('Failed to save customer:', response.error);
         alert('Failed to save sold car data: ' + response.error);
@@ -440,6 +449,8 @@ function SoldCarsContent() {
     } catch (error: any) {
       console.error('Error saving customer:', error);
       alert('Error saving sold car data: ' + error.message);
+    } finally {
+      setIsSubmitting(false); // Stop loading regardless of success/failure
     }
   };
 
@@ -477,7 +488,7 @@ function SoldCarsContent() {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -500,7 +511,7 @@ function SoldCarsContent() {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -526,7 +537,7 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -569,94 +580,94 @@ function SoldCarsContent() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-black mb-2">Customer Name</label>
-          <Input
-            type="text"
-            placeholder="Enter Customer Name"
-            value={formData.customerName}
-            onChange={(e) => handleInputChange('customerName', e.target.value)}
-            className="placeholder-custom text-sm"
-            style={{
-              width: '100%',
-              height: '42px',
-              borderRadius: '8px',
-              opacity: 1,
-              gap: '12px',
-              borderWidth: '1px',
-              paddingTop: '10px',
-              paddingRight: '12px',
-              paddingBottom: '10px',
-              paddingLeft: '12px'
-            }}
-          />
+                      <Input
+              type="text"
+              placeholder="Enter Customer Name"
+              value={formData.customerName}
+              onChange={(e) => handleInputChange('customerName', e.target.value)}
+              className="placeholder-custom text-sm"
+              style={{
+                width: '100%',
+                height: '42px',
+                borderRadius: '8px',
+                opacity: 1,
+                gap: '12px',
+                border: '1px solid #0000003D',
+                paddingTop: '10px',
+                paddingRight: '12px',
+                paddingBottom: '10px',
+                paddingLeft: '12px'
+              }}
+            />
         </div>
         
         <div>
           <label className="block text-sm font-medium text-black mb-2">Phone Number</label>
-          <Input
-            type="tel"
-            placeholder="Enter Phone Number"
-            value={formData.phoneNumber}
-            onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-            className="placeholder-custom text-sm"
-            style={{
-              width: '100%',
-              height: '42px',
-              borderRadius: '8px',
-              opacity: 1,
-              gap: '12px',
-              borderWidth: '1px',
-              paddingTop: '10px',
-              paddingRight: '12px',
-              paddingBottom: '10px',
-              paddingLeft: '12px'
-            }}
-          />
+                      <Input
+              type="tel"
+              placeholder="Enter Phone Number"
+              value={formData.phoneNumber}
+              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              className="placeholder-custom text-sm"
+              style={{
+                width: '100%',
+                height: '42px',
+                borderRadius: '8px',
+                opacity: 1,
+                gap: '12px',
+                border: '1px solid #0000003D',
+                paddingTop: '10px',
+                paddingRight: '12px',
+                paddingBottom: '10px',
+                paddingLeft: '12px'
+              }}
+            />
         </div>
         
         <div>
           <label className="block text-sm font-medium text-black mb-2">Email Address (optional)</label>
-          <Input
-            type="email"
-            placeholder="Enter Email Address"
-            value={formData.emailAddress}
-            onChange={(e) => handleInputChange('emailAddress', e.target.value)}
-            className="placeholder-custom text-sm"
-            style={{
-              width: '100%',
-              height: '42px',
-              borderRadius: '8px',
-              opacity: 1,
-              gap: '12px',
-              borderWidth: '1px',
-              paddingTop: '10px',
-              paddingRight: '12px',
-              paddingBottom: '10px',
-              paddingLeft: '12px'
-            }}
-          />
+                      <Input
+              type="email"
+              placeholder="Enter Email Address"
+              value={formData.emailAddress}
+              onChange={(e) => handleInputChange('emailAddress', e.target.value)}
+              className="placeholder-custom text-sm"
+              style={{
+                width: '100%',
+                height: '42px',
+                borderRadius: '8px',
+                opacity: 1,
+                gap: '12px',
+                border: '1px solid #0000003D',
+                paddingTop: '10px',
+                paddingRight: '12px',
+                paddingBottom: '10px',
+                paddingLeft: '12px'
+              }}
+            />
         </div>
         
         <div>
           <label className="block text-sm font-medium text-black mb-2">Address (optional)</label>
-          <Input
-            type="text"
-            placeholder="Enter Address"
-            value={formData.address}
-            onChange={(e) => handleInputChange('address', e.target.value)}
-            className="placeholder-custom text-sm"
-            style={{
-              width: '100%',
-              height: '42px',
-              borderRadius: '8px',
-              opacity: 1,
-              gap: '12px',
-              borderWidth: '1px',
-              paddingTop: '10px',
-              paddingRight: '12px',
-              paddingBottom: '10px',
-              paddingLeft: '12px'
-            }}
-          />
+                      <Input
+              type="text"
+              placeholder="Enter Address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              className="placeholder-custom text-sm"
+              style={{
+                width: '100%',
+                height: '42px',
+                borderRadius: '8px',
+                opacity: 1,
+                gap: '12px',
+                border: '1px solid #0000003D',
+                paddingTop: '10px',
+                paddingRight: '12px',
+                paddingBottom: '10px',
+                paddingLeft: '12px'
+              }}
+            />
         </div>
       </div>
     </div>
@@ -689,7 +700,7 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -712,7 +723,7 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -735,12 +746,12 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
               paddingLeft: '12px'
-            }}
+              }}
           />
         </div>
           
@@ -758,7 +769,7 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -785,7 +796,7 @@ function SoldCarsContent() {
                 borderRadius: '8px',
                 opacity: 1,
                 gap: '12px',
-                borderWidth: '1px',
+                border: '1px solid #0000003D',
                 paddingTop: '10px',
                 paddingRight: '12px',
                 paddingBottom: '10px',
@@ -826,7 +837,7 @@ function SoldCarsContent() {
                   borderRadius: '8px',
                   opacity: 1,
                   gap: '12px',
-                  borderWidth: '1px',
+                  border: '1px solid #0000003D',
                   paddingTop: '10px',
                   paddingRight: '12px',
                   paddingBottom: '10px',
@@ -869,7 +880,7 @@ function SoldCarsContent() {
               borderRadius: '8px',
               opacity: 1,
               gap: '12px',
-              borderWidth: '1px',
+              border: '1px solid #0000003D',
               paddingTop: '10px',
               paddingRight: '12px',
               paddingBottom: '10px',
@@ -890,7 +901,7 @@ function SoldCarsContent() {
                     borderRadius: '8px',
                     opacity: 1,
                     gap: '12px',
-                    borderWidth: '1px',
+                    border: '1px solid #0000003D',
                     paddingTop: '10px',
                     paddingRight: '12px',
                     paddingBottom: '10px',
@@ -912,7 +923,7 @@ function SoldCarsContent() {
                   borderRadius: '8px',
                   opacity: 1,
                   gap: '12px',
-                  borderWidth: '1px',
+                  border: '1px solid #0000003D',
                   paddingTop: '10px',
                   paddingRight: '12px',
                   paddingBottom: '10px',
@@ -939,7 +950,7 @@ function SoldCarsContent() {
                     borderRadius: '8px',
                     opacity: 1,
                     gap: '12px',
-                    borderWidth: '1px',
+                    border: '1px solid #0000003D',
                     paddingTop: '10px',
                     paddingRight: '12px',
                     paddingBottom: '10px',
@@ -960,7 +971,7 @@ function SoldCarsContent() {
                     borderRadius: '8px',
                     opacity: 1,
                     gap: '12px',
-                    borderWidth: '1px',
+                    border: '1px solid #0000003D',
                     paddingTop: '10px',
                     paddingRight: '12px',
                     paddingBottom: '10px',
@@ -982,7 +993,7 @@ function SoldCarsContent() {
                   borderRadius: '8px',
                   opacity: 1,
                   gap: '12px',
-                  borderWidth: '1px',
+                  border: '1px solid #0000003D',
                   paddingTop: '10px',
                   paddingRight: '12px',
                   paddingBottom: '10px',
@@ -995,7 +1006,7 @@ function SoldCarsContent() {
 
         {formData.paymentMethod.type === "BankDeposit" && (
           <div className={`grid grid-cols-2 ${gridGap}`}>
-            <div>
+                        <div>
               <label className="block text-sm font-medium text-black mb-2">Bank Name</label>
               <Input
                 placeholder="Enter Bank Name"
@@ -1008,14 +1019,14 @@ function SoldCarsContent() {
                   borderRadius: '8px',
                   opacity: 1,
                   gap: '12px',
-                  borderWidth: '1px',
+                  border: '1px solid #0000003D',
                   paddingTop: '10px',
                   paddingRight: '12px',
                   paddingBottom: '10px',
                   paddingLeft: '12px'
                 }}
               />
-      </div>
+            </div>
             <div>
               <label className="block text-sm font-medium text-black mb-2">Slip No</label>
               <Input
@@ -1029,7 +1040,7 @@ function SoldCarsContent() {
                   borderRadius: '8px',
                   opacity: 1,
                   gap: '12px',
-                  borderWidth: '1px',
+                  border: '1px solid #0000003D',
                   paddingTop: '10px',
                   paddingRight: '12px',
                   paddingBottom: '10px',
@@ -1469,6 +1480,7 @@ function SoldCarsContent() {
             <div className="flex justify-end mt-4">
               <Button
                 onClick={currentStep === 4 ? handleSubmit : handleNextStep}
+                disabled={currentStep === 4 && isSubmitting}
                 style={{
                   width: "472px",
                   height: "45px",
@@ -1477,12 +1489,31 @@ function SoldCarsContent() {
                 }}
                 className="text-white"
               >
-                {currentStep === 4 ? 'Save & close' : 'Save & Continue'}
+                {currentStep === 4 ? (
+                  isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save & close'
+                  )
+                ) : (
+                  'Save & Continue'
+                )}
               </Button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Success Popup Card - Shows when car is sold successfully */}
+      <SuccessPopupCard
+        heading="Car Sold Successfully"
+        message="The car has been marked as sold and customer data has been saved"
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
     </MainLayout>
   );
 }

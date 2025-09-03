@@ -48,14 +48,19 @@ export default function TransitPage() {
   // Filter cars by transit status for a specific batch
   const getTransitCarsForBatch = (batchNumber: string) => {
     return cars.filter((car: any) => {
-      return car.batchNo === batchNumber;
+      return car.batchNo === batchNumber && car.status === 'transit';
     }) as Car[];
   };
 
   // Get unique batch numbers that have transit cars
   const getUniqueBatchesWithTransitCars = () => {
-    const batchNumbers = [...new Set(cars.map((car: any) => car.batchNo).filter(Boolean))];
-    return batchNumbers.sort((a, b) => {
+    // Only include batches that actually have cars with transit status
+    const batchesWithTransitCars = cars
+      .filter((car: any) => car.status === 'transit' && car.batchNo)
+      .map((car: any) => car.batchNo);
+    
+    const uniqueBatchNumbers = [...new Set(batchesWithTransitCars)];
+    return uniqueBatchNumbers.sort((a, b) => {
       // Extract numbers from batch numbers for proper sorting
       const numA = parseInt(a);
       const numB = parseInt(b);
@@ -183,18 +188,15 @@ export default function TransitPage() {
           {currentBatches.map((batchNumber) => {
             const batchCars = getTransitCarsForBatch(batchNumber);
             
-            // Calculate delivery timeframe from cars in this batch
-            const deliveryTimeframe = batchCars.length > 0 
-              ? (batchCars[0] as any)?.deliveryTimeframe || "34" 
-              : "34";
+            // Since we're only showing batches with transit cars, always include "Transit" in title
+            const batchTitle = `Batch ${batchNumber} Transit`;
             
             return (
               <BatchCarsSection 
                 key={batchNumber}
-                batchTitle={`Batch ${batchNumber}`} 
+                batchTitle={batchTitle} 
                 batchNumber={batchNumber} 
                 cars={batchCars}
-                deliveryTimeframe={deliveryTimeframe}
               />
             );
           })}

@@ -1,103 +1,158 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { FaBars, FaTimes } from "react-icons/fa";
-import Logo from "@/components/navbar/logo";
-import DesktopMenu from "@/components/navbar/DesktopMenu";
-import CallToActionButton from "@/components/navbar/CallToActionButton";
-import MobileMenu from "@/components/navbar/MobileMenu";
+import FooterSection from "@/components/footer/footer";
+import Navbar from "@/components/navbar/navbar";
+import React, { useState } from "react";
+import { MdLocationOn, MdAccessTime, MdEmail, MdPhone } from "react-icons/md";
 
+export default function Contact() {
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
 
-const Navbar = () => {
-  const pathname = usePathname();
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileCarsOpen, setMobileCarsOpen] = useState(false);
-  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
-  const [carsOpen, setCarsOpen] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  // Routes that need black theme
-  const isCarDetailPage = pathname.includes("/car/");
-  const isContactPage = pathname === "/contact"; // Adjust if your route is different
-  const isBlackThemePage = isCarDetailPage || isContactPage;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = (scrollY / docHeight) * 100;
-
-      if (scrollPercent > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    alert(
+      `Submitted Data:\nName: ${form.fullName}\nEmail: ${form.email}\nPhone: ${form.phone}\nMessage: ${form.message}`
+    );
+    setForm({ fullName: "", email: "", phone: "", message: "" });
+  }
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 py-3 px-4 md:px-12 flex items-center justify-between transition-colors duration-300
-        ${scrolled ? "bg-black/90" : ""}
-        ${isBlackThemePage ? "text-black" : "text-white"}
-      `}
-    >
-      {/* Logo with black bg when on black-themed pages */}
-      <div className={`${isBlackThemePage ? "bg-black p-1 rounded" : ""}`}>
-        <Logo />
-      </div>
+    <>
+      <div className="max-w-[1400px] mx-auto mb-12 mt-28 px-4 flex flex-col md:flex-row gap-10 text-[#222] font-sans">
+        {/* Left Section */}
+        <Navbar />
+        <div className="flex-1 w-full md:w-auto">
+          <h2 className="text-[26px] font-semibold mb-2">Contact Drive X Deal</h2>
+          <p className="text-[16px] mb-8 text-gray-700">
+            We’re here to help you with your car buying journey.
+          </p>
 
-      {/* Desktop Menu */}
-      <DesktopMenu
-        carsOpen={carsOpen}
-        setCarsOpen={setCarsOpen}
-        productsOpen={productsOpen}
-        setProductsOpen={setProductsOpen}
-        textColor={isBlackThemePage ? "text-black" : "text-white"}
-      />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 rounded-2xl">
+            {[
+              {
+                icon: <MdLocationOn size={18} />,
+                title: "Head Office",
+                content: "11605 West Dodge Rd, Suite 3, Omaha, NE - 68154",
+              },
+              {
+                icon: <MdAccessTime size={18} />,
+                title: "Office Hours",
+                content: "Mon - Sat: 9:00 am to 7:00 pm\nSunday: Closed",
+              },
+              {
+                icon: <MdEmail size={18} />,
+                title: "Email",
+                content: "contact@drivexdeals.com\ncontact@drivexdeals.com",
+              },
+              {
+                icon: <MdPhone size={18} />,
+                title: "Phone Number",
+                content: "+92 330 010009\n+92 330 010009",
+              },
+            ].map(({ icon, title, content }, index) => (
+              <div
+                key={index}
+                className="w-full max-w-md min-h-[180px] border border-gray-300 rounded-2xl p-8 flex flex-col items-start justify-start space-y-3"
+              >
+                <div className="text-green-800">{icon}</div>
+                <div className="font-bold text-[14px] text-green-800 mt-1">{title}</div>
+                <div className="text-[11px] leading-6 whitespace-pre-line text-gray-700">
+                  {content}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {/* CTA Button */}
-      <div className="hidden md:block">
-        <CallToActionButton isBlackTheme={isBlackThemePage} />
-      </div>
-
-      {/* Mobile Menu Button */}
-      <div className="md:hidden z-30 flex items-center">
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`
-            transition-colors duration-300 px-2 py-1 rounded
-            ${
-              isBlackThemePage
-                ? "text-white hover:text-black hover:bg-white"
-                : "text-white hover:text-black hover:bg-transparent"
-            }
-          `}
-          aria-label="Toggle mobile menu"
+        {/* Right Section (Form) */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 w-full max-w-md flex flex-col gap-3 p-5 border border-gray-400 rounded-2xl"
         >
-          {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-        </button>
+          <label htmlFor="fullName" className="text-[12px]">
+            Full Name
+          </label>
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            placeholder="Full Name"
+            value={form.fullName}
+            onChange={handleChange}
+            autoComplete="off"
+            className="text-[13px] px-3 py-2 border border-gray-300 rounded-md focus:border-green-700 outline-none"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col">
+              <label htmlFor="email" className="text-[12px]">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={handleChange}
+                autoComplete="off"
+                className="text-[13px] px-3 py-2 border border-gray-300 rounded-md focus:border-green-700 outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="phone" className="text-[12px]">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="Phone Number"
+                value={form.phone}
+                onChange={handleChange}
+                autoComplete="off"
+                className="text-[13px] px-3 py-2 border border-gray-300 rounded-md focus:border-green-700 outline-none"
+              />
+            </div>
+          </div>
+
+          <label htmlFor="message" className="text-[12px] mt-2">
+            Message
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Enter your Message here"
+            value={form.message}
+            onChange={handleChange}
+            rows={5}
+            className="text-[13px] px-3 py-2 border border-gray-300 rounded-md focus:border-green-700 outline-none resize-none"
+          />
+
+          <button
+            type="submit"
+            className="mt-3 px-4 py-2 bg-green-800 text-white font-semibold rounded hover:bg-green-900 text-[14px]"
+          >
+            Submit
+          </button>
+        </form>
       </div>
 
-      {/* Mobile Menu */}
-      <MobileMenu
-        open={mobileMenuOpen}
-        setOpen={setMobileMenuOpen}
-        mobileCarsOpen={mobileCarsOpen}
-        setMobileCarsOpen={setMobileCarsOpen}
-        mobileProductsOpen={mobileProductsOpen}
-        setMobileProductsOpen={setMobileProductsOpen}
-        textColor={isBlackThemePage ? "text-black" : "text-white"}
-      />
-    </nav>
+      {/* Footer Section */}
+      <FooterSection />
+    </>
   );
-};
-
-export default Navbar;
+}

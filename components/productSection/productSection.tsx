@@ -8,7 +8,9 @@ import RatingIcons from "../icons/ratingIcons";
 
 const ProductSection = () => {
   return (
-    <div className="max-w-[1400px] mx-auto pt-[30px] pb-8 px-[60px] font-raleway">
+    // Outer container: max width 1440px, consistent padding (like other sections)
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-[60px] pt-[30px] pb-8 font-raleway">
+      {/* Inner white background container, no extra horizontal padding */}
       <div className="pt-6 pb-6 bg-white">
         {/* Top Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 sm:gap-0">
@@ -20,15 +22,20 @@ const ProductSection = () => {
               These are the luxury collection we have
             </div>
           </div>
-          <button className="text-black font-normal border border-gray-700 rounded-full px-4 py-1 mt-2 sm:mt-0 text-[20px] font-raleway">
-            View More
-          </button>
+          <div className="w-full sm:w-auto flex justify-center sm:justify-end">
+  <Link href="/features/automotive/collection" className="w-full sm:w-auto">
+    <button className="w-full sm:w-auto border border-gray-700 rounded-full text-black font-normal px-4 py-2 text-[20px] text-center font-raleway">
+      View More
+    </button>
+  </Link>
+</div>
+
         </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {productData.map((car) => (
-            <Link key={car.id} href={`/car/${car.id}`} passHref>
+            <Link key={car.id} href={`/features/automotive/car/${car.id}`} passHref>
               <div className="border border-gray-300 rounded-[24px] p-4 shadow-sm hover:shadow-md transition-shadow duration-300 text-left font-raleway cursor-pointer group">
                 {/* Image with Zoom on Hover */}
                 <div className="rounded-[20px] border border-gray-300 overflow-hidden">
@@ -59,7 +66,9 @@ const ProductSection = () => {
 
                 {/* Price */}
                 <div className="mt-3 flex flex-col">
-                  <div className="text-gray-500 font-medium text-[14px]">Price</div>
+                  <div className="text-gray-500 font-medium text-[14px]">
+                    Price
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="font-bold text-[24px] text-green-700">
                       {car.amount_price}

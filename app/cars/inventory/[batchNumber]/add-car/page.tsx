@@ -6,17 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { ArrowLeft, X, Upload, Loader2, FileText, Trash2, Image as ImageIcon, ChevronRight, ChevronDown } from "lucide-react";
 import { carAPI } from "@/lib/api";
 import FlagDropdown from "@/components/ui/flag-dropdown";
 import Image from "next/image";
+import SuccessPopupCard from "@/components/ui/success-popup-card";
+import DynamicInput from "@/components/ui/dynamic-input";
 
 interface AddCarPageProps {
   params: {
     batchNumber: string;
   };
 }
+
+
 
 function AddCarContent({ params }: AddCarPageProps) {
   const router = useRouter();
@@ -89,7 +93,7 @@ function AddCarContent({ params }: AddCarPageProps) {
     federalExciseDuty: "",
     incomeTax: "",
     freightAndStorageCharges: "",
-    demurage: "",
+    demurrage: "",
     ageOfVehicle: ""
   });
 
@@ -99,6 +103,7 @@ function AddCarContent({ params }: AddCarPageProps) {
   const [carPictures, setCarPictures] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<{ name: string; flag: string; code: string; rate: number } | null>({
     name: "United States",
     flag: "/flags/usa.svg",
@@ -167,7 +172,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           federalExciseDuty: carData.financing?.federalExciseDuty?.toString() || prev.federalExciseDuty,
           incomeTax: carData.financing?.incomeTax?.toString() || prev.incomeTax,
           freightAndStorageCharges: carData.financing?.freightAndStorageCharges?.toString() || prev.freightAndStorageCharges,
-          demurage: carData.financing?.demurage?.toString() || prev.demurage,
+          demurrage: carData.financing?.demurrage?.toString() || prev.demurrage,
           ageOfVehicle: carData.financing?.ageOfVehicle?.toString() || prev.ageOfVehicle,
         }));
 
@@ -225,10 +230,55 @@ function AddCarContent({ params }: AddCarPageProps) {
       }));
     }
     
+    // Check for duplicate chassis number when chassisNumber field is updated
+    if (field === 'chassisNumber' && value.trim().length > 0) {
+      checkDuplicateChassisNumber(value.trim());
+    }
+    
     // Clear calculating status after a short delay
     setTimeout(() => {
       setIsCalculating(false);
     }, 500);
+  };
+
+  // Function to check for duplicate chassis number
+  const checkDuplicateChassisNumber = async (chassisNumber: string) => {
+    try {
+      // Skip validation if in edit mode and chassis number hasn't changed
+      if (isEditMode && carDataParam) {
+        try {
+          const carData = JSON.parse(decodeURIComponent(carDataParam));
+          if (carData.chassisNumber === chassisNumber || carData.chasisNumber === chassisNumber) {
+            return; // Same chassis number in edit mode, no need to check
+          }
+        } catch (error) {
+          console.error('Error parsing car data:', error);
+        }
+      }
+
+      const response = await carAPI.getAll();
+      if (response.success && response.data) {
+        const existingCar = response.data.find((car: any) => 
+          (car.chassisNumber === chassisNumber || car.chasisNumber === chassisNumber) && 
+          car._id !== (isEditMode && carDataParam ? JSON.parse(decodeURIComponent(carDataParam))?._id : null)
+        );
+        
+        if (existingCar) {
+          setError(`Chassis number "${chassisNumber}" already exists. Please use a different chassis number.`);
+          // Clear the chassis number field
+          setFormData(prev => ({
+            ...prev,
+            chassisNumber: ""
+          }));
+        } else {
+          // Clear any previous chassis number error
+          setError(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking duplicate chassis number:', error);
+      // Don't show error to user for API failures, just log it
+    }
   };
 
 
@@ -275,7 +325,7 @@ function AddCarContent({ params }: AddCarPageProps) {
       federalExciseDuty: "",
       incomeTax: "",
       freightAndStorageCharges: "",
-      demurage: "",
+      demurrage: "",
       ageOfVehicle: "",
       // Update all rates to the new currency rate
       auctionPriceRate: country.rate.toString(),
@@ -378,7 +428,9 @@ function AddCarContent({ params }: AddCarPageProps) {
           'containerCharges', 'containerChargesRate', 'auctionExpenses', 'auctionExpensesRate',
           'loadingCharges', 'loadingChargesRate', 'freightSea', 'freightSeaRate', 
           'originCity', 'destinationCity', 'variantDuty', 'passportCharges', 
-          'servicesCharges', 'transportCharges', 'repairCharges', 'miscellaneousCharges'
+          'servicesCharges', 'transportCharges', 'repairCharges', 'miscellaneousCharges',
+          'vehicleValueCif', 'landingCharges', 'customsDuty', 'salesTax', 
+          'federalExciseDuty', 'incomeTax', 'freightAndStorageCharges', 'demurrage', 'ageOfVehicle'
         ];
 
         for (const field of requiredFields) {
@@ -469,8 +521,31 @@ function AddCarContent({ params }: AddCarPageProps) {
             federalExciseDuty: parseFloat(formData.federalExciseDuty || '0'),
             incomeTax: parseFloat(formData.incomeTax || '0'),
             freightAndStorageCharges: parseFloat(formData.freightAndStorageCharges || '0'),
-            demurage: parseFloat(formData.demurage || '0'),
-            ageOfVehicle: parseFloat(formData.ageOfVehicle || '0')
+            demurrage: parseFloat(formData.demurrage || '0'),
+            ageOfVehicle: parseFloat(formData.ageOfVehicle || '0'),
+            
+            // Finance Total Amount - inline calculation
+            financeTotalAmount: (parseFloat(formData.auctionPrice || '0') * parseFloat(formData.auctionPriceRate || '0')) +
+                               (parseFloat(formData.inlandCharges || '0') * parseFloat(formData.inlandChargesRate || '0')) +
+                               (parseFloat(formData.containerCharges || '0') * parseFloat(formData.containerChargesRate || '0')) +
+                               (parseFloat(formData.auctionExpenses || '0') * parseFloat(formData.auctionExpensesRate || '0')) +
+                               (parseFloat(formData.loadingCharges || '0') * parseFloat(formData.loadingChargesRate || '0')) +
+                               (parseFloat(formData.freightSea || '0') * parseFloat(formData.freightSeaRate || '0')) +
+                               (parseFloat(formData.variantDuty || '0')) +
+                               (parseFloat(formData.passportCharges || '0')) +
+                               (parseFloat(formData.servicesCharges || '0')) +
+                               (parseFloat(formData.transportCharges || '0')) +
+                               (parseFloat(formData.repairCharges || '0')) +
+                               (parseFloat(formData.miscellaneousCharges || '0')) +
+                               (parseFloat(formData.vehicleValueCif || '0')) +
+                               (parseFloat(formData.landingCharges || '0')) +
+                               (parseFloat(formData.customsDuty || '0')) +
+                               (parseFloat(formData.salesTax || '0')) +
+                               (parseFloat(formData.federalExciseDuty || '0')) +
+                               (parseFloat(formData.incomeTax || '0')) +
+                               (parseFloat(formData.freightAndStorageCharges || '0')) +
+                               (parseFloat(formData.demurrage || '0')) +
+                               (parseFloat(formData.ageOfVehicle || '0'))
           }
         };
 
@@ -484,8 +559,11 @@ function AddCarContent({ params }: AddCarPageProps) {
 
         if (response.success) {
           console.log('Car saved successfully:', response.data);
-          alert('Car saved successfully!');
-          router.push(`/cars/inventory/${batchNumber}`);
+          setShowSuccess(true);
+          setTimeout(() => {
+            setShowSuccess(false);
+            router.push(`/cars/inventory/${batchNumber}`);
+          }, 800);
         } else {
           // Handle specific error messages
           if (response.error?.includes('chassis number already exists')) {
@@ -1300,101 +1378,69 @@ function AddCarContent({ params }: AddCarPageProps) {
             width: '100%',
             alignSelf: 'stretch'
           }}>
-            <div className="w-full">
-              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Auction price</label>
+   <div className="w-full">
+  <label
+    className="block text-sm font-medium text-black mb-2"
+    style={{ fontWeight: "500" }}
+  >
+    Auction price
+  </label>
 
-              <div
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  height: "42px",
-                  padding: "10px 12px",
-                  alignItems: "center",
-                  gap: "12px",
-                  border: '1px solid #0000003D',
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                }}
-              >
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.auctionPrice}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, auctionPrice: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',  
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.auctionPrice || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-            [&::-webkit-outer-spin-button]:appearance-none 
-            [&::-webkit-inner-spin-button]:appearance-none"
-                />
+  <div
+    style={{
+      display: "flex",
+      width: "100%",
+      height: "42px",
+      padding: "10px 12px",
+      alignItems: "center",
+      gap: "12px",
+      border: "1px solid #0000003D",
+      borderRadius: "8px",
+      backgroundColor: "#fff",
+    }}
+  >
+    {/* Amount input - starts with 1 digit width, expands to 5 digits, then fixes */}
+    <DynamicInput
+      value={formData.auctionPrice}
+      onChange={(value) =>
+        setFormData({ ...formData, auctionPrice: value })
+      }
+      maxDigits={5}
+    />
 
-                <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
-                <span className="text-sm text-gray-600">x</span>
+    <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
+    <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.auctionPriceRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, auctionPriceRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',  
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.auctionPriceRate || "").length * 12 + 20
-                      }px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-            [&::-webkit-outer-spin-button]:appearance-none 
-            [&::-webkit-inner-spin-button]:appearance-none"
-                />
+    {/* Rate input - starts with 1 digit width, expands to 3 digits, then fixes */}
+    <DynamicInput
+      value={formData.auctionPriceRate}
+      onChange={(value) =>
+        setFormData({ ...formData, auctionPriceRate: value })
+      }
+      maxDigits={3}
+    />
 
-                <span className="text-sm text-gray-600">PKR</span>
-                <span className="text-sm text-gray-600">=</span>
+    <span className="text-sm text-gray-600">PKR</span>
+    <span className="text-sm text-gray-600">=</span>
 
-                <span className="text-sm font-medium">
-                  {calculateTotal(formData.auctionPrice, formData.auctionPriceRate)}/- PKR
-                </span>
+    <span className="text-sm font-medium">
+      {calculateTotal(formData.auctionPrice, formData.auctionPriceRate)}/- PKR
+    </span>
 
-                {/* Flag pinned at right */}
-                <div style={{ marginLeft: "auto" }}>
-                  <Image
-                    src={selectedCountry?.flag || "/flags/us.svg"}
-                    alt={selectedCountry?.name || "USA"}
-                    width={24}
-                    height={16}
-                    className="rounded border"
-                  />
-                </div>
-              </div>
-            </div>
+    {/* Flag pinned at right */}
+    <div style={{ marginLeft: "auto" }}>
+      <Image
+        src={selectedCountry?.flag || "/flags/us.svg"}
+        alt={selectedCountry?.name || "USA"}
+        width={24}
+        height={16}
+        className="rounded border"
+      />
+    </div>
+  </div>
+</div>
+
+
 
             <div className="w-full">
               <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Inland charges</label>
@@ -1409,63 +1455,23 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                {/* Amount input - starts with initial width, increases dynamically, fixes at 5 digits */}
+                <DynamicInput
                   value={formData.inlandCharges}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, inlandCharges: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.inlandCharges || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
+                  onChange={(value) => setFormData({ ...formData, inlandCharges: value })}
+                  initialWidth={80}
+                  maxDigits={5}
                 />
 
                 <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
                 <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                {/* Rate input - starts with initial width, increases dynamically, fixes at 3 digits */}
+                <DynamicInput
                   value={formData.inlandChargesRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, inlandChargesRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',  
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.inlandChargesRate || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
+                  onChange={(value) => setFormData({ ...formData, inlandChargesRate: value })}
+                  initialWidth={60}
+                  maxDigits={3}
                 />
 
                 <span className="text-sm text-gray-600">PKR</span>
@@ -1501,63 +1507,21 @@ function AddCarContent({ params }: AddCarPageProps) {
                 borderRadius: '8px',
                 backgroundColor: '#fff'
               }}>
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                {/* Amount input - starts with 1 digit width, expands to 5 digits, then fixes */}
+                <DynamicInput
                   value={formData.containerCharges}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, containerCharges: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.containerCharges || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
+                  onChange={(value) => setFormData({ ...formData, containerCharges: value })}
+                  maxDigits={5}
                 />
 
                 <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
                 <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                {/* Rate input - starts with 1 digit width, expands to 3 digits, then fixes */}
+                <DynamicInput
                   value={formData.containerChargesRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, containerChargesRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.containerChargesRate || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
+                  onChange={(value) => setFormData({ ...formData, containerChargesRate: value })}
+                  maxDigits={3}
                 />
 
                 <span className="text-sm text-gray-600">PKR</span>
@@ -1582,289 +1546,201 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           {/* Financing Information - Right Column */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '24px',
-            alignSelf: 'stretch'
-          }}>
-            <div className="w-full">
-              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Auction expenses/taxes</label>
-              <div style={{
-                display: 'flex',
-                width: '100%',
-                height: '42px',
-                padding: '10px 12px',
-                alignItems: 'center',
-                gap: '12px',
-                border: '1px solid #0000003D',
-                borderRadius: '8px',
-                backgroundColor: '#fff'
-              }}>
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.auctionExpenses}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, auctionExpenses: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.auctionExpenses || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                          [&::-webkit-outer-spin-button]:appearance-none 
-                          [&::-webkit-inner-spin-button]:appearance-none"
-                />
+          <div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "24px",
+    alignSelf: "stretch",
+  }}
+>
+  {/* Auction expenses/taxes */}
+  <div className="w-full">
+    <label
+      className="block text-sm font-medium text-black mb-2"
+      style={{ fontWeight: "500" }}
+    >
+      Auction expenses/taxes
+    </label>
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "42px",
+        padding: "10px 12px",
+        alignItems: "center",
+        gap: "12px",
+        border: "1px solid #0000003D",
+        borderRadius: "8px",
+        backgroundColor: "#fff",
+      }}
+    >
+      {/* Amount input - expands up to 5 digits */}
+      <DynamicInput
+        value={formData.auctionExpenses}
+        onChange={(value) =>
+          setFormData({ ...formData, auctionExpenses: value })
+        }
+        maxDigits={5}
+      />
 
-                <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
-                <span className="text-sm text-gray-600">x</span>
+      <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
+      <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.auctionExpensesRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, auctionExpensesRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.auctionExpensesRate || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                          [&::-webkit-outer-spin-button]:appearance-none 
-                          [&::-webkit-inner-spin-button]:appearance-none"
-                />
+      {/* Rate input - expands up to 3 digits */}
+      <DynamicInput
+        value={formData.auctionExpensesRate}
+        onChange={(value) =>
+          setFormData({ ...formData, auctionExpensesRate: value })
+        }
+        maxDigits={3}
+      />
 
-                <span className="text-sm text-gray-600">PKR</span>
-                <span className="text-sm text-gray-600">=</span>
+      <span className="text-sm text-gray-600">PKR</span>
+      <span className="text-sm text-gray-600">=</span>
 
-                <span className="text-sm font-medium">
-                  {calculateTotal(formData.auctionExpenses, formData.auctionExpensesRate)}/- PKR
-                </span>
+      <span className="text-sm font-medium">
+        {calculateTotal(
+          formData.auctionExpenses,
+          formData.auctionExpensesRate
+        )}
+        /- PKR
+      </span>
 
-                {/* Flag pinned at right */}
-                <div style={{ marginLeft: "auto" }}>
-                  <Image
-                    src={selectedCountry?.flag || "/flags/us.svg"}
-                    alt={selectedCountry?.name || "USA"}
-                    width={24}
-                    height={16}
-                    className="rounded border"
-                  />
-                </div>
-              </div>
-            </div>
+      {/* Flag pinned at right */}
+      <div style={{ marginLeft: "auto" }}>
+        <Image
+          src={selectedCountry?.flag || "/flags/us.svg"}
+          alt={selectedCountry?.name || "USA"}
+          width={24}
+          height={16}
+          className="rounded border"
+        />
+      </div>
+    </div>
+  </div>
 
-            <div className="w-full">
-              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Loading charges (inland)</label>
-              <div style={{
-                display: 'flex',
-                width: '100%',
-                height: '42px',
-                padding: '10px 12px',
-                alignItems: 'center',
-                gap: '12px',
-                border: '1px solid #0000003D',
-                borderRadius: '8px',
-                backgroundColor: '#fff'
-              }}>
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.loadingCharges}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, loadingCharges: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.loadingCharges || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                        [&::-webkit-outer-spin-button]:appearance-none 
-                        [&::-webkit-inner-spin-button]:appearance-none"
-                />
+  {/* Loading charges (inland) */}
+  <div className="w-full">
+    <label
+      className="block text-sm font-medium text-black mb-2"
+      style={{ fontWeight: "500" }}
+    >
+      Loading charges (inland)
+    </label>
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "42px",
+        padding: "10px 12px",
+        alignItems: "center",
+        gap: "12px",
+        border: "1px solid #0000003D",
+        borderRadius: "8px",
+        backgroundColor: "#fff",
+      }}
+    >
+      <DynamicInput
+        value={formData.loadingCharges}
+        onChange={(value) =>
+          setFormData({ ...formData, loadingCharges: value })
+        }
+        maxDigits={5}
+      />
 
-                <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
-                <span className="text-sm text-gray-600">x</span>
+      <span className="text-sm text-gray-600">{selectedCountry?.code}</span>
+      <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.loadingChargesRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, loadingChargesRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.loadingChargesRate || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
-                />
+      <DynamicInput
+        value={formData.loadingChargesRate}
+        onChange={(value) =>
+          setFormData({ ...formData, loadingChargesRate: value })
+        }
+        maxDigits={3}
+      />
 
-                <span className="text-sm text-gray-600">PKR</span>
-                <span className="text-sm text-gray-600">=</span>
+      <span className="text-sm text-gray-600">PKR</span>
+      <span className="text-sm text-gray-600">=</span>
 
-                <span className="text-sm font-medium">
-                  {calculateTotal(formData.loadingCharges, formData.loadingChargesRate)}/- PKR
-                </span>
+      <span className="text-sm font-medium">
+        {calculateTotal(formData.loadingCharges, formData.loadingChargesRate)}/-
+        PKR
+      </span>
 
-                {/* Flag pinned at right */}
-                <div style={{ marginLeft: "auto" }}>
-                  <Image
-                    src={selectedCountry?.flag || "/flags/us.svg"}
-                    alt={selectedCountry?.name || "USA"}
-                    width={24}
-                    height={16}
-                    className="rounded border"
-                  />
-                </div>
-              </div>
-            </div>
+      <div style={{ marginLeft: "auto" }}>
+        <Image
+          src={selectedCountry?.flag || "/flags/us.svg"}
+          alt={selectedCountry?.name || "USA"}
+          width={24}
+          height={16}
+          className="rounded border"
+        />
+      </div>
+    </div>
+  </div>
 
-            <div className="w-full">
-              <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Freight Sea</label>
-              <div style={{
-                display: 'flex',
-                width: '100%',
-                height: '42px',
-                padding: '10px 12px',
-                alignItems: 'center',
-                gap: '12px',
-                border: '1px solid #0000003D',
-                borderRadius: '8px',
-                backgroundColor: '#fff'
-              }}>
-                {/* Amount input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.freightSea}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, freightSea: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.freightSea || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
-                />
+  {/* Freight Sea */}
+  <div className="w-full">
+    <label
+      className="block text-sm font-medium text-black mb-2"
+      style={{ fontWeight: "500" }}
+    >
+      Freight Sea
+    </label>
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "42px",
+        padding: "10px 12px",
+        alignItems: "center",
+        gap: "12px",
+        border: "1px solid #0000003D",
+        borderRadius: "8px",
+        backgroundColor: "#fff",
+      }}
+    >
+      <DynamicInput
+        value={formData.freightSea}
+        onChange={(value) => setFormData({ ...formData, freightSea: value })}
+        maxDigits={5}
+      />
 
-                <span className="text-sm text-gray-600">USD</span>
-                <span className="text-sm text-gray-600">x</span>
+      <span className="text-sm text-gray-600">USD</span>
+      <span className="text-sm text-gray-600">x</span>
 
-                {/* Rate input (auto width, no arrows) */}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.freightSeaRate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Prevent negative numbers
-                    if (value.startsWith('-')) return;
-                    setFormData({ ...formData, freightSeaRate: value });
-                  }}
-                  style={{
-                    minWidth: "40px",
-                    border: '1px solid #0000003D',
-                    borderRadius: "5px",
-                    backgroundColor: "#fff",
-                    padding: "0 8px",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    width: `${String(formData.freightSeaRate || "").length * 12 + 20}px`,
-                    MozAppearance: "textfield", // Firefox
-                  }}
-                  className="text-sm outline-none 
-                    [&::-webkit-outer-spin-button]:appearance-none 
-                    [&::-webkit-inner-spin-button]:appearance-none"
-                />
+      <DynamicInput
+        value={formData.freightSeaRate}
+        onChange={(value) =>
+          setFormData({ ...formData, freightSeaRate: value })
+        }
+        maxDigits={3}
+      />
 
-                <span className="text-sm text-gray-600">PKR</span>
-                <span className="text-sm text-gray-600">=</span>
+      <span className="text-sm text-gray-600">PKR</span>
+      <span className="text-sm text-gray-600">=</span>
 
-                <span className="text-sm font-medium">
-                  {calculateTotal(formData.freightSea, formData.freightSeaRate)}/- PKR
-                </span>
+      <span className="text-sm font-medium">
+        {calculateTotal(formData.freightSea, formData.freightSeaRate)}/- PKR
+      </span>
 
-                {/* Flag pinned at right */}
-                <div style={{ marginLeft: "auto" }}>
-                  <Image
-                    src="/flags/usa.svg"
-                    alt="USA"
-                    width={24}
-                    height={16}
-                    className="rounded border"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+      <div style={{ marginLeft: "auto" }}>
+        <Image
+          src="/flags/usa.svg"
+          alt="USA"
+          width={24}
+          height={16}
+          className="rounded border"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
         </div>
 
         {/* Other Charges and Details */}
@@ -2211,12 +2087,12 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
 
           <div>
-                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Demurage</label>
+                          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Demurrage</label>
             <Input
               type="number"
-              placeholder="Enter demurage"
-              value={formData.demurage}
-              onChange={(e) => handleInputChange('demurage', e.target.value)}
+              placeholder="Enter demurrage"
+              value={formData.demurrage}
+              onChange={(e) => handleInputChange('demurrage', e.target.value)}
               className="placeholder-custom text-sm"
               style={{
                 width: '100%',
@@ -2709,10 +2585,10 @@ function AddCarContent({ params }: AddCarPageProps) {
     const federalExciseDutyPKR = parseFloat(formData.federalExciseDuty || '0');
     const incomeTaxPKR = parseFloat(formData.incomeTax || '0');
     const freightAndStorageChargesPKR = parseFloat(formData.freightAndStorageCharges || '0');
-    const demuragePKR = parseFloat(formData.demurage || '0');
+    const demurragePKR = parseFloat(formData.demurrage || '0');
     const ageOfVehiclePKR = parseFloat(formData.ageOfVehicle || '0');
 
-    const total = auctionPricePKR + inlandChargesPKR + containerChargesPKR + auctionExpensesPKR + loadingChargesPKR + freightSeaPKR + variantDutyPKR + passportChargesPKR + servicesChargesPKR + transportChargesPKR + repairChargesPKR + miscellaneousChargesPKR + vehicleValueCifPKR + landingChargesPKR + customsDutyPKR + salesTaxPKR + federalExciseDutyPKR + incomeTaxPKR + freightAndStorageChargesPKR + demuragePKR + ageOfVehiclePKR;
+    const total = auctionPricePKR + inlandChargesPKR + containerChargesPKR + auctionExpensesPKR + loadingChargesPKR + freightSeaPKR + variantDutyPKR + passportChargesPKR + servicesChargesPKR + transportChargesPKR + repairChargesPKR + miscellaneousChargesPKR + vehicleValueCifPKR + landingChargesPKR + customsDutyPKR + salesTaxPKR + federalExciseDutyPKR + incomeTaxPKR + freightAndStorageChargesPKR + demurragePKR + ageOfVehiclePKR;
     return total.toLocaleString();
   };
 
@@ -2811,6 +2687,14 @@ function AddCarContent({ params }: AddCarPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Success Popup Card */}
+      <SuccessPopupCard
+        heading="Car Added Successfully"
+        message="You have successfully added a new car to the inventory"
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
     </MainLayout>
   );
 }

@@ -1,13 +1,28 @@
 "use client";
 
 import SearchBar from "@/components/searchbar/searchbar";
-
+import { useState, useEffect } from "react";
 
 export default function HeroSection() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   return (
     <section
       className="relative h-screen w-full bg-cover bg-center flex items-start justify-center pt-32 sm:pt-44 font-raleway"
-      style={{ backgroundImage: "url('/heroCar.png')" }}
+      style={{ 
+        backgroundImage: `url('${isMobile ? '/mobileViewhero.png' : '/heroCar.png'}')`
+      }}
     >
       {/* Content */}
       <div className="relative z-10 text-center text-white px-4 max-w-6xl mx-auto font-raleway">

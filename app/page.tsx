@@ -1,12 +1,12 @@
 import React from "react";
-import CarSection from "./carSection/page";
-import Navbar from "@/components/navbar/navbar";
-import HeroSection from "./heroSection/page";
-import TestimonialSlider from "@/components/testimonal/testimonalSlider";
-import ProductSection from "@/components/productSection/productSection";
-import ExploreSection from "@/components/exploreSection/exploreSection";
-import BlogsSection from "./blog/page";
-import Footer from "@/components/footer/footer";
+import CarSection from "@/components/automotive/car-section/CarSection"; // page";
+import Navbar from "@/components/layout/navbar/navbar";
+import HeroSection from "./features/general/hero-section/page";
+import TestimonialSlider from "@/components/shared/testimonial/testimonalSlider";
+import AccessoriesSection from "@/components/automotive/accessories/AccessoriesSection";
+import GallerySection from "@/components/automotive/gallery/GallerySection";
+import BlogsSection from "./features/automotive/blog/page";
+import Footer from "@/components/layout/footer/footer";
 
 export default function HomePage() {
   return (
@@ -15,13 +15,13 @@ export default function HomePage() {
       <HeroSection />
       <CarSection />
       <TestimonialSlider />
-      <ProductSection />
-      <ExploreSection />
+      <AccessoriesSection />
+      <GallerySection />
       <BlogsSection
         limit={3}
         sectionTitle="Happy Buyers, Real Stories"
         sectionSubtitle="Stories from happy buyers who found their car with DriveXDeals."
-        seeMoreLink="/blogs"
+        seeMoreLink="/features/automotive/blog"
       />
       <Footer />
     </div>

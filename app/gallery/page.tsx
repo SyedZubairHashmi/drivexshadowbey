@@ -5,6 +5,7 @@ import YouTube from "react-youtube";
 import Navbar from "@/components/navbar/navbar";
 import { videoData } from "./data";
 import Pagination from "@/components/pagination/pagination";
+import FooterSection from "@/components/footer/footer";
 
 const Gallery: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +47,7 @@ const Gallery: React.FC = () => {
         {currentVideos.map((video, idx) => (
           <div key={idx} className="w-full">
             {/* YouTube Video */}
-            <div className="relative pb-[56.25%] h-0 rounded-lg overflow-hidden shadow-md">
+            <div className="relative pb-[56.25%] h-0 rounded-2xl overflow-hidden shadow-md">
               <YouTube
                 videoId={video.id}
                 className="absolute top-0 left-0 w-full h-full"
@@ -67,10 +68,7 @@ const Gallery: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Pagination */}
-      <Pagination
+         <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={(page) => {
@@ -78,6 +76,11 @@ const Gallery: React.FC = () => {
           window.scrollTo({ top: 0, behavior: "smooth" }); // optional: scroll to top on page change
         }}
       />
+      </div>
+
+      {/* Pagination */}
+     
+      <FooterSection/>
     </div>
   );
 };

@@ -390,7 +390,8 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
     "Services Charges",
     "Transport Charges",
     "Repair Charges",
-    "Miscellaneous Charges"
+    "Miscellaneous Charges",
+    "Total Finance Amount"
   ];
 
   // Calculate dynamic table width and column widths
@@ -587,6 +588,8 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
                         return car.financing?.repairCharges ? `${car.financing.repairCharges.toLocaleString()} PKR` : "N/A";
                       case "Miscellaneous Charges":
                         return car.financing?.miscellaneousCharges ? `${car.financing.miscellaneousCharges.toLocaleString()} PKR` : "N/A";
+                      case "Total Finance Amount":
+                        return car.financing?.financeTotalAmount ? `${car.financing.financeTotalAmount.toLocaleString()} PKR` : "N/A";
                       default:
                         return "N/A";
                     }

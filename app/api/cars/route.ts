@@ -119,6 +119,12 @@ export async function POST(request: NextRequest) {
     if (contentType.includes("application/json")) {
       // Handle JSON request
       body = await request.json();
+
+      console.log("🚀 UI Sent Data (JSON):", JSON.stringify(body, null, 2));
+  
+      // Check specifically for financeTotalAmount
+      console.log("👉 financeTotalAmount at top level:", body.financeTotalAmount);
+      console.log("👉 financeTotalAmount inside financing:", body.financing?.financeTotalAmount);
       
       // Initialize images object for JSON requests
       body.images = {
@@ -201,16 +207,24 @@ export async function POST(request: NextRequest) {
       'originCity', 'destinationCity', 'variantDuty', 'passportCharges', 
       'servicesCharges', 'transportCharges', 'repairCharges', 'miscellaneousCharges',
       'vehicleValueCif', 'landingCharges', 'customsDuty', 'salesTax', 
-      'federalExciseDuty', 'incomeTax', 'freightAndStorageCharges', 'demurage', 'ageOfVehicle'
+      'federalExciseDuty', 'incomeTax', 'freightAndStorageCharges', 'demurrage', 'ageOfVehicle','financeTotalAmount'
     ];
     
     for (const field of simpleFinancingFields) {
-      if (!body.financing[field as keyof typeof body.financing]) {
+      if (!(field in body.financing)) {
         return NextResponse.json(
           { success: false, error: `Missing required financing field: ${field}` },
           { status: 400 }
         );
       }
+    }
+
+    // Additional validation for financeTotalAmount
+    if (typeof body.financing.financeTotalAmount !== 'number' || body.financing.financeTotalAmount < 0) {
+      return NextResponse.json(
+        { success: false, error: 'financeTotalAmount must be a valid non-negative number' },
+        { status: 400 }
+      );
     }
 
     // Validate complex financing fields (objects with amount, currency, rate, totalAmount)
@@ -252,11 +266,14 @@ export async function POST(request: NextRequest) {
 
     // Create new car
     console.log('Creating car with data:', JSON.stringify(body, null, 2));
+    console.log('Finance Total Amount received:', body.financing?.financeTotalAmount);
     const car = new Car(body);
     console.log('Car instance created:', car);
+    console.log('Car financing data:', JSON.stringify(car.financing, null, 2));
     
     const savedCar = await car.save();
     console.log('Car saved successfully:', savedCar);
+    console.log('Saved car financing data:', JSON.stringify(savedCar.financing, null, 2));
 
     // Add the car to the batch's cars array
     await Batch.findByIdAndUpdate(

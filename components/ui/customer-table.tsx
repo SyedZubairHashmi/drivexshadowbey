@@ -333,8 +333,17 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                     onDelete={() => onDelete?.(customer)}
                     onView={() => onView?.(customer)}
                     onChangeStatus={async (newStatus) => {
-                      console.log("Status changed to:", newStatus, "for customer:", customer._id);
-                      const success = await onChangeStatus?.(customer);
+                      console.log("CustomerTable: Status changed to:", newStatus, "for customer:", customer._id);
+                      // Update the customer's status locally first
+                      const updatedCustomer = {
+                        ...customer,
+                        sale: {
+                          ...customer.sale,
+                          paymentStatus: newStatus
+                        }
+                      };
+                      const success = await onChangeStatus?.(updatedCustomer);
+                      console.log("CustomerTable: Parent onChangeStatus result:", success);
                       return success || false;
                     }}
                   />

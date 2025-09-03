@@ -163,7 +163,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               <p className="text-lg text-gray-600 mt-1">{car.engineType}</p>
             </div>
             <div>
-             <p>price</p>
+             <p>Total Finance Amount</p>
               <p 
                 className="text-4xl font-bold"
                 style={{
@@ -174,10 +174,12 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   lineHeight: '30px'
                 }}
               >
-                {car.saleInfo?.soldPrice ? formatPrice(car.saleInfo.soldPrice) : formatPrice(car.financing.auctionPrice.totalAmount)}
+                PKR {car.financing?.financeTotalAmount ? car.financing.financeTotalAmount.toFixed(2) : '0.00'}
               </p>
             </div>
           </div>
+
+
 
           {/* Car Icons and Details */}
           <div className="flex justify-between">

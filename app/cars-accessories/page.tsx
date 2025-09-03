@@ -6,6 +6,7 @@ import accessoriesData from "./data";
 import Navbar from "@/components/navbar/navbar";
 import SearchBar from "@/components/searchbar/searchbar";
 import Pagination from "@/components/pagination/pagination";
+import FooterSection from "@/components/footer/footer";
 
 export default function CarAccessoriesCollectionPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,6 +81,7 @@ export default function CarAccessoriesCollectionPage() {
           onPageChange={setCurrentPage}
         />
       </div>
+      <FooterSection/>
     </div>
   );
 }

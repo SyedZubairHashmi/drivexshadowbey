@@ -185,7 +185,7 @@ export default function RemainingBalancePage() {
               onClick={handleAddNewCustomer}
               className="flex items-center border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
-                width: '200px',
+                width: '160px',
                 height: '50px',
                 borderRadius: '50px',
                 paddingTop: '10px',
@@ -198,7 +198,7 @@ export default function RemainingBalancePage() {
               }}
             >
               <Plus className="h-4 w-4" />
-              Add New Customer
+              Add Customer
             </Button>
           </div>
         </div>

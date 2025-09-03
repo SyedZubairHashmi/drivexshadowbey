@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/navbar/navbar";
 import { useEffect, useState } from "react";
-import blogData from "../blogdata";
+import blogData from "../../../public/blogdata";
 import BlogsSection from "../page";
 
 export default function BlogDetail({ params }: { params: { id: string } }) {

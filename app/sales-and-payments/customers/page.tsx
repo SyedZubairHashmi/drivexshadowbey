@@ -114,13 +114,15 @@ export default function CustomersPage() {
   };
 
   const handleStatusChange = async (customer: Customer): Promise<boolean> => {
-    console.log("Status change requested for customer:", customer);
+    console.log("CustomerPage: Status change requested for customer:", customer);
     try {
       // Refresh the customers list to show updated data
+      console.log("CustomerPage: Refreshing customers list...");
       await fetchCustomers();
+      console.log("CustomerPage: Customers refreshed successfully after status change");
       return true; // Return true if refresh was successful
     } catch (error) {
-      console.error("Error refreshing customers:", error);
+      console.error("CustomerPage: Error refreshing customers:", error);
       return false; // Return false if refresh failed
     }
   };
@@ -176,11 +178,11 @@ export default function CustomersPage() {
               onClick={handleAddNewCustomer}
               className="flex items-center  border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
-                width: '200px',
+                width: '160px',
                 height: '50px',
                 borderRadius: '50px',
                 paddingTop: '10px',
-                paddingRight: '10px',
+                paddingRight: '12px',
                 paddingBottom: '10px',
                 paddingLeft: '10px',
                 gap: '10px',

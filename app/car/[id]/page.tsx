@@ -24,15 +24,17 @@ const CarDetailPage = () => {
       <Navbar />
 
       {/* CAR IMAGE & DETAILS SECTION */}
-      <div className="max-w-[1440px] mx-auto pt-[60px] pb-6 px-[60px] mt-24">
-        <div className="flex gap-8 flex-wrap">
+      <div className="max-w-[1440px] mx-auto pt-[60px] pb-6 px-4 sm:px-[60px] mt-24">
+        <div className="flex gap-8 flex-wrap lg:flex-nowrap">
           <CarImagesSection images={car.images} title={car.title} />
           <CarDetailsSection car={car} />
         </div>
       </div>
 
-      {/* RELATED CAR SECTION */}
-      <CarSection limit={4} />
+      {/* RELATED CAR SECTION - Full width */}
+      <div className="w-full">
+        <CarSection limit={4} />
+      </div>
 
       {/* OTHER SECTIONS */}
       <ExploreSection />

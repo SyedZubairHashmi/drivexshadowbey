@@ -1,78 +1,78 @@
 // Car 1 images
 import car1_img1 from
-  "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+  "@/public/L1.jpg"
+"@/public/L2.jpg"
+"@/public/L3.jpg"
+"@/public/L4.jpg"
+"@/public/L5.jpg"
 import car1_img2 from
-  "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+  "@/public/11452733.png"
+"@/public/11452734.png"
+"@/public/c1.jpg"
+"@/public/11452746.png"
+"@/public/c1.jpg"
 import car1_img3 from
-  "@/public/car1.png"
+  "@/public/c1.jpg"
+"@/public/11452733.png"
+"@/public/11452734.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452746.png"
 import car1_img4 from
   "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452733.png"
+"@/public/11452734.png"
+"@/public/11452734.png"
+"@/public/11452746.png"
 import car1_img5 from
-  "@/public/car1.png"
+  "@/public/11452733.png"
+"@/public/11452734.png"
+"@/public/11452733.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452733.png"
 
 // Car 2 images
 import car2_img1 from
-  "@/public/car1.png"
+  "@/public/11452734.png"
 "@/public/car1.png"
+"@/public/11452733.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452746.png"
 import car2_img2 from
   "@/public/car1.png"
+"@/public/11452733.png"
+"@/public/11452734.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452746.png"
 import car2_img3 from
   "@/public/car1.png"
+"@/public/11452733.png"
+"@/public/11452734.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452746.png"
 import car2_img4 from
   "@/public/car1.png"
+"@/public/11452734.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452734.png"
+"@/public/11452746.png"
 import car2_img5 from
   "@/public/car1.png"
 "@/public/car1.png"
+"@/public/11452734.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
+"@/public/11452746.png"
 
 // Car 3 images
 import car3_img1 from
   "@/public/car1.png"
+"@/public/11452734.png"
+"@/public/11452746.png"
 "@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-"@/public/car1.png"
-import car3_img2 from "@/public/car1.png";
+"@/public/11452746.png"
+import car3_img2 from "@/public/11452746.png";
 import car3_img3 from "@/public/car1.png";
 import car3_img4 from "@/public/car1.png";
-import car3_img5 from "@/public/car1.png";
+import car3_img5 from "@/public/11452746.png";
 
 // Car 4 images
 import car4_img1 from "@/public/car1.png"
