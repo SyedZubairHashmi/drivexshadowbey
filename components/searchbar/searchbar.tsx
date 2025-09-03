@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import CallToActionButton from "../navbar/CallToActionButton";
+import CallToActionButton from "../layout/navbar/CallToActionButton";
 
-export default function SearchBar() {
+interface SearchBarProps {
+  className?: string;
+}
+
+export default function SearchBar({ className = "" }: SearchBarProps) {
   const [city, setCity] = useState("All Cities");
   const [price, setPrice] = useState("Price Range");
 
   return (
-    <div className="mt-6 w-full flex flex-col items-center justify-center font-raleway max-w-[1440px] mx-auto px-4">
+    <div className={`mt-6 w-full flex flex-col items-center justify-center font-raleway max-w-[1440px] mx-auto px-4 ${className}`}>
       {/* Container for desktop & mobile */}  
       <div className="w-full">
         
@@ -58,23 +62,25 @@ export default function SearchBar() {
         {/* Mobile version - visible only on small screens */}
         <div className="sm:hidden">
           {/* Search Bar */}
-          <div className="flex items-center bg-white border border-gray-300 rounded-full px-4 h-12 shadow-sm w-full max-w-md mx-auto">
-            <input
-              type="text"
-              placeholder="Car Model"
-              className="flex-1 bg-transparent text-gray-700 placeholder-gray-400 focus:outline-none text-sm"
-            />
-            <button
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-[#00674F] hover:bg-[#008060] transition text-white ml-2"
-              aria-label="Search"
-            >
-              <FiSearch size={16} />
-            </button>
-          </div>
+          {/* Search Bar - Mobile */}
+<div className="relative flex items-center bg-white border border-gray-300 rounded-full px-4 h-12 shadow-sm w-full max-w-md mx-auto">
+  <input
+    type="text"
+    placeholder="Car Model"
+    className="flex-1 bg-transparent text-gray-700 placeholder-gray-400 focus:outline-none text-sm pr-10"
+  />
+  <button
+    className="absolute right-2 flex items-center justify-center w-8 h-8 rounded-full bg-[#00674F] hover:bg-[#008060] transition text-white"
+    aria-label="Search"
+  >
+    <FiSearch size={18} />
+  </button>
+</div>
+
 
           {/* CTA Button below search bar */}
           <div className="block sm:hidden mt-4 w-full max-w-md mx-auto text-center">
-            <CallToActionButton fullWidth heroMobile />
+            <CallToActionButton />
           </div>
         </div>
       </div>

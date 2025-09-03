@@ -7,10 +7,8 @@ import carSectionData from "@/app/features/automotive/car-section/data";
 import CheckIcon from "@/components/shared/icons/checkIcons";
 import CcLayer from "@/components/shared/icons/cc-layer1";
 import Seater from "@/components/shared/icons/seater";
-import Navbar from "@/components/layout/navbar/navbar";
 import SearchBar from "@/components/layout/search/searchbar";
 import Pagination from "@/components/shared/pagination/pagination";
-import FooterSection from "@/components/layout/footer/footer";
 import AccessoriesSection from "@/components/automotive/accessories/AccessoriesSection";
 
 interface CarSectionProps {
@@ -28,14 +26,13 @@ const CarSection = ({ limit }: CarSectionProps) => {
 
   return (
     <div className="bg-white min-h-screen pb-10">
-      <Navbar />
-
+      {/* GREEN HERO SECTION */}
       <div className="bg-green-900 text-white">
-        <div className="w-full h-[400px] pb-16 flex flex-col items-center justify-center relative overflow-hidden px-4 sm:px-6 md:px-8">
-          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-center">
+        <div className="w-full h-[400px] flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8">
+          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight mt-6">
             Cars Collection
           </h2>
-          <p className="mt-3 text-base md:text-lg font-normal tracking-tight text-center max-w-2xl">
+          <p className="mt-3 text-base md:text-lg font-normal tracking-tight max-w-2xl mx-auto">
             All cars at the best possible pricing in Pakistan
           </p>
 
@@ -99,8 +96,9 @@ const CarSection = ({ limit }: CarSectionProps) => {
           onPageChange={setCurrentPage}
         />
       </div>
-      <AccessoriesSection/>
-      <FooterSection/>
+
+      {/* Accessories Section Below */}
+      <AccessoriesSection />
     </div>
   );
 };

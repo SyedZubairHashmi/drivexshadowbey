@@ -1,18 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const Logo = () => (
-  <Link href="/" passHref>
-    <div className="flex items-center space-x-2 cursor-pointer">
-      <Image
-        src="/logo.png"
-        alt="Logo"
-        width={184}
-        height={24}
-        className="object-contain"
-      />
+export default function Logo() {
+  return (
+    <div className="flex items-center space-x-2">
+      <Link href="/">
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          width={150}
+          height={150}
+          priority
+          className="cursor-pointer"
+        />
+      </Link>
     </div>
-  </Link>
-);
-
-export default Logo;
+  );
+}

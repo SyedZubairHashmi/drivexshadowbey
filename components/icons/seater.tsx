@@ -1,22 +1,36 @@
 import React from 'react';
 
-const Seater = (props: React.SVGProps<SVGSVGElement>) => (
+interface SeaterIconProps {
+  className?: string;
+  size?: number;
+}
+
+const SeaterIcon: React.FC<SeaterIconProps> = ({ className = '', size = 24 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
     fill="none"
-    {...props}
+    className={className}
   >
-     <path
-      stroke="#000"
+    <path
+      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      stroke="currentColor"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.8}
-      d="M10 3.628a3.333 3.333 0 1 1 0 4.41m2.5 9.462h-10v-.833a5 5 0 1 1 10 0v.833Zm0 0h5v-.833a5 5 0 0 0-7.5-4.331m.833-6.503a3.333 3.333 0 1 1-6.666 0 3.333 3.333 0 0 1 6.666 0Z"
+    />
+    <circle
+      cx="12"
+      cy="7"
+      r="4"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
-export default Seater;
+export default SeaterIcon;

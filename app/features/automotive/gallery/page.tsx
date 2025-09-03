@@ -2,10 +2,8 @@
 
 import React, { useState } from "react";
 import YouTube from "react-youtube";
-import Navbar from "@/components/layout/navbar/navbar";
 import { videoData } from "./data";
 import Pagination from "@/components/shared/pagination/pagination";
-import FooterSection from "@/components/layout/footer/footer";
 
 const Gallery: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,8 +15,6 @@ const Gallery: React.FC = () => {
 
   return (
     <div className="bg-white">
-      <Navbar />
-
       {/* Hero Section */}
       <div className="bg-green-900 h-[400px] flex flex-col justify-center items-center text-white py-16">
         <div className="max-w-6xl mx-auto px-4 text-center">
@@ -80,7 +76,6 @@ const Gallery: React.FC = () => {
 
       {/* Pagination */}
      
-      <FooterSection/>
     </div>
   );
 };

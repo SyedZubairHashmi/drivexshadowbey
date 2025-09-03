@@ -17,14 +17,14 @@ const CarDetailsSection = ({ car }: CarDetailsSectionProps) => {
   const [isAuctionOpen, setIsAuctionOpen] = useState(false);
 
   return (
-    <div className="flex flex-col justify-start min-h-[798px] w-full lg:max-w-[649px] px-4 sm:px-6 lg:px-0">
+    <div className="flex flex-col justify-start w-full">
       {/* Title and Price */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{car.title}</h1>
           <p className="text-gray-700 mt-1">{car.sub_title}</p>
         </div>
-        <div className="flex flex-col items-start sm:items-end">
+        <div className="flex flex-col items-start">
           <span className="text-black font-medium text-sm">Price</span>
           <span className="text-green-800 font-semibold text-xl">{car.amount_price}</span>
           <span className="text-gray-400 line-through">{car.sub_price}</span>
@@ -32,13 +32,13 @@ const CarDetailsSection = ({ car }: CarDetailsSectionProps) => {
       </div>
 
       {/* Icons */}
-      <div className="flex flex-col sm:flex-row justify-between mt-6 text-gray-600 gap-4 items-start sm:items-center">
+      <div className="flex flex-col mt-6 text-gray-600 gap-4">
         <div className="flex flex-wrap gap-3 sm:gap-6">
           <span className="flex items-center gap-2"><Seater/> {car.num} Seats</span>
           <span className="flex items-center gap-2"><CcLayer/> {car.num2}</span>
           <span className="flex items-center gap-2"><CheckIcon/> {car.num3}</span>
         </div>
-        <button className="bg-green-600 text-white px-3 py-1 rounded-full font-medium shadow-sm hover:bg-blue-700 transition">
+        <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow-sm hover:bg-green-700 transition w-fit">
           Warehouse
         </button>
       </div>
@@ -50,7 +50,7 @@ const CarDetailsSection = ({ car }: CarDetailsSectionProps) => {
           {isOverviewOpen ? <FaMinus /> : <FaPlus />}
         </div>
         {isOverviewOpen && (
-          <div className="text-gray-700 mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="text-gray-700 mt-3 grid grid-cols-1 gap-3">
             <p><span className="font-medium">Engine: </span>{car.engine}</p>
             <p><span className="font-medium">Auction Grade: </span>{car.auction_grade}</p>
             <p><span className="font-medium">Assembly: </span>{car.assembly}</p>

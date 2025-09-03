@@ -1,13 +1,17 @@
 'use client';
+
+import React from "react";
 import Image from "next/image";
 
-export default function FooterSection() {
-  return (
-    <section className="bg-black text-white w-full flex flex-col">
+interface FooterSectionProps {
+  className?: string;
+}
 
+export default function FooterSection({ className = "" }: FooterSectionProps) {
+  return (
+    <section className={`bg-black text-white w-full flex flex-col ${className}`}>
       {/* Container aligned same as other sections */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-[60px] py-10 sm:py-12">
-
         {/* Top Row: Text + Button (Desktop only) */}
         <div className="hidden sm:flex justify-between items-center mb-8">
           <p className="text-gray-400 text-base font-normal">
@@ -80,9 +84,7 @@ export default function FooterSection() {
             className="w-full max-w-full transition duration-300 ease-in-out hover:brightness-125"
           />
         </div>
-
       </div>
-
     </section>
   );
 }

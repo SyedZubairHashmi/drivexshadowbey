@@ -10,7 +10,7 @@ export async function GET(
   try {
     await connectDB();
 
-    const user = await User.findById(params.id).select('-pin -confirmPin');
+    const user = await User.findById(params.id);
     
     if (!user) {
       return NextResponse.json(
@@ -43,15 +43,25 @@ export async function PUT(
 
     const userData = await request.json();
     
-    // Remove fields that shouldn't be updated directly
-    delete userData._id;
-    delete userData.createdAt;
+    // Prepare update object with only provided fields
+    const updateFields: any = {};
     
-    // If updating email, check for duplicates
-    if (userData.email) {
+    // Process profile fields if provided
+    if (userData.firstName !== undefined) updateFields.firstName = userData.firstName;
+    if (userData.secondName !== undefined) updateFields.secondName = userData.secondName;
+    if (userData.city !== undefined) updateFields.city = userData.city;
+    if (userData.country !== undefined) updateFields.country = userData.country;
+    if (userData.image !== undefined) updateFields.image = userData.image;
+    
+    // Process email if provided
+    if (userData.email !== undefined) {
+      const processedEmail = userData.email.toLowerCase().trim();
+      updateFields.email = processedEmail;
+      
+      // Check for duplicate email
       const existingUser = await User.findOne({
         _id: { $ne: params.id },
-        email: userData.email
+        email: processedEmail
       });
 
       if (existingUser) {
@@ -61,30 +71,50 @@ export async function PUT(
         );
       }
     }
-
-    // If updating PIN, validate PIN matching
-    if (userData.pin && userData.confirmPin && userData.pin !== userData.confirmPin) {
-      return NextResponse.json(
-        { success: false, error: 'PIN and confirm PIN do not match' },
-        { status: 400 }
-      );
+    
+    // Process recoveryEmail if provided
+    if (userData.recoveryEmail !== undefined) {
+      updateFields.recoveryEmail = userData.recoveryEmail.toLowerCase().trim();
     }
 
-    // If only pin is provided without confirmPin, copy pin to confirmPin
-    if (userData.pin && !userData.confirmPin) {
-      userData.confirmPin = userData.pin;
+    // Process PIN fields if provided
+    if (userData.pin !== undefined || userData.confirmPin !== undefined) {
+      // If only one PIN field is provided, copy it to the other
+      if (userData.pin !== undefined && userData.confirmPin === undefined) {
+        updateFields.confirmPin = userData.pin;
+      } else if (userData.confirmPin !== undefined && userData.pin === undefined) {
+        updateFields.pin = userData.confirmPin;
+      } else {
+        // Both PIN fields are provided
+        updateFields.pin = userData.pin;
+        updateFields.confirmPin = userData.confirmPin;
+      }
+      
+      // Validate PIN matching if both are provided
+      if (updateFields.pin && updateFields.confirmPin && updateFields.pin !== updateFields.confirmPin) {
+        return NextResponse.json(
+          { success: false, error: 'PIN and confirm PIN do not match' },
+          { status: 400 }
+        );
+      }
     }
 
-    // If only confirmPin is provided without pin, copy confirmPin to pin
-    if (userData.confirmPin && !userData.pin) {
-      userData.pin = userData.confirmPin;
-    }
-
+    // Add updatedAt timestamp
+    updateFields.updatedAt = new Date();
+    
+    console.log('=== USER UPDATE DEBUG ===');
+    console.log('User ID:', params.id);
+    console.log('Original request data:', userData);
+    console.log('Processed update fields:', updateFields);
+    
+    // Use $set to only update provided fields
     const user = await User.findByIdAndUpdate(
       params.id,
-      { ...userData, updatedAt: new Date() },
+      { $set: updateFields },
       { new: true, runValidators: true }
-    ).select('-pin -confirmPin');
+    );
+    
+    console.log('MongoDB update result:', user);
 
     if (!user) {
       return NextResponse.json(
@@ -92,6 +122,8 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    console.log('User updated successfully. New user data:', user);
 
     return NextResponse.json({
       success: true,

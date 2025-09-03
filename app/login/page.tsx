@@ -124,12 +124,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-green-900 hover:bg-orange-500 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-3xl transition-colors duration-200 flex items-center justify-center"
+              className="w-full bg-green-900 hover:bg-green-800 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-3xl transition-colors duration-200 flex items-center justify-center"
             >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Logging in...
+                  Loading...
                 </>
               ) : (
                 'Login'

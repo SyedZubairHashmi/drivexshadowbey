@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import testimonials, { Testimonial } from "./data";
 
-const TestimonialSlider = () => {
+interface TestimonialSliderProps {
+  className?: string;
+}
+
+const TestimonialSlider: React.FC<TestimonialSliderProps> = ({ className = "" }) => {
   const infiniteTestimonials = [...testimonials, ...testimonials];
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -36,21 +40,21 @@ const TestimonialSlider = () => {
     };
 
     if (slider) {
-      slider.addEventListener("mouseenter", handleMouseEnter);
-      slider.addEventListener("mouseleave", handleMouseLeave);
+      slider.addEventListener('mouseenter', handleMouseEnter);
+      slider.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
       cancelAnimationFrame(animation);
       if (slider) {
-        slider.removeEventListener("mouseenter", handleMouseEnter);
-        slider.removeEventListener("mouseleave", handleMouseLeave);
+        slider.removeEventListener('mouseenter', handleMouseEnter);
+        slider.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-start p-4 pt-12 font-raleway">
+    <div className={`bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-start p-4 pt-12 font-raleway ${className}`}>
       <div className="w-full mx-auto">
         {/* Header */}
         <div className="text-center mb-6">

@@ -27,15 +27,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       {/* Overlay */}
       <div
         onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-10 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className="fixed inset-0 z-10 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
       />
 
       {/* Drawer with glassmorphism */}
       <div
         className={`md:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full
-          bg-white/10 backdrop-blur-lg border border-white/30
+          bg-gradient-to-b from-green-100/40 via-green-100/20 to-green-50/10 backdrop-blur-md
           z-20 flex flex-col items-start justify-start pt-24 px-6
           transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"} font-raleway
@@ -127,7 +125,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </Link>
           </li>
           <li>
-            <Link href="/contact" onClick={() => setOpen(false)} className="font-raleway">
+            <Link href="/features/general/contact" onClick={() => setOpen(false)} className="font-raleway">
               Contact
             </Link>
           </li>

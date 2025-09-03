@@ -2,10 +2,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { blogData, BlogPost } from '@/types/blog';
-import Navbar from "@/components/layout/navbar/navbar";
 import GallerySection from "@/components/automotive/gallery/GallerySection";
 import AccessoriesSection from "@/components/automotive/accessories/AccessoriesSection";
-import FooterSection from "@/components/layout/footer/footer";
 
 interface BlogDetailProps {
   params: {
@@ -23,8 +21,6 @@ export default function BlogDetail({ params }: BlogDetailProps) {
 
   return (
     <div className="bg-white min-h-screen">
-      <Navbar />
-
       {/* Hero Section */}
       <div className="bg-green-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
@@ -139,7 +135,6 @@ export default function BlogDetail({ params }: BlogDetailProps) {
         </div>
       </section>
 
-      <FooterSection />
     </div>
   );
 }

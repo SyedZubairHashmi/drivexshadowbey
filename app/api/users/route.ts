@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     }
 
     const users = await User.find(query)
-      .select('-pin -confirmPin') // Exclude sensitive fields from results
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
@@ -80,8 +79,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: userData.email });
+    // Process email to lowercase before checking existence
+    const processedEmail = userData.email.toLowerCase().trim();
+    
+    // Check if email already exists (case-insensitive)
+    const existingUser = await User.findOne({ email: processedEmail });
 
     if (existingUser) {
       return NextResponse.json(
@@ -89,14 +91,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    // Update the userData with processed email
+    userData.email = processedEmail;
+    if (userData.recoveryEmail) {
+      userData.recoveryEmail = userData.recoveryEmail.toLowerCase().trim();
+    }
 
     const user = new User(userData);
     await user.save();
 
-    // Remove sensitive fields from response
+    // Return full user data for creation confirmation
     const userResponse = user.toObject();
-    delete userResponse.pin;
-    delete userResponse.confirmPin;
 
     return NextResponse.json({
       success: true,

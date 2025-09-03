@@ -1,37 +1,10 @@
-import React from "react";
-
-type CallToActionButtonProps = {
-  fullWidth?: boolean;
-  isBlackTheme?: boolean;
-};
-
-const CallToActionButton = ({
-  fullWidth = false,
-  isBlackTheme = false,
-}: CallToActionButtonProps) => {
+export default function CallToActionButton() {
   return (
-    <div className={`flex justify-center sm:justify-start ${fullWidth ? "w-full" : ""}`}>
-      <a href="/features/automotive/collection" className={`${fullWidth ? "w-full" : ""}`}>
-        <button
-          className={`
-            ${fullWidth 
-              ? "w-full py-3 px-4" 
-              : "w-[120px] sm:w-[180px] py-1.5 sm:py-2 px-3 sm:px-4"}
-            rounded-full transition-all duration-300 ease-in-out
-            text-[12px] sm:text-[16px] font-raleway font-medium
-            border text-center
-            ${
-              isBlackTheme
-                ? "border-black text-black hover:bg-black hover:text-white"
-                : "border-white text-white hover:bg-white hover:text-black"
-            }
-          `}
-        >
-          Get My Dream Car
-        </button>
-      </a>
-    </div>
+    <button
+      className="text-white font-medium border border-white rounded-full px-6 py-2 transition 
+      hover:bg-white/10 hover:backdrop-blur-sm"
+    >
+      Get My Dream Car
+    </button>
   );
-};
-
-export default CallToActionButton;
+}

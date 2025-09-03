@@ -62,7 +62,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         "HEADS UP DISPLAY HUD", "AUTOMATIC PARKING ASSIST APA", 
         "NIGHT VISION", "ADAPTIVE CRUISE CONTROL","MANY MORE"
       ],
-    selectedFeatures: [] as string[],
+    selectedFeatures: ["ABS", "AIR CONDITIONING"] as string[], // Default selected features
     description: "",
 
     // Step 2: Financial Information
@@ -414,6 +414,12 @@ function AddCarContent({ params }: AddCarPageProps) {
             'description'
           ];
 
+          // Check if at least one feature is selected
+          if (!formData.selectedFeatures || formData.selectedFeatures.length === 0) {
+            setError('Please select at least one feature for the car');
+            return;
+          }
+
         for (const field of requiredFields) {
           if (!formData[field as keyof typeof formData] || formData[field as keyof typeof formData] === '') {
             setError(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
@@ -470,9 +476,10 @@ function AddCarContent({ params }: AddCarPageProps) {
           interiorColor: formData.interiorColor.trim(),
           mileage: formData.mileage.trim(),
           keywords: Array.isArray(formData.keywords) ? formData.keywords : [],
-                      status: formData.status,
+          features: Array.isArray(formData.selectedFeatures) ? formData.selectedFeatures : [],
+          status: formData.status,
           exteriorColor: formData.exteriorColor.trim(),
-                      ...(formData.status === 'transit' && { deliveryTimeframe: formData.deliveryTimeframe.trim() }),
+          ...(formData.status === 'transit' && { deliveryTimeframe: formData.deliveryTimeframe.trim() }),
           batchNo: formData.selectedBatch,
           description: formData.description.trim(),
           financing: {
@@ -550,6 +557,9 @@ function AddCarContent({ params }: AddCarPageProps) {
         };
 
         console.log('Sending car data to API:', JSON.stringify(carData, null, 2));
+        console.log('Selected features:', formData.selectedFeatures);
+        console.log('Features array length:', formData.selectedFeatures.length);
+        console.log('Features field in carData:', carData.features);
         const response = await carAPI.create(carData, {
           coverPhoto,
           invoiceReceipt,
@@ -1282,7 +1292,11 @@ function AddCarContent({ params }: AddCarPageProps) {
         </div>
 
         <div className="w-full">
-          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>Features ({formData.features.length} available)</label>
+          <label className="block text-sm font-medium text-black mb-2" style={{ fontWeight: "500" }}>
+            Features ({formData.features.length} available) <span className="text-red-500">*</span>
+            <span className="text-xs text-gray-500 ml-2">(Select at least one feature)</span>
+            <span className="text-sm text-blue-600 ml-2">({formData.selectedFeatures.length} selected)</span>
+          </label>
           <div style={{
             display: 'flex',
             width: '100%',
@@ -1294,7 +1308,7 @@ function AddCarContent({ params }: AddCarPageProps) {
             borderRadius: '24px',
             border: '1px solid rgba(0, 0, 0, 0.24)'
           }}>
-            {console.log('Features array:', formData.features)}
+
             {formData.features && formData.features.length > 0 ? (
               formData.features.map((feature, index) => (
               <div
@@ -1333,6 +1347,9 @@ function AddCarContent({ params }: AddCarPageProps) {
               <div style={{ color: '#666', fontSize: '14px' }}>No features available</div>
             )}
           </div>
+          <p className="text-sm text-gray-500 mt-2">
+            💡 <strong>Tip:</strong> Click on features to select/deselect them. At least one feature must be selected.
+          </p>
         </div>
       </div>
     </div>

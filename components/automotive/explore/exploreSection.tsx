@@ -23,7 +23,7 @@ export default function ExploreSection() {
   };
 
   const handleViewMore = () => {
-    router.push("/gallery");
+    router.push("/features/automotive/gallery");
   };
 
   return (

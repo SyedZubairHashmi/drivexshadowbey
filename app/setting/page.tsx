@@ -89,8 +89,8 @@ export default function ProfileSettings() {
         email: "admin@drivexdeal.com",
         city: "Karachi",
         country: "Pakistan",
-        pin: "1234",
-        confirmPin: "1234",
+        pin: "123456",
+        confirmPin: "123456",
         recoveryEmail: "admin@drivexdeal.com"
       };
 
@@ -157,7 +157,9 @@ export default function ProfileSettings() {
           });
           
           // Log current PIN for debugging (remove in production)
-          console.log("Current user PIN:", userData.pin ? "***" : "Not set");
+          console.log("Current user PIN:", userData.pin ? userData.pin : "Not set");
+          console.log("Current user confirmPin:", userData.confirmPin ? userData.confirmPin : "Not set");
+          console.log("Full user data loaded:", userData);
         } else {
           console.error("Failed to load user:", response.error);
           // Create a test user if loading fails
@@ -221,6 +223,7 @@ export default function ProfileSettings() {
       const response = await userAPI.update(userId, updateData);
 
       if (response.success) {
+        // Update local user state
         setUser(response.data);
         
         // Show alert message
@@ -309,20 +312,39 @@ export default function ProfileSettings() {
     try {
       setSaving(true);
       
-      console.log("Updating PIN for user:", userId, "New PIN:", formData.enterPin);
+      const newPin = formData.enterPin.trim();
+      console.log("=== PIN UPDATE DEBUG ===");
+      console.log("User ID:", userId);
+      console.log("New PIN:", newPin);
+      console.log("Confirm PIN:", formData.confirmPin);
       
-      const response = await userAPI.update(userId, {
-        pin: formData.enterPin,
-        confirmPin: formData.confirmPin
-      });
+      // First, let's check what the current user data looks like
+      const currentUserResponse = await userAPI.getById(userId);
+      console.log("Current user data before update:", currentUserResponse);
+      
+      // Now update the PIN
+      const updateData = {
+        pin: newPin,
+        confirmPin: newPin
+      };
+      
+      console.log("Sending update data:", updateData);
+      console.log("User email before update:", user?.email);
+      console.log("User recoveryEmail before update:", user?.recoveryEmail);
+      
+      const response = await userAPI.update(userId, updateData);
+      
+      console.log("PIN update response:", response);
 
       if (response.success) {
-        // Update the user state with new PIN
+        console.log("PIN update successful! New user data:", response.data);
+        
+        // Update the local user state immediately
         if (user) {
           setUser({
             ...user,
-            pin: formData.enterPin,
-            confirmPin: formData.confirmPin
+            pin: newPin,
+            confirmPin: newPin
           });
         }
         
@@ -336,8 +358,33 @@ export default function ProfileSettings() {
         
         toast({
           title: "Success",
-          description: "Security PIN updated successfully! You can now use this PIN to access secure information."
+          description: `Security PIN updated successfully to: ${newPin}`
         });
+        
+        // Force a re-render by updating a timestamp
+        setUser(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
+        
+        // Test: Try to verify the PIN was saved by making a test login request
+        console.log("Testing PIN update with login API...");
+        try {
+          const testResponse = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: user?.email || 'admin@drivexdeal.com', 
+              password: newPin 
+            }),
+          });
+          const testData = await testResponse.json();
+          console.log("Test login response:", testData);
+          if (testData.success) {
+            console.log("✅ PIN update verified - can login with new PIN!");
+          } else {
+            console.log("❌ PIN update failed - cannot login with new PIN:", testData.error);
+          }
+        } catch (testError) {
+          console.error("Test login error:", testError);
+        }
       } else {
         console.error("PIN update failed:", response.error);
         toast({
@@ -372,12 +419,26 @@ export default function ProfileSettings() {
     try {
       setSaving(true);
       
+      console.log("=== RESET PIN DEBUG ===");
+      console.log("Resetting PIN for user:", userId);
+      
       const response = await userAPI.update(userId, {
         pin: "",
         confirmPin: ""
       });
 
       if (response.success) {
+        console.log("PIN reset successful! New user data:", response.data);
+        
+        // Update the local user state immediately
+        if (user) {
+          setUser({
+            ...user,
+            pin: "",
+            confirmPin: ""
+          });
+        }
+        
         setFormData(prev => ({
           ...prev,
           enterPin: "",
@@ -388,6 +449,9 @@ export default function ProfileSettings() {
           title: "Success",
           description: "Security PIN reset successfully"
         });
+        
+        // Force a re-render
+        setUser(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
       } else {
         console.error("PIN reset failed:", response.error);
         toast({
@@ -659,11 +723,6 @@ export default function ProfileSettings() {
                         {errors.enterPin && (
                           <p className="text-xs text-red-500">{errors.enterPin}</p>
                         )}
-                        {user?.pin && (
-                          <p className="text-xs text-gray-500">
-                            Current PIN: {user.pin.replace(/./g, '*')} (Click "Set Security Pin" to update)
-                          </p>
-                        )}
                       </div>
 
                       <div className="space-y-1 flex flex-col">
@@ -744,6 +803,12 @@ export default function ProfileSettings() {
                         {saving ? "Resetting..." : "Reset Security Pin"}
                       </Button>
                     </div>
+                    
+
+                    
+
+                    
+
                   </div>
 
                   {/* Save Button */}

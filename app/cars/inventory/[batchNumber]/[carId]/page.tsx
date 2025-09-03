@@ -23,10 +23,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [carInfoExpanded, setCarInfoExpanded] = useState(true);
   const [financeInfoExpanded, setFinanceInfoExpanded] = useState(true);
-      const [descriptionExpanded, setDescriptionExpanded] = useState(true);
-    const [picturesExpanded, setPicturesExpanded] = useState(true);
-    const [invoiceReceiptExpanded, setInvoiceReceiptExpanded] = useState(true);
-    const [auctionSheetExpanded, setAuctionSheetExpanded] = useState(true);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(true);
+  const [picturesExpanded, setPicturesExpanded] = useState(true);
+  const [invoiceReceiptExpanded, setInvoiceReceiptExpanded] = useState(true);
+  const [auctionSheetExpanded, setAuctionSheetExpanded] = useState(true);
 
   useEffect(() => {
     fetchCarDetails();
@@ -36,9 +36,9 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await carAPI.getById(carId);
-      
+
       if (response.success) {
         setCar(response.data);
       } else {
@@ -61,14 +61,19 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
     router.push(`/cars/inventory/${batchNumber}/add-car?edit=true&carData=${carData}`);
   };
 
-      const formatPrice = (price: number) => {
-      return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: 'PKR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(price);
-    };
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-PK', {
+      style: 'currency',
+      currency: 'PKR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const formatFinanceAmount = (amount: number) => {
+    if (!amount || amount === 0) return '0/- PKR';
+    return `${amount.toLocaleString('en-PK')}/- PKR`;
+  };
 
   if (loading) {
     return (
@@ -89,7 +94,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <p className="text-red-600 mb-4">Error: {error || "Car not found"}</p>
-            <button 
+            <button
               onClick={fetchCarDetails}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
@@ -103,10 +108,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
 
   return (
     <MainLayout>
-      <div className="flex min-h-screen mt-5 mr-4"> 
+      <div className="flex min-h-screen mt-5 mr-4">
         <div className="flex-1 flex flex-col space-y-5">
           {/* Header with Breadcrumb and Edit Button */}
-          <div 
+          <div
             className="flex flex-col items-start gap-6"
             style={{
               display: 'flex',
@@ -130,7 +135,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 style={{
                   display: 'flex',
                   height: '50px',
-                  width:'100px',
+                  width: '100px',
                   padding: '10px 10px',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -148,14 +153,14 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
           {/* Car Name and Price Section */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 
+              <h1
                 className="text-5xl font-semibold"
                 style={{
                   color: '#000',
                   fontSize: '44px',
                   fontStyle: 'normal',
                   fontWeight: 600,
-                  lineHeight: 'normal'  
+                  lineHeight: 'normal'
                 }}
               >
                 {car.carName}
@@ -163,8 +168,8 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
               <p className="text-lg text-gray-600 mt-1">{car.engineType}</p>
             </div>
             <div>
-             <p>Total Finance Amount</p>
-              <p 
+              <p>Total Finance Amount</p>
+              <p
                 className="text-4xl font-bold"
                 style={{
                   color: '#00674F',
@@ -197,7 +202,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 <span className="text-gray-700">{car.engineType}</span>
               </div>
             </div>
-            
+
             {/* Batch and Transit Tags */}
             <div className="flex items-center gap-4">
               {/* Batch Tag */}
@@ -221,7 +226,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   Batch {car.batchNo}
                 </span>
               </div>
-              
+
               {/* Transit Tag */}
               <div style={{
                 width: '148px',
@@ -243,10 +248,10 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   padding: car.status === 'transit' ? '4px 8px' : '0',
                   borderRadius: car.status === 'transit' ? '4px' : '0'
                 }}>
-                  {car.status === 'transit' ? `In Transit - ${car.deliveryTimeframe || '24 Weeks'}` : 
-                   car.status === 'warehouse' ? 'In Warehouse' :
-                   car.status === 'showroom' ? 'In Showroom' :
-                   car.status === 'sold' ? 'Sold' : 'Available'}
+                  {car.status === 'transit' ? `In Transit - ${car.deliveryTimeframe || '24 Weeks'}` :
+                    car.status === 'warehouse' ? 'In Warehouse' :
+                      car.status === 'showroom' ? 'In Showroom' :
+                        car.status === 'sold' ? 'Sold' : 'Available'}
                 </span>
               </div>
             </div>
@@ -289,64 +294,64 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             {carInfoExpanded && (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 {/* Left Column */}
-                <div style={{width: '410px'}}>
-                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
+                <div style={{ width: '410px' }}>
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Engine</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.engineNumber}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Manufacturer Year</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.manufacturingYear}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Chassis</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.chasisNumber}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Mileage</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.mileage}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Interior Color</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.interiorColor}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Engine Capacity</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.engineCapacity}</span>
-                </div>
+                  </div>
                 </div>
 
-                                {/* Right Column */}
+                {/* Right Column */}
                 <div style={{ width: '410px' }}>
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Engine Type</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.engineType}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Auction Grade</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.auctionGrade}</span>
-                </div>
-                  
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Imported Year</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.importYear}</span>
-                </div>
-                  
-                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
+                  </div>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Exterior Color</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.exteriorColor}</span>
                   </div>
-                  
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Assembly</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.assembly}</span>
-                </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -357,6 +362,8 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-semibold">Features</h2>
             </div>
+
+
 
             {car.features && car.features.length > 0 ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
@@ -381,7 +388,12 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 ))}
               </div>
             ) : (
-              <div style={{ color: '#666', fontSize: '14px' }}>No features available</div>
+              <div style={{ color: '#666', fontSize: '14px' }}>
+                No features available. 
+                {car.features === undefined && ' (Features field is undefined)'}
+                {car.features === null && ' (Features field is null)'}
+                {car.features && car.features.length === 0 && ' (Features array is empty)'}
+              </div>
             )}
           </div>
 
@@ -420,126 +432,128 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             )}
 
             {financeInfoExpanded && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
                 {/* Left Column */}
-                <div style={{ width: '410px' }}>
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Auction Price</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.auctionPrice?.totalAmount || 0)}</span>
+                <div style={{ width: '450px' }}>
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Auction Price</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.auctionPrice?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Auction Expenses</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.auctionExpenses?.totalAmount || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Auction Expenses</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.auctionExpenses?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Inland Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.inlandCharges?.totalAmount || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Inland Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.inlandCharges?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Loading Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.loadingCharges?.totalAmount || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Loading Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.loadingCharges?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Container Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.containerCharges?.totalAmount || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Container Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.containerCharges?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Freight Sea</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.freightSea?.totalAmount || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Freight Sea</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.freightSea?.totalAmount || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Variant Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.variantDuty || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Variant Duty</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.variantDuty || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Passport Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.passportCharges || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Passport Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.passportCharges || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Services Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.servicesCharges || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Services Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.servicesCharges || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Transport Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.transportCharges || 0)}</span>
-                  </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Repair Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.repairCharges || 0)}</span>
-                  </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Miscellaneous</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.miscellaneousCharges || 0)}</span>
-                  </div>
+
+
+
                 </div>
 
-                                {/* Right Column */}
-                <div style={{ width: '410px' }}>
-                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Vehicle Value CIF</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.vehicleValueCif || 0)}</span>
+                {/* Right Column */}
+                <div style={{ width: '450px' }}>
+
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Transport Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.transportCharges || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Landing Charges</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.landingCharges || 0)}</span>
+
+                                    <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Vehicle Value CIF</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.vehicleValueCif || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Customs Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.customsDuty || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Landing Charges</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.landingCharges || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Sales Tax</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.salesTax || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Customs Duty</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.customsDuty || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Federal Excise Duty</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.federalExciseDuty || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Sales Tax</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.salesTax || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Income Tax</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.incomeTax || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Federal Excise Duty</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.federalExciseDuty || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Freight & Storage</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.freightAndStorageCharges || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Income Tax</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.incomeTax || 0)}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Demurage</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{formatPrice(car.financing?.demurage || 0)}</span>
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Freight & Storage</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.freightAndStorageCharges || 0)}</span>
                   </div>
-                  
+
+                  <div style={{ display: 'flex', marginBottom: '20px', gap: '40px', alignItems: 'center' }}>
+                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px', flexShrink: 0 }}>Demurage</span>
+                    <span style={{ fontWeight: '400', fontSize: '18px', minWidth: '150px', textAlign: 'right' }}>{formatFinanceAmount(car.financing?.demurrage || 0)}</span>
+                  </div>
+
                   <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
                     <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Age of Vehicle</span>
                     <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.ageOfVehicle || 0} years</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Origin City</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.originCity || 'N/A'}</span>
+                  <div className="w-full flex  items-end gap-[100px]">
+                    <p style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Total Finance Amount</p>
+                    <p
+                      className="text-4xl font-bold"
+                      style={{
+                        
+                        fontSize: '20px',
+                        fontStyle: 'normal',
+                        fontWeight: 400,
+                        lineHeight: '30px',
+                      }}
+                    >
+                      PKR {car.financing?.financeTotalAmount ? car.financing.financeTotalAmount.toFixed(2) : '0.00'}
+                    </p>
                   </div>
-                  
-                  <div style={{ display: 'flex', marginBottom: '20px', gap: '35%' }}>
-                    <span style={{ width: '200px', fontWeight: '600', fontSize: '18px' }}>Destination City</span>
-                    <span style={{ fontWeight: '400', fontSize: '18px' }}>{car.financing?.destinationCity || 'N/A'}</span>
-                  </div>
+
+
                 </div>
               </div>
             )}
@@ -623,7 +637,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             </div>
 
             {invoiceReceiptExpanded && (
-              <div 
+              <div
                 style={{
                   width: '388px',
                   height: '84px',
@@ -653,11 +667,11 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 2V8H20" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16 13H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16 17H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M10 9H9H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M14 2V8H20" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M16 13H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M16 17H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M10 9H9H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
 
@@ -698,9 +712,9 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V3" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 10L12 15L17 10" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 15V3" stroke={car.images?.invoiceReceipt ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -731,7 +745,7 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
             </div>
 
             {auctionSheetExpanded && (
-              <div 
+              <div
                 style={{
                   width: '388px',
                   height: '84px',
@@ -761,11 +775,11 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 2V8H20" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16 13H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16 17H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M10 9H9H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M14 2V8H20" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M16 13H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M16 17H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M10 9H9H8" stroke="#6A5ACD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
 
@@ -806,9 +820,9 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V3" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 10L12 15L17 10" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 15V3" stroke={car.images?.auctionSheet ? "#29A403" : "#999999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>

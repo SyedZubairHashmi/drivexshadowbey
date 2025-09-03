@@ -4,9 +4,7 @@ import { useParams } from "next/navigation";
 import accessoriesData from "@/app/features/automotive/accessories/data";
 import AccessoriesSection from "@/components/automotive/accessories/AccessoriesSection";
 import GallerySection from "@/components/automotive/gallery/GallerySection";
-import Navbar from "@/components/layout/navbar/navbar";
 import AccessoryImagesSection from "@/components/automotive/accessories/AccessoryImagesSection";
-import FooterSection from "@/components/layout/footer/footer";
 import AccessoryDetailsSection from "@/components/automotive/accessories/AccessoryDetailsSection";
 
 const AccessoryDetailPage = () => {
@@ -19,8 +17,6 @@ const AccessoryDetailPage = () => {
 
   return (
     <>
-      <Navbar />
-
       {/* ACCESSORY IMAGE & DETAILS SECTION */}
       <div className="max-w-[1440px] mx-auto pt-[60px] pb-6 px-4 sm:px-[60px] mt-24">
         <div className="flex gap-8 flex-wrap lg:flex-nowrap">
@@ -37,7 +33,6 @@ const AccessoryDetailPage = () => {
       {/* OTHER SECTIONS */}
       <GallerySection />
       <AccessoriesSection />
-      <FooterSection/>
     </>
   );
 };

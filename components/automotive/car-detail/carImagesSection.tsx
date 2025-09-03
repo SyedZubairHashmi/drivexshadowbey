@@ -27,16 +27,16 @@ const CarImagesSection = ({ images, title }: CarImagesSectionProps) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full h-[332px] bg-gray-100 rounded-lg">
+      <div className="flex items-center justify-center w-full h-64 sm:h-80 bg-gray-100 rounded-lg">
         <p className="text-gray-500">No images available</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col w-full">
       {/* Main Image */}
-      <div className="relative w-full aspect-video max-w-[611px] rounded-lg border border-gray-300 overflow-hidden mb-4">
+      <div className="relative w-full aspect-video rounded-lg border border-gray-300 overflow-hidden mb-4">
         {selectedImage && (
           <Image
             src={selectedImage}
@@ -44,7 +44,7 @@ const CarImagesSection = ({ images, title }: CarImagesSectionProps) => {
             fill
             sizes="(max-width: 768px) 100vw, 
                    (max-width: 1200px) 50vw, 
-                   33vw"
+                   50vw"
             className="object-contain bg-white"
             priority
           />
@@ -52,12 +52,12 @@ const CarImagesSection = ({ images, title }: CarImagesSectionProps) => {
       </div>
 
       {/* Thumbnails */}
-      <div className="flex gap-3 mt-4 overflow-x-auto pb-2 px-1 -mx-1">
+      <div className="flex gap-2 sm:gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
         {images.map((img, index) => (
           <button
             key={index}
             onClick={() => handleThumbnailClick(img, index)}
-            className={`flex-shrink-0 w-20 h-16 rounded-md overflow-hidden border-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+            className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-md overflow-hidden border-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
               selectedIndex === index 
                 ? "border-blue-600 ring-2 ring-blue-500 ring-offset-1" 
                 : "border-gray-200 hover:border-gray-400"

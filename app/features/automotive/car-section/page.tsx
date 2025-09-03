@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import carSectionData from "@/app/carSection/data";
+import carSectionData from "@/app/features/automotive/car-section/data";
 import CheckIcon from "@/components/icons/checkIcons";
 import CcLayer from "@/components/icons/cc-layer1";
 import Seater from "@/components/icons/seater";

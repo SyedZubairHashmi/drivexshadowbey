@@ -6,10 +6,8 @@ import { useState } from "react";
 import accessoriesData from "./data";
 import CheckIcon from "@/components/shared/icons/checkIcons";
 import RatingIcons from "@/components/shared/icons/ratingIcons";
-import Navbar from "@/components/layout/navbar/navbar";
 import SearchBar from "@/components/layout/search/searchbar";
 import Pagination from "@/components/shared/pagination/pagination";
-import FooterSection from "@/components/layout/footer/footer";
 
 interface AccessoriesSectionProps {
   limit?: number;
@@ -26,22 +24,21 @@ const AccessoriesSection = ({ limit }: AccessoriesSectionProps) => {
 
   return (
     <div className="bg-white min-h-screen pb-10">
-      <Navbar />
+     <div className="bg-green-900 text-white">
+  <div className="w-full h-[400px] pb-16 flex flex-col items-center justify-center text-center relative overflow-hidden px-4 sm:px-6 md:px-8">
+    <h2 className="text-2xl md:text-4xl mt-24 font-extrabold tracking-tight">
+      Car Accessories Collection
+    </h2>
+    <p className="mt-3 text-base md:text-lg font-normal tracking-tight max-w-2xl">
+      Premium car accessories at the best possible pricing in Pakistan
+    </p>
 
-      <div className="bg-green-900 text-white">
-        <div className="w-full h-[400px] pb-16 flex flex-col items-center justify-center relative overflow-hidden px-4 sm:px-6 md:px-8">
-          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-center">
-            Car Accessories Collection
-          </h2>
-          <p className="mt-3 text-base md:text-lg font-normal tracking-tight text-center max-w-2xl">
-            Premium car accessories at the best possible pricing in Pakistan
-          </p>
+    <div className="w-full max-w-5xl mt-6 px-4 sm:px-0">
+      <SearchBar />
+    </div>
+  </div>
+</div>
 
-          <div className="w-full max-w-5xl mt-6 px-4 sm:px-0">
-            <SearchBar />
-          </div>
-        </div>
-      </div>
 
       {/* SECTION WRAPPER */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-16">
@@ -106,7 +103,6 @@ const AccessoriesSection = ({ limit }: AccessoriesSectionProps) => {
           onPageChange={setCurrentPage}
         />
       </div>
-      <FooterSection/>
     </div>
   );
 };

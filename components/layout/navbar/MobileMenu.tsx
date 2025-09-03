@@ -1,171 +1,104 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { FaChevronDown } from "react-icons/fa";
-import React from "react";
-import CallToActionButton from "./CallToActionButton";
+import { FaBars, FaTimes, FaChevronDown } from "react-icons/fa";
 
-interface MobileMenuProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  mobileCarsOpen: boolean;
-  setMobileCarsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  mobileProductsOpen: boolean;
-  setMobileProductsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  textColor?: string;
-}
+export default function MobileMenu() {
+  const [open, setOpen] = useState(false);
+  const [carsOpen, setCarsOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
 
-const MobileMenu: React.FC<MobileMenuProps> = ({
-  open,
-  setOpen,
-  mobileCarsOpen,
-  setMobileCarsOpen,
-  mobileProductsOpen,
-  setMobileProductsOpen,
-  textColor = "text-white",
-}) => {
   return (
-    <>
-      {/* Overlay */}
-      <div
-        onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-10 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      />
+    <div className="lg:hidden">
+      {/* Toggle Button */}
+      <button onClick={() => setOpen(!open)} className="text-gray-800">
+        {open ? <FaTimes size={22} /> : <FaBars size={22} />}
+      </button>
 
-      {/* Drawer with glassmorphism */}
-      <div
-        className={`md:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full
-          bg-white/10 backdrop-blur-lg border border-white/30
-          z-20 flex flex-col items-start justify-start pt-24 px-6
-          transition-transform duration-300
-          ${open ? "translate-x-0" : "-translate-x-full"} font-raleway
-        `}
-      >
-        <ul className={`space-y-4 text-[16px] font-medium w-full ${textColor}`}>
-          <li>
-            <Link href="/" onClick={() => setOpen(false)} className="font-raleway">
-              Home
-            </Link>
-          </li>
-
-          {/* Cars */}
-          <li className="w-full">
+      {/* Mobile Menu */}
+      {open && (
+        <div className="absolute top-16 left-0 w-full bg-black text-white flex flex-col space-y-4 p-6 z-50 max-h-[90vh] overflow-y-auto">
+          {/* Cars Dropdown */}
+          <div>
             <button
-              className="flex justify-between items-center w-full py-2 font-raleway"
-              onClick={() => setMobileCarsOpen(!mobileCarsOpen)}
+              onClick={() => setCarsOpen(!carsOpen)}
+              className="flex justify-between items-center w-full"
             >
-              <span>Cars</span>
+              Cars
               <FaChevronDown
-                className={`transition-transform ${mobileCarsOpen ? "rotate-180" : ""}`}
+                className={`ml-2 transform transition-transform ${
+                  carsOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
-            {mobileCarsOpen && (
-              <ul className="pl-4 mt-2 space-y-2 font-raleway">
-                <li>
-                  <Link 
-                    href="/features/automotive/collection" 
-                    onClick={() => setOpen(false)} 
-                    className="block py-1 hover:text-gray-300 transition-colors"
-                  >
-                    Cars Collection
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/features/automotive/accessories" 
-                    onClick={() => setOpen(false)} 
-                    className="block py-1 hover:text-gray-300 transition-colors"
-                  >
-                    Cars Accessories
-                  </Link>
-                </li>
-              </ul>
+            {carsOpen && (
+              <div className="ml-4 mt-2 flex flex-col space-y-2 text-sm">
+                <Link
+                  href="/features/automotive/collection"
+                  onClick={() => setOpen(false)}
+                >
+                  Car Collection
+                </Link>
+                <Link
+                  href="/features/automotive/accessories"
+                  onClick={() => setOpen(false)}
+                >
+                  Car Accessories
+                </Link>
+              </div>
             )}
-          </li>
+          </div>
 
-          {/* Products */}
-          <li className="w-full">
+          {/* Products Mega Menu */}
+          <div>
             <button
-              className="flex justify-between items-center w-full py-2 font-raleway"
-              onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+              onClick={() => setProductsOpen(!productsOpen)}
+              className="flex justify-between items-center w-full"
             >
-              <span>Products</span>
+              Products
               <FaChevronDown
-                className={`transition-transform ${mobileProductsOpen ? "rotate-180" : ""}`}
+                className={`ml-2 transform transition-transform ${
+                  productsOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
-            {mobileProductsOpen && (
-              <ul className="pl-4 mt-2 space-y-2 font-raleway">
-                {[
-                  { name: "Seat Covers", category: "car-accessories" },
-                  { name: "Floor Mats", category: "car-accessories" },
-                  { name: "Steering Wheel Covers", category: "car-accessories" },
-                  { name: "Dashboard Covers", category: "car-accessories" },
-                  { name: "Sun Shades", category: "car-accessories" },
-                  { name: "LED Lights", category: "interior-accessories" },
-                  { name: "Mobile Holders", category: "interior-accessories" },
-                  { name: "Organizers", category: "interior-accessories" },
-                  { name: "Cushions", category: "interior-accessories" },
-                  { name: "Alloy Wheels", category: "exterior-accessories" },
-                  { name: "Body Kits", category: "exterior-accessories" },
-                  { name: "Car Covers", category: "exterior-accessories" },
-                  { name: "Roof Racks", category: "exterior-accessories" },
-                  { name: "Spoilers", category: "exterior-accessories" },
-                  { name: "Dash Cameras", category: "electronics" },
-                  { name: "Parking Sensors", category: "electronics" },
-                  { name: "Reverse Cameras", category: "electronics" },
-                  { name: "Chargers & Cables", category: "electronics" },
-                ].map((item, idx) => (
-                  <li key={idx}>
-                    <Link 
-                      href={`/features/automotive/accessories?category=${item.category}`}
-                      onClick={() => setOpen(false)}
-                      className="block py-1 hover:text-gray-300 transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {productsOpen && (
+              <div className="ml-4 mt-2 grid grid-cols-2 gap-4 text-sm">
+                <Link href="/products/interior" onClick={() => setOpen(false)}>
+                  Interior
+                </Link>
+                <Link href="/products/exterior" onClick={() => setOpen(false)}>
+                  Exterior
+                </Link>
+                <Link href="/products/electronics" onClick={() => setOpen(false)}>
+                  Electronics
+                </Link>
+                <Link href="/products/performance" onClick={() => setOpen(false)}>
+                  Performance
+                </Link>
+                <Link href="/products/wheels" onClick={() => setOpen(false)}>
+                  Wheels
+                </Link>
+                <Link href="/products/lights" onClick={() => setOpen(false)}>
+                  Lights
+                </Link>
+              </div>
             )}
-          </li>
+          </div>
 
-          <li>
-            <Link 
-              href="/features/automotive/blog" 
-              onClick={() => setOpen(false)} 
-              className="block py-2 hover:text-gray-300 transition-colors"
-            >
-              Blog
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/features/automotive/gallery" 
-              onClick={() => setOpen(false)} 
-              className="block py-2 hover:text-gray-300 transition-colors"
-            >
-              Gallery
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/features/general/contact" 
-              onClick={() => setOpen(false)} 
-              className="block py-2 hover:text-gray-300 transition-colors"
-            >
-              Contact
-            </Link>
-          </li>
-
-          {/* CTA */}
-          <li className="w-full">
-            <CallToActionButton fullWidth isBlackTheme={false} />
-          </li>
-        </ul>
-      </div>
-    </>
+          {/* Other Menu Items */}
+          <Link href="/features/automotive/blog" onClick={() => setOpen(false)}>
+            Blog
+          </Link>
+          <Link href="/features/automotive/gallery" onClick={() => setOpen(false)}>
+            Gallery
+          </Link>
+          <Link href="/features/general/contact" onClick={() => setOpen(false)}>
+            Contact
+          </Link>
+        </div>
+      )}
+    </div>
   );
-};
-
-export default MobileMenu;
+}

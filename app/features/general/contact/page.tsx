@@ -1,7 +1,5 @@
 "use client";
 
-import FooterSection from "@/components/footer/footer";
-import Navbar from "@/components/navbar/navbar";
 import React, { useState } from "react";
 import { MdLocationOn, MdAccessTime, MdEmail, MdPhone } from "react-icons/md";
 
@@ -32,11 +30,10 @@ export default function Contact() {
     <>
       <div className="max-w-[1400px] mx-auto mb-12 mt-28 px-4 flex flex-col md:flex-row gap-10 text-[#222] font-sans">
         {/* Left Section */}
-        <Navbar />
         <div className="flex-1 w-full md:w-auto">
           <h2 className="text-[26px] font-semibold mb-2">Contact Drive X Deal</h2>
           <p className="text-[16px] mb-8 text-gray-700">
-            We’re here to help you with your car buying journey.
+            We're here to help you with your car buying journey.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 rounded-2xl">
@@ -49,7 +46,7 @@ export default function Contact() {
               {
                 icon: <MdAccessTime size={18} />,
                 title: "Office Hours",
-                content: "Mon - Sat: 9:00 am to 7:00 pm\nSunday: Closed",
+                content: "Mon - Sat: 9:00 am to 7:00 pm\nSunday: Closed",
               },
               {
                 icon: <MdEmail size={18} />,
@@ -152,7 +149,7 @@ export default function Contact() {
       </div>
 
       {/* Footer Section */}
-      <FooterSection />
+      {/* Footer Section */}
     </>
   );
 }

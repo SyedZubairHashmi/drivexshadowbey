@@ -1,17 +1,14 @@
 import React from "react";
-import CarSection from "../carSection/page";
-import Navbar from "@/components/navbar/navbar";
-import HeroSection from "../heroSection/page";
+import CarSection from "../features/automotive/car-section/page";
+import HeroSection from "../features/general/hero-section/page";
 import TestimonialSlider from "@/components/testimonal/testimonalSlider";
 import ProductSection from "@/components/productSection/productSection";
 import ExploreSection from "@/components/exploreSection/exploreSection";
-import BlogsSection from "../blog/page";
-import Footer from "@/components/footer/footer";
+import BlogsSection from "../features/automotive/blog/page";
 
 const HomePage = () => {
   return (
     <div>
-      <Navbar />
       <HeroSection />
       <CarSection />
       <TestimonialSlider />
@@ -21,9 +18,8 @@ const HomePage = () => {
         limit={3}
         sectionTitle="Happy Buyers, Real Stories"
         sectionSubtitle="Stories from happy buyers who found their car with DriveXDeals."
-        seeMoreLink="/blogs"
+        seeMoreLink="/features/automotive/blog"
       />
-      <Footer />
     </div>
   );
 };

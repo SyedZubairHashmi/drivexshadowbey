@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Raleway } from "next/font/google"
+import { ConditionalLayout } from "@/components/layout/conditional-layout"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -29,7 +30,11 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
         />
       </head>
-      <body className={`${inter.className} ${raleway.variable}`}>{children}</body>
+      <body className={`${inter.className} ${raleway.variable}`}>
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
+      </body>
     </html>
   )
 }
