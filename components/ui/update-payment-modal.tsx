@@ -86,8 +86,75 @@ export function UpdatePaymentModal({ isOpen, onClose, onSubmit }: UpdatePaymentM
     }
   }, [isOpen]);
 
+  // Handle click outside for payment method dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showPaymentMethodDropdown && !target.closest('.payment-method-dropdown')) {
+        setShowPaymentMethodDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showPaymentMethodDropdown]);
+
+  // Handle click outside for batch dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showBatchDropdown && !target.closest('.batch-dropdown')) {
+        setShowBatchDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showBatchDropdown]);
+
+  // Handle click outside for investor dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showInvestorDropdown && !target.closest('.investor-dropdown')) {
+        setShowInvestorDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showInvestorDropdown]);
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let newValue = value;
+    
+    // Auto-format CNIC field
+    if (field === 'investorId') {
+      // Remove all non-digits first
+      const digitsOnly = value.replace(/\D/g, '');
+      
+      // Limit to 13 digits maximum
+      if (digitsOnly.length > 13) {
+        return; // Don't update if more than 13 digits
+      }
+      
+      // Auto-format with hyphens
+      if (digitsOnly.length <= 5) {
+        newValue = digitsOnly;
+      } else if (digitsOnly.length <= 12) {
+        newValue = digitsOnly.slice(0, 5) + '-' + digitsOnly.slice(5);
+      } else {
+        newValue = digitsOnly.slice(0, 5) + '-' + digitsOnly.slice(5, 12) + '-' + digitsOnly.slice(12);
+      }
+    }
+
+    setFormData(prev => ({ ...prev, [field]: newValue }));
 
     // Auto-fill investor details when name is entered
     if (field === 'investorName' && value.trim()) {
@@ -96,7 +163,7 @@ export function UpdatePaymentModal({ isOpen, onClose, onSubmit }: UpdatePaymentM
 
     // Calculate remaining amount when amount paid is entered
     if (field === 'amountPaid') {
-      const amountPaid = parseFloat(value) || 0;
+      const amountPaid = parseFloat(newValue) || 0;
       const pastRemaining = parseFloat(formData.investmentAmount) || 0; // This is past remaining amount
       const newRemaining = Math.max(0, pastRemaining - amountPaid);
       
@@ -401,7 +468,7 @@ export function UpdatePaymentModal({ isOpen, onClose, onSubmit }: UpdatePaymentM
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   
                   {showInvestorDropdown && batchInvestors.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                    <div className="investor-dropdown absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                       {batchInvestors.slice(0, 5).map((investor) => (
                         <div
                           key={investor._id}
@@ -423,12 +490,9 @@ export function UpdatePaymentModal({ isOpen, onClose, onSubmit }: UpdatePaymentM
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-gray-700">ID/CNIC</Label>
                 <Input
-                  placeholder="Enter ID/CNIC"
+                  placeholder="54303-5476210-3"
                   value={formData.investorId}
-                  onChange={(e) => {
-                    // Allow manual editing of ID field without triggering search
-                    setFormData(prev => ({ ...prev, investorId: e.target.value }));
-                  }}
+                  onChange={(e) => handleInputChange("investorId", e.target.value)}
                   style={{
                     width: "230px",
                     height: "42px",
@@ -571,7 +635,7 @@ export function UpdatePaymentModal({ isOpen, onClose, onSubmit }: UpdatePaymentM
                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                  
                  {showPaymentMethodDropdown && (
-                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                   <div className="payment-method-dropdown absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                      {paymentMethods.map((method) => (
                        <div
                          key={method.value}
