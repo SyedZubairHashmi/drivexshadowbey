@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Investor } from '@/lib/models';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/investors/[id] - Get a specific investor by ID
 export async function GET(
@@ -10,7 +11,16 @@ export async function GET(
   try {
     await connectDB();
     
-    const investor = await Investor.findById(params.id).lean();
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const investor = await Investor.findOne({ _id: params.id, companyId }).lean();
 
     if (!investor) {
       return NextResponse.json(
@@ -41,10 +51,19 @@ export async function PUT(
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const body = await request.json();
     
-    // Check if investor exists
-    const existingInvestor = await Investor.findById(params.id);
+    // Check if investor exists and belongs to the company
+    const existingInvestor = await Investor.findOne({ _id: params.id, companyId });
     if (!existingInvestor) {
       return NextResponse.json(
         { success: false, error: 'Investor not found' },
@@ -56,11 +75,11 @@ export async function PUT(
     if (body.batchNo && body.batchNo !== existingInvestor.batchNo) {
       const Batch = (await import('@/lib/models')).Batch;
       
-      // Check if new batch exists
-      const newBatch = await Batch.findOne({ batchNo: body.batchNo });
+      // Check if new batch exists and belongs to the company
+      const newBatch = await Batch.findOne({ batchNo: body.batchNo, companyId });
       if (!newBatch) {
         return NextResponse.json(
-          { success: false, error: `Batch with number "${body.batchNo}" not found. Please create the batch first.` },
+          { success: false, error: `Batch with number "${body.batchNo}" not found for your company. Please create the batch first.` },
           { status: 404 }
         );
       }
@@ -126,8 +145,17 @@ export async function DELETE(
   try {
     await connectDB();
     
-    // Check if investor exists
-    const investor = await Investor.findById(params.id);
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    // Check if investor exists and belongs to the company
+    const investor = await Investor.findOne({ _id: params.id, companyId });
     if (!investor) {
       return NextResponse.json(
         { success: false, error: 'Investor not found' },

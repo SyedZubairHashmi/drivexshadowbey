@@ -18,6 +18,12 @@ interface BatchCarsSectionProps {
   isExpanded?: boolean;
   onToggle?: () => void;
   isLatestBatch?: boolean;
+  batchData?: {
+    _id: string;
+    batchNo: string;
+    countryOfOrigin: string;
+    flagImage: string;
+  };
 }
 
 export function BatchCarsSection({ 
@@ -26,7 +32,8 @@ export function BatchCarsSection({
   cars, 
   isExpanded: externalIsExpanded,
   onToggle: externalOnToggle,
-  isLatestBatch
+  isLatestBatch,
+  batchData
 }: BatchCarsSectionProps) {
   const router = useRouter();
 
@@ -67,6 +74,7 @@ export function BatchCarsSection({
         onToggle={handleToggle}
         batchNumber={batchNumber}
         isLatestBatch={isLatestBatch}
+        batchData={batchData}
       />
 
       {/* Table with smooth transition */}

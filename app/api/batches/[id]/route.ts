@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Batch } from '@/lib/models';
 import { CreateBatchInput } from '@/lib/models/types';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/batches/[id] - Get a specific batch by ID
 export async function GET(
@@ -11,7 +12,16 @@ export async function GET(
   try {
     await connectDB();
     
-    const batch = await Batch.findById(params.id)
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const batch = await Batch.findOne({ _id: params.id, companyId })
       .populate('investors', 'name emailAddress investorId investAmount percentageShare amountPaid remainingAmount')
       .populate('cars', 'carName company status')
       .lean();
@@ -45,10 +55,19 @@ export async function PUT(
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const body: Partial<CreateBatchInput> = await request.json();
     
-    // Check if batch exists
-    const existingBatch = await Batch.findById(params.id);
+    // Check if batch exists and belongs to the company
+    const existingBatch = await Batch.findOne({ _id: params.id, companyId });
     if (!existingBatch) {
       return NextResponse.json(
         { success: false, error: 'Batch not found' },
@@ -56,16 +75,17 @@ export async function PUT(
       );
     }
 
-    // Check if batch number is being updated and if it already exists
+    // Check if batch number is being updated and if it already exists for this company
     if (body.batchNo && body.batchNo !== existingBatch.batchNo) {
       const duplicateBatch = await Batch.findOne({ 
         batchNo: body.batchNo,
+        companyId,
         _id: { $ne: params.id }
       });
       
       if (duplicateBatch) {
         return NextResponse.json(
-          { success: false, error: 'Batch with this number already exists' },
+          { success: false, error: 'Batch with this number already exists for your company' },
           { status: 409 }
         );
       }
@@ -121,7 +141,16 @@ export async function DELETE(
   try {
     await connectDB();
     
-    const deletedBatch = await Batch.findByIdAndDelete(params.id);
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const deletedBatch = await Batch.findOneAndDelete({ _id: params.id, companyId });
     
     if (!deletedBatch) {
       return NextResponse.json(

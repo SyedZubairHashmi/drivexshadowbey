@@ -1,39 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import User from '@/lib/models/User';
+import Company from '@/lib/models/Company';
 
-// POST /api/auth/validate-pin - Validate user PIN
+// POST /api/auth/validate-pin - Validate company password
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
-    const { email, pin } = await request.json();
+    const { email, password } = await request.json();
     
     // Validate required fields
-    if (!email || !pin) {
+    if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Email and PIN are required' },
+        { success: false, error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find company by email
+    const company = await Company.findOne({ companyEmail: email.toLowerCase() });
 
-    if (!user) {
+    if (!company) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Company not found' },
         { status: 404 }
       );
     }
 
-    // Check if PIN matches (case-insensitive)
-    const isValid = user.pin.toLowerCase() === pin.toLowerCase();
+    // Check if password matches (case-insensitive)
+    const isValid = company.password.toLowerCase() === password.toLowerCase();
 
     return NextResponse.json({
       success: true,
       isValid: isValid,
-      message: isValid ? 'PIN is valid' : 'Invalid PIN'
+      message: isValid ? 'Password is valid' : 'Invalid password'
     });
 
   } catch (error: any) {

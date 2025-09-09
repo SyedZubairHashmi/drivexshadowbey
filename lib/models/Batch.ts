@@ -2,10 +2,12 @@ import mongoose from "mongoose";
 
 const batchSchema = new mongoose.Schema(
   {
+    // Multi-tenant field
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+    
     batchNo: {
       type: String, // like "0", "01", "02", "11"
       required: true,
-      unique: true,
       trim: true,
     },
     countryOfOrigin: {
@@ -37,8 +39,11 @@ const batchSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for quick search
-batchSchema.index({ batchNo: 1, countryOfOrigin: 1 });
+// Index for quick search - now includes companyId for multi-tenant isolation
+batchSchema.index({ companyId: 1, batchNo: 1, countryOfOrigin: 1 });
+
+// Compound unique index: batchNo must be unique within each company
+batchSchema.index({ companyId: 1, batchNo: 1 }, { unique: true });
 
 // Clear any existing model to ensure fresh schema
 if (mongoose.models.Batch) {

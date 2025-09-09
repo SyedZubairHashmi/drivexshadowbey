@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Car } from '@/lib/models';
 import { UpdateCarInput } from '@/lib/models/types';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/cars/[id] - Get a specific car by ID
 export async function GET(
@@ -11,7 +12,16 @@ export async function GET(
   try {
     await connectDB();
     
-    const car = await Car.findById(params.id).lean();
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const car = await Car.findOne({ _id: params.id, companyId }).lean();
 
     if (!car) {
       return NextResponse.json(
@@ -42,10 +52,19 @@ export async function PUT(
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const body: UpdateCarInput = await request.json();
     
-    // Check if car exists
-    const existingCar = await Car.findById(params.id);
+    // Check if car exists and belongs to the company
+    const existingCar = await Car.findOne({ _id: params.id, companyId });
     if (!existingCar) {
       return NextResponse.json(
         { success: false, error: 'Car not found' },
@@ -65,11 +84,11 @@ export async function PUT(
     if (body.batchNo && body.batchNo !== existingCar.batchNo) {
       const Batch = (await import('@/lib/models')).Batch;
       
-      // Check if new batch exists
-      const newBatch = await Batch.findOne({ batchNo: body.batchNo });
+      // Check if new batch exists and belongs to the company
+      const newBatch = await Batch.findOne({ batchNo: body.batchNo, companyId });
       if (!newBatch) {
         return NextResponse.json(
-          { success: false, error: `Batch with number "${body.batchNo}" not found. Please create the batch first.` },
+          { success: false, error: `Batch with number "${body.batchNo}" not found for your company. Please create the batch first.` },
           { status: 404 }
         );
       }
@@ -135,8 +154,17 @@ export async function DELETE(
   try {
     await connectDB();
     
-    // Check if car exists
-    const car = await Car.findById(params.id);
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    // Check if car exists and belongs to the company
+    const car = await Car.findOne({ _id: params.id, companyId });
     if (!car) {
       return NextResponse.json(
         { success: false, error: 'Car not found' },

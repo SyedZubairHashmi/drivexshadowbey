@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Customer from '@/lib/models/Customer';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/customers - Get all customers with optional filtering
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
@@ -14,8 +24,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: any = {};
+    // Build filter object - always filter by companyId for multi-tenant isolation
+    const filter: any = { companyId };
     
     if (search) {
       filter.$or = [
@@ -65,6 +75,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const body = await request.json();
     
@@ -123,20 +142,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if customer with same chassis number already exists
+    // Check if customer with same chassis number already exists for this company
     const existingCustomer = await Customer.findOne({ 
+      companyId,
       'vehicle.chassisNumber': body.vehicle.chassisNumber 
     });
 
     if (existingCustomer) {
       return NextResponse.json(
-        { success: false, error: 'Customer with this chassis number already exists' },
+        { success: false, error: 'Customer with this chassis number already exists for your company' },
         { status: 409 }
       );
     }
 
     // Create new customer
     const customer = new Customer({
+      companyId,
       vehicle: {
         companyName: body.vehicle.companyName,
         model: body.vehicle.model,

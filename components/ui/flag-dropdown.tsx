@@ -14,9 +14,10 @@ interface FlagDropdownProps {
   onSelect?: (country: { name: string; flag: string; code: string; rate: number }) => void;
   selectedCountry?: { name: string; flag: string; code: string; rate: number } | null;
   className?: string;
+  hideOtherFlags?: boolean; // New prop to hide other flags when one is selected
 }
 
-export default function FlagDropdown({ onSelect, selectedCountry, className = "" }: FlagDropdownProps) {
+export default function FlagDropdown({ onSelect, selectedCountry, className = "", hideOtherFlags = false }: FlagDropdownProps) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (country: { name: string; flag: string; code: string; rate: number }) => {
@@ -70,7 +71,16 @@ export default function FlagDropdown({ onSelect, selectedCountry, className = ""
       {open && (
         <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px]">
           <div className="py-1">
-            {countries.map((country) => (
+            {countries
+              .filter(country => {
+                // If hideOtherFlags is true and a country is selected, only show the selected country
+                if (hideOtherFlags && selectedCountry) {
+                  return country.name === selectedCountry.name;
+                }
+                // Otherwise show all countries
+                return true;
+              })
+              .map((country) => (
               <button
                 key={country.name}
                 type="button"

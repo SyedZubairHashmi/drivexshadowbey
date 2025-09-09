@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import SuccessPopupCard from "@/components/ui/success-popup-card";
+import CompanyDropdown from "@/components/ui/company-dropdown";
 import { useEffect, useState, Suspense } from "react";
 import { carAPI, customerAPI } from "@/lib/api";
 import { Plus, X, ArrowLeft, Upload, FileText, ChevronDown, Search, Filter } from "lucide-react";
@@ -196,11 +197,31 @@ function SoldCarsContent() {
   }, [formData.companyName, formData.model, availableCars]);
 
   const handleInputChange = (field: keyof SoldCarFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // If company name or model changes, show chassis dropdown
-    if (field === 'companyName' || field === 'model') {
-      setShowChassisDropdown(true);
+    // Handle different field changes with single setFormData call
+    if (field === 'companyName') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: value,
+        model: '',
+        chassisNumber: ''
+      }));
+      setShowChassisDropdown(false);
+    } else if (field === 'model') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: value,
+        chassisNumber: ''
+      }));
+      setShowChassisDropdown(false);
+    } else if (field === 'chassisNumber') {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      // If chassis number changes, try to auto-fill model
+      if (value.trim()) {
+        handleChassisAutoFill(value.trim());
+      }
+    } else {
+      // For all other fields, just update the field
+      setFormData(prev => ({ ...prev, [field]: value }));
     }
   };
 
@@ -270,8 +291,44 @@ function SoldCarsContent() {
 
   // Handle chassis number selection
   const handleChassisSelection = (chassisNumber: string) => {
-    setFormData(prev => ({ ...prev, chassisNumber }));
+    // Find the car with this chassis number
+    const car = availableCars.find((car: any) => 
+      (car.chassisNumber || car.chasisNumber)?.toLowerCase() === chassisNumber.toLowerCase()
+    );
+    
+    setFormData(prev => ({
+      ...prev,
+      chassisNumber,
+      companyName: prev.companyName || car?.company || car?.companyName || '',
+      model: prev.model || car?.manufacturingYear?.toString() || ''
+    }));
     setShowChassisDropdown(false);
+  };
+
+  // Handle chassis auto-fill when user types chassis number
+  const handleChassisAutoFill = (chassisNumber: string) => {
+    // Find the car with this chassis number
+    const car = availableCars.find((car: any) => 
+      (car.chassisNumber || car.chasisNumber)?.toLowerCase() === chassisNumber.toLowerCase()
+    );
+    
+    if (car) {
+      // Only auto-fill if the fields are actually empty to prevent loops
+      setFormData(prev => {
+        const needsUpdate = 
+          (!prev.companyName && (car.company || car.companyName)) ||
+          (!prev.model && car.manufacturingYear);
+        
+        if (needsUpdate) {
+          return {
+            ...prev,
+            companyName: prev.companyName || car.company || car.companyName || '',
+            model: prev.model || car.manufacturingYear?.toString() || ''
+          };
+        }
+        return prev;
+      });
+    }
   };
 
   const handleAmountChange = (field: 'salePrice' | 'paidAmount', value: string) => {
@@ -476,12 +533,10 @@ function SoldCarsContent() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-black mb-2">Company</label>
-            <Input
-              type="text"
-              placeholder="Enter Company Name"
+            <CompanyDropdown
               value={formData.companyName}
-              onChange={(e) => handleInputChange('companyName', e.target.value)}
-              className="placeholder-custom text-sm"
+              onChange={(value) => handleInputChange('companyName', value)}
+              placeholder="Enter Company Name"
               style={{
                 width: '100%',
                 height: '42px',
@@ -498,10 +553,10 @@ function SoldCarsContent() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Model</label>
+            <label className="block text-sm font-medium text-black mb-2">Manufacturing Year</label>
             <Input
               type="text"
-              placeholder="Enter Model"
+              placeholder="Manufacturing Year"
               value={formData.model}
               onChange={(e) => handleInputChange('model', e.target.value)}
               className="placeholder-custom text-sm"
@@ -524,26 +579,26 @@ function SoldCarsContent() {
         <div>
           <label className="block text-sm font-medium text-black mb-2">Chassis Number</label>
           <div className="relative">
-          <Input
-            type="text"
-            placeholder="Enter Chassis number"
-            value={formData.chassisNumber}
-            onChange={(e) => handleInputChange('chassisNumber', e.target.value)}
-              onClick={() => setShowChassisDropdown(!showChassisDropdown)}
-              className="placeholder-custom text-sm cursor-pointer"
-            style={{
-              width: '100%',
-              height: '42px',
-              borderRadius: '8px',
-              opacity: 1,
-              gap: '12px',
-              border: '1px solid #0000003D',
-              paddingTop: '10px',
-              paddingRight: '12px',
-              paddingBottom: '10px',
-              paddingLeft: '12px'
-            }}
-          />
+            <Input
+              type="text"
+              placeholder="Enter Chassis number"
+              value={formData.chassisNumber}
+              onChange={(e) => handleInputChange('chassisNumber', e.target.value)}
+              onFocus={() => setShowChassisDropdown(true)}
+              className="placeholder-custom text-sm"
+              style={{
+                width: '100%',
+                height: '42px',
+                borderRadius: '8px',
+                opacity: 1,
+                gap: '12px',
+                border: '1px solid #0000003D',
+                paddingTop: '10px',
+                paddingRight: '12px',
+                paddingBottom: '10px',
+                paddingLeft: '12px'
+              }}
+            />
             <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             
             {showChassisDropdown && filteredCars.length > 0 && (

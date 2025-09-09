@@ -11,6 +11,9 @@ const amountWithRateSchema = new mongoose.Schema(
 
 const carSchema = new mongoose.Schema(
   {
+    // Multi-tenant field
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+    
     // Basic Car Information
     carName: { type: String, required: true, trim: true },
     company: { type: String, required: true, trim: true },
@@ -22,7 +25,7 @@ const carSchema = new mongoose.Schema(
     },
 
     engineNumber: { type: String, required: true, trim: true },
-    chasisNumber: { type: String, required: true, trim: true , unique: true},
+    chasisNumber: { type: String, required: true, trim: true },
     auctionGrade: { type: Number, required: true, min: 3, max: 6 }, // Updated to support 3-6 range
     importYear: {
       type: Number,
@@ -163,6 +166,9 @@ carSchema.virtual("totalCost").get(function () {
 //     next();
 //   }
 // });
+
+// Compound unique index: chasisNumber must be unique within each company
+carSchema.index({ companyId: 1, chasisNumber: 1 }, { unique: true });
 
 // Force model recompilation to ensure latest schema
 if (mongoose.models.Car) {

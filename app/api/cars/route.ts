@@ -4,6 +4,7 @@ import { Car } from '@/lib/models';
 import { CreateCarInput } from '@/lib/models/types';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // Helper function to save uploaded files
 async function saveUploadedFile(file: File, folder: string): Promise<string> {
@@ -35,6 +36,15 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const { searchParams } = new URL(request.url);
     const batchNo = searchParams.get('batchNo');
     const status = searchParams.get('status');
@@ -45,8 +55,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: any = {};
+    // Build filter object - always filter by companyId for multi-tenant isolation
+    const filter: any = { companyId };
     
     if (batchNo) {
       filter.batchNo = batchNo;
@@ -106,6 +116,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     let body: CreateCarInput;
     let coverPhoto: File | null = null;
@@ -253,16 +272,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Find the batch by batch number and add car to it
+    // Find the batch by batch number and companyId
     const Batch = (await import('@/lib/models')).Batch;
-    const existingBatch = await Batch.findOne({ batchNo: body.batchNo });
+    const existingBatch = await Batch.findOne({ batchNo: body.batchNo, companyId });
     
     if (!existingBatch) {
       return NextResponse.json(
-        { success: false, error: `Batch with number "${body.batchNo}" not found. Please create the batch first.` },
+        { success: false, error: `Batch with number "${body.batchNo}" not found for your company. Please create the batch first.` },
         { status: 404 }
       );
     }
+
+    // Add companyId to the car data
+    body.companyId = companyId;
 
     // Create new car
     console.log('Creating car with data:', JSON.stringify(body, null, 2));

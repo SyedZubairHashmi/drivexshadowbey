@@ -124,24 +124,26 @@ export default function CarDetailPage({ params }: CarDetailPageProps) {
                 <ChevronLeft className="h-4 w-4 text-gray-400 rotate-180" />
                 <span className="font-medium">Car Detail</span>
               </div>
-              <Button
-                onClick={handleEdit}
-                className="flex items-center gap-2 bg-white text-black hover:bg-gray-100"
-                style={{
-                  display: 'flex',
-                  height: '50px',
-                  width:'100px',
-                  padding: '10px 10px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
-                  borderRadius: '50px',
-                  border: '1px solid #0000003D',
-                }}
-              >
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
+              {car.status !== 'sold' && (
+                <Button
+                  onClick={handleEdit}
+                  className="flex items-center gap-2 bg-white text-black hover:bg-gray-100"
+                  style={{
+                    display: 'flex',
+                    height: '50px',
+                    width:'100px',
+                    padding: '10px 10px',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '10px',
+                    borderRadius: '50px',
+                    border: '1px solid #0000003D',
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
+              )}
             </div>
           </div>
 

@@ -71,10 +71,12 @@ export function ActionMenu({ car, batchNumber, onDelete, onGenerateInvoice }: Ac
           <Eye className="mr-2 h-4 w-4" />
           View
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleEdit}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </DropdownMenuItem>
+        {car.status !== 'sold' && (
+          <DropdownMenuItem onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleGenerateInvoice}>
           <FileText className="mr-2 h-4 w-4" />
           Generate Invoice

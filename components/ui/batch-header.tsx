@@ -12,6 +12,84 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Flag SVG Components
+const FlagJP = () => (
+  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="Japan flag" role="img">
+    <path fill="#fff" d="M0 0h3v2H0z" />
+    <circle cx="1.5" cy="1" r="0.5" fill="#bc002d" />
+  </svg>
+);
+
+const FlagUS = () => (
+  <svg viewBox="0 0 7410 3900" className="h-4 w-6" aria-label="United States flag" role="img">
+    <path fill="#b22234" d="M0 0h7410v3900H0z" />
+    <path stroke="#fff" strokeWidth="300" d="M0 450h7410M0 1050h7410M0 1650h7410M0 2250h7410M0 2850h7410M0 3450h7410" />
+    <path fill="#3c3b6e" d="M0 0h2964v2100H0z" />
+  </svg>
+);
+
+const FlagGB = () => (
+  <svg viewBox="0 0 60 30" className="h-4 w-6" aria-label="United Kingdom flag" role="img">
+    <clipPath id="s"><path d="M0 0v30h60V0z"/></clipPath>
+    <clipPath id="t"><path d="M30 15h30v15zM0 0h30V0zM0 15H0v15zM30 0h30v15z"/></clipPath>
+    <g clipPath="url(#s)">
+      <path fill="#012169" d="M0 0h60v30H0z"/>
+      <path stroke="#fff" strokeWidth="6" d="M0 0l60 30m0-30L0 30"/>
+      <path stroke="#C8102E" strokeWidth="4" clipPath="url(#t)" d="M0 0l60 30m0-30L0 30"/>
+      <path stroke="#fff" strokeWidth="10" d="M30 0v30M0 15h60"/>
+      <path stroke="#C8102E" strokeWidth="6" d="M30 0v30M0 15h60"/>
+    </g>
+  </svg>
+);
+
+const FlagAU = () => (
+  <svg viewBox="0 0 60 30" className="h-4 w-6" aria-label="Australia flag" role="img">
+    <path fill="#00247d" d="M0 0h60v30H0z"/>
+    <g transform="scale(0.5)">
+      <clipPath id="a"><path d="M0 0h30v15H0z"/></clipPath>
+      <g clipPath="url(#a)">
+        <path fill="#012169" d="M0 0h30v15H0z"/>
+        <path stroke="#fff" strokeWidth="3" d="M0 0l30 15m0-15L0 15"/>
+        <path stroke="#C8102E" strokeWidth="2" d="M0 0l30 15m0-15L0 15"/>
+        <path stroke="#fff" strokeWidth="5" d="M15 0v15M0 7.5h30"/>
+        <path stroke="#C8102E" strokeWidth="3" d="M15 0v15M0 7.5h30"/>
+      </g>
+    </g>
+    <g fill="#fff">
+      <circle cx="40" cy="5" r="1.2"/>
+      <circle cx="50" cy="10" r="1.2"/>
+      <circle cx="45" cy="15" r="1.2"/>
+      <circle cx="52" cy="18" r="1.2"/>
+      <circle cx="38" cy="20" r="1.2"/>
+      <circle cx="12" cy="20" r="2" />
+    </g>
+  </svg>
+);
+
+const FlagKR = () => (
+  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="South Korea flag" role="img">
+    <path fill="#fff" d="M0 0h3v2H0z"/>
+    <g transform="translate(1.5 1)">
+      <circle r="0.5" fill="#cd2e3a"/>
+      <path d="M0-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1z" fill="#0047a0"/>
+    </g>
+    <g stroke="#000" strokeWidth="0.06">
+      <g transform="translate(.5 .45)"><path d="M-.3-.2h.6M-.3 0h.6M-.3.2h.6"/></g>
+      <g transform="translate(2.5 1.55)"><path d="M-.3-.2h.6M-.3 0h.6M-.3.2h.6"/></g>
+      <g transform="translate(.5 1.55)"><path d="M-.3-.2h.6M-.3.2h.6"/></g>
+      <g transform="translate(2.5 .45)"><path d="M-.3-.2h.6M-.3.2h.6"/></g>
+    </g>
+  </svg>
+);
+
+const FLAG_COMPONENTS: { [key: string]: React.ComponentType } = {
+  JP: FlagJP,
+  US: FlagUS,
+  GB: FlagGB,
+  AU: FlagAU,
+  KR: FlagKR,
+};
+
 interface BatchHeaderProps {
   title: string;
   onAddNew?: () => void;
@@ -20,6 +98,12 @@ interface BatchHeaderProps {
   onToggle?: () => void;
   batchNumber?: string;
   isLatestBatch?: boolean;
+  batchData?: {
+    _id: string;
+    batchNo: string;
+    countryOfOrigin: string;
+    flagImage: string;
+  };
   // Filter props
   searchTerm?: string;
   onSearchChange?: (value: string) => void;
@@ -41,6 +125,7 @@ export function BatchHeader({
   onToggle,
   batchNumber,
   isLatestBatch,
+  batchData,
   // Filter props
   searchTerm = '',
   onSearchChange,
@@ -61,8 +146,12 @@ export function BatchHeader({
     }
   };
 
+  // Get flag component and country name
+  const FlagComponent = batchData?.flagImage ? FLAG_COMPONENTS[batchData.flagImage] || FlagJP : null;
+  const countryName = batchData?.countryOfOrigin || "Unknown";
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div 
         className={`flex items-center justify-between transition-all duration-300 ease-in-out ${
           !isExpanded ? "border border-gray-300 rounded-xl p-3 gap-6" : ""
@@ -77,8 +166,43 @@ export function BatchHeader({
           border: !isExpanded ? "1px solid #0000001F" : "none",
         }}
       >
-                <div className="flex gap-6">
+        <div className="flex items-center gap-2">
+          {FlagComponent && (
+            <div 
+              style={{
+                width: "35px",
+                height: "20px",
+                borderRadius: "4px",
+                opacity: 1,
+              }}
+            >
+              <FlagComponent />
+            </div>
+          )}
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          {batchData && (
+            <div 
+              style={{
+                // width: "121px",
+                height: "25px",
+                borderRadius: "1000px",
+                opacity: 1,
+                gap: "10px",
+                paddingTop: "4px",
+                paddingRight: "13px",
+                paddingBottom: "4px",
+                paddingLeft: "13px",
+                backgroundColor: "#F3F4F6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                color: "#374151",
+              }}
+            >
+              {countryName}
+            </div>
+          )}
 
           {/* Transit Status Badge - Show if title contains "Transit" */}
           {title.includes('Transit') && (
@@ -106,10 +230,10 @@ export function BatchHeader({
             </div>
           )}
 
-            {isLatestBatch && (
+          {isLatestBatch && (
             <div
               style={{
-                width: '102px',
+                // width: '102px',
                 height: '25px',
                 borderRadius: '1000px',
                 opacity: 1,
@@ -318,7 +442,6 @@ export function BatchHeader({
                   width: "96px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis"
@@ -360,7 +483,6 @@ export function BatchHeader({
                   width: "128px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis"
@@ -399,7 +521,6 @@ export function BatchHeader({
                   width: "112px",
                   height: "41px",
                   color: "#00000099",
-                  fontWeight: "500",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis"

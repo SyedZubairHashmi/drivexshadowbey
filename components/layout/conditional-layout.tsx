@@ -14,6 +14,7 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   // List of admin/dashboard routes that should NOT use PublicLayout
   const adminRoutes = [
     '/dashboard',
+    '/admin',
     '/analytics',
     '/cars/inventory',
     '/cars/sold',

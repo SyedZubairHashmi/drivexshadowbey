@@ -6,13 +6,14 @@ const CompanySchema = new mongoose.Schema({
   ownerName: { type: String, required: true },
   companyName: { type: String, required: true },
   companyEmail: { type: String, required: true, unique: true },
-  companyPassword: { type: String, required: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['company', 'admin'], default: 'company' },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
-  city: String,
-  country: String,
-  recoveryEmail: String,
-  image: String,
-});
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'SuperAdmin' },
+  // Optional fields for company settings
+  pin: { type: String, default: '123456' },
+  recoveryEmail: { type: String },
+}, { timestamps: true });
 
 const Company = mongoose.models.Company || mongoose.model('Company', CompanySchema);
 
@@ -30,15 +31,15 @@ async function createTestCompany() {
       return;
     }
 
-    // Create test company
+    // Create test company for multi-tenant platform
     const testCompany = new Company({
       ownerName: 'Admin Owner',
       companyName: 'DriveX Deal Admin',
       companyEmail: 'admin@drivexdeal.com',
-      companyPassword: '123456',
+      password: '123456',
+      role: 'admin', // Admin role for testing
       status: 'active',
-      city: 'Karachi',
-      country: 'Pakistan',
+      pin: '123456',
       recoveryEmail: 'admin@drivexdeal.com'
     });
 
@@ -46,6 +47,7 @@ async function createTestCompany() {
     console.log('Test company created successfully:');
     console.log('Email: admin@drivexdeal.com');
     console.log('Password: 123456');
+    console.log('PIN: 123456');
     console.log('You can now use these credentials to login');
 
   } catch (error) {

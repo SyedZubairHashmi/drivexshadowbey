@@ -72,9 +72,10 @@ export default function TransitPage() {
   const currentBatches = uniqueBatches.slice(startIndex, endIndex);
 
   const handleAddNewCar = () => {
-    // Navigate to add car page with a default batch number
-    // You can change this to any default batch number you prefer
-    router.push('/cars/inventory/01/add-car');
+    // Navigate to add car page with the first available batch number
+    // If no batches available, use a default batch number
+    const defaultBatch = uniqueBatches.length > 0 ? uniqueBatches[0] : '01';
+    router.push(`/cars/inventory/${defaultBatch}/add-car`);
   };
 
   const handlePageChange = (page: number) => {

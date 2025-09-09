@@ -13,12 +13,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect to dashboard if already logged in
+  // Redirect to appropriate dashboard based on role if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else if (user.role === 'company') {
+        router.push('/dashboard');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +44,14 @@ export default function LoginPage() {
         // Use the auth hook to login
         login(data.data, rememberMe);
         
-        // Navigate to dashboard
-        router.push('/dashboard');
+        // Navigate to appropriate dashboard based on role
+        if (data.data.role === 'admin') {
+          router.push('/admin');
+        } else if (data.data.role === 'company') {
+          router.push('/dashboard');
+        } else {
+          router.push('/dashboard'); // fallback
+        }
       } else {
         setError(data.error || 'Login failed');
       }

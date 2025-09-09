@@ -13,6 +13,8 @@ import type { Car } from "@/types";
 interface Batch {
   _id: string;
   batchNo: string;
+  countryOfOrigin: string;
+  flagImage: string;
   investor: {
     name: string;
     contactNumber: string;
@@ -75,14 +77,13 @@ export default function InventoryPage() {
     }) as Car[];
   };
 
-  // Get unique batch numbers from batches data
+  // Get unique batches with their data
   const getUniqueBatches = () => {
     return batches
-      .map(batch => batch.batchNo)
       .sort((a, b) => {
         // Extract numbers from batch numbers for proper sorting
-        const numA = parseInt(a.replace(/\D/g, ''));
-        const numB = parseInt(b.replace(/\D/g, ''));
+        const numA = parseInt(a.batchNo.replace(/\D/g, ''));
+        const numB = parseInt(b.batchNo.replace(/\D/g, ''));
         return numB - numA; // Sort descending (latest first)
       });
   };
@@ -131,7 +132,7 @@ export default function InventoryPage() {
               className="text-gray-900 font-semibold"
               style={{
                 fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                fontWeight: 600,
+                fontWeight: 600,  
                 fontStyle: 'normal',
                 fontSize: '22px',
                 lineHeight: '30px',
@@ -144,7 +145,7 @@ export default function InventoryPage() {
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
-                width: '158px',
+                width: '150px',
                 height: '50px',
                 borderRadius: '50px',
                 paddingTop: '10px',
@@ -163,17 +164,18 @@ export default function InventoryPage() {
 
           {/* Batch Sections */}
           {uniqueBatches.length > 0 ? (
-            uniqueBatches.map((batchNumber, index) => {
-              const batchCars = getCarsForBatch(batchNumber);
-              console.log(`Rendering batch ${batchNumber} with ${batchCars.length} cars`);
+            uniqueBatches.map((batch, index) => {
+              const batchCars = getCarsForBatch(batch.batchNo);
+              console.log(`Rendering batch ${batch.batchNo} with ${batchCars.length} cars`);
               
               return (
                 <BatchCarsSection 
-                  key={batchNumber}
-                  batchTitle={`Batch ${batchNumber}`} 
-                  batchNumber={batchNumber} 
+                  key={batch._id}
+                  batchTitle={`Batch ${batch.batchNo}`} 
+                  batchNumber={batch.batchNo} 
                   cars={batchCars}
                   isLatestBatch={index === 0}
+                  batchData={batch}
                 />
               );
             })

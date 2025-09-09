@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface Investor extends Document {
+  companyId: mongoose.Types.ObjectId; // Multi-tenant field
   name: string;
   contactNumber: string;
   emailAddress: string;
@@ -26,6 +27,7 @@ interface Investor extends Document {
 
 const InvestorSchema: Schema = new Schema<Investor>(
   {
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
     name: { type: String, required: true },
     contactNumber: { type: String, required: true },
     emailAddress: { type: String, required: true },
@@ -74,6 +76,10 @@ InvestorSchema.pre('findOneAndUpdate', function(next) {
   }
   next();
 });
+
+// Compound unique indexes: email and investorId must be unique within each company
+InvestorSchema.index({ companyId: 1, emailAddress: 1 }, { unique: true });
+InvestorSchema.index({ companyId: 1, investorId: 1 }, { unique: true });
 
 export default mongoose.models.Investor ||
   mongoose.model<Investor>("Investor", InvestorSchema);

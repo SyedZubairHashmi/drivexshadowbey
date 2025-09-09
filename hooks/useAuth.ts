@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation';
 
 interface User {
   _id: string;
-  firstName: string;
-  secondName: string;
-  email: string;
-  city?: string;
-  country?: string;
+  role: 'company' | 'admin';
+  // Company fields
+  ownerName?: string;
+  companyName?: string;
+  companyEmail?: string;
+  status?: 'active' | 'inactive';
   recoveryEmail?: string;
-  image?: string;
+  // Admin fields
+  name?: string;
+  email?: string;
 }
 
 export function useAuth() {
@@ -47,7 +50,15 @@ export function useAuth() {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Call logout API to clear server-side cookie
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+    
+    // Clear client-side storage
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
     setUser(null);
@@ -55,11 +66,15 @@ export function useAuth() {
   };
 
   const isAuthenticated = !!user;
+  const isAdmin = user?.role === 'admin';
+  const isCompany = user?.role === 'company';
 
   return {
     user,
     loading,
     isAuthenticated,
+    isAdmin,
+    isCompany,
     login,
     logout
   };

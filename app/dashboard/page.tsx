@@ -6,6 +6,7 @@ import { HeaderStatCard } from "@/components/ui/header-stat-card";
 import { SecureStatCard } from "@/components/ui/secure-stat-card";
 import { BatchCarsSection } from "@/components/batch/BatchCarsSection";
 import { Header } from "@/components/layout/header";
+import { CompanyProtectedRoute } from "@/components/CompanyProtectedRoute";
 import { carAPI, batchAPI } from "@/lib/api";
 import type { Car } from "@/types";
 
@@ -154,7 +155,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <MainLayout>
+    <CompanyProtectedRoute>
+      <MainLayout>
       <div className="space-y-8 h-screen overflow-hidden  ">
         <div className="spacey-2">
 
@@ -221,6 +223,7 @@ export default function DashboardPage() {
               isExpanded={expandedBatch === batches[0].batchNo}
               onToggle={() => handleBatchToggle(batches[0].batchNo)}
               isLatestBatch={true}
+              batchData={batches[0]}
             />
           </div>
         ) : (
@@ -233,5 +236,6 @@ export default function DashboardPage() {
           )}
         </div>
       </MainLayout>
+    </CompanyProtectedRoute>
   );
 }

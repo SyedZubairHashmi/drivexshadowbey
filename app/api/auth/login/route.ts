@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import User from '@/lib/models/User';
+import { Admin, Company } from '@/lib/models';
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // POST /api/auth/login - Authenticate user
 export async function POST(request: NextRequest) {
@@ -8,7 +12,6 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const { email, password } = await request.json();
-    console.log(email,password)
     // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
@@ -17,67 +20,81 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
-    
-    if (!user) {
+    // Build case-insensitive matcher for exact email
+    const emailMatcher = { $regex: `^${escapeRegExp(email)}$`, $options: 'i' } as const;
+
+    // Try admin first (by email)
+    const admin = await Admin.findOne({ email: emailMatcher });
+    if (admin) {
+      if (!admin.password || admin.password !== password) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
+
+      const adminResponse = {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: 'admin' as const,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+      };
+
+      const response = NextResponse.json({ success: true, data: adminResponse, message: 'Login successful' });
+      
+      // Set user data in cookie for middleware access
+      response.cookies.set('user', JSON.stringify(adminResponse), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      
+      return response;
+    }
+
+    // Fallback: try company (by companyEmail)
+    const company = await Company.findOne({ companyEmail: emailMatcher });
+    if (!company || !company.password || company.password !== password) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // Debug logging
-    console.log('=== LOGIN DEBUG ===');
-    console.log('Email provided:', email);
-    console.log('Password provided:', password);
-    console.log('User found:', user.email);
-    console.log('User PIN in DB:', user.pin);
-    console.log('User confirmPin in DB:', user.confirmPin);
-    console.log('PIN comparison:', user.pin.toLowerCase(), '===', password.toLowerCase());
-    console.log('Full user object:', JSON.stringify(user, null, 2));
-
-    // Check if PIN exists
-    if (!user.pin) {
-      console.log('PIN is missing from user record!');
+    // Block inactive companies
+    if (company.status !== 'active') {
       return NextResponse.json(
-        { success: false, error: 'User PIN not set. Please contact administrator.' },
-        { status: 401 }
+        { success: false, error: 'Company account is inactive. Please contact support.' },
+        { status: 403 }
       );
     }
 
-    // Check if password matches pin (case-insensitive)
-    if (user.pin.toLowerCase() !== password.toLowerCase()) {
-      console.log('PIN mismatch! Login failed.');
-      console.log('Expected PIN:', user.pin);
-      console.log('Provided password:', password);
-      return NextResponse.json(
-        { success: false, error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
-
-    console.log('PIN match! Login successful.');
-
-    // Remove sensitive fields from response
-    const userResponse = {
-      _id: user._id,
-      firstName: user.firstName,
-      secondName: user.secondName,
-      email: user.email,
-      city: user.city,
-      country: user.country,
-      recoveryEmail: user.recoveryEmail,
-      image: user.image,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+    const companyResponse = {
+      _id: company._id,
+      ownerName: company.ownerName,
+      companyName: company.companyName,
+      companyEmail: company.companyEmail,
+      status: company.status,
+      recoveryEmail: company.recoveryEmail,
+      role: 'company' as const,
+      createdAt: company.createdAt,
+      updatedAt: company.updatedAt,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: userResponse,
-      message: 'Login successful'
+    const response = NextResponse.json({ success: true, data: companyResponse, message: 'Login successful' });
+    
+    // Set user data in cookie for middleware access
+    response.cookies.set('user', JSON.stringify(companyResponse), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
     });
+    
+    return response;
 
   } catch (error: any) {
     console.error('Error during login:', error);

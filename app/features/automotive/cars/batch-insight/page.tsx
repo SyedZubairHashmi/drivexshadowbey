@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Search, Filter, ChevronUp, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { batchAPI, carAPI } from "@/lib/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -605,6 +606,7 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
 }
 
 export default function BatchInsightPage() {
+  const router = useRouter();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -675,6 +677,13 @@ export default function BatchInsightPage() {
     setCurrentPage(page);
   };
 
+  const handleAddNewCar = () => {
+    // Navigate to add car page with the first available batch number
+    // If no batches available, use a default batch number
+    const defaultBatch = batches.length > 0 ? batches[0].batchNo : '01';
+    router.push(`/cars/inventory/${defaultBatch}/add-car`);
+  };
+
   if (loading) {
     return (
       <MainLayout>
@@ -726,7 +735,7 @@ export default function BatchInsightPage() {
               Batch Insights
             </h1>
             <Button 
-              
+              onClick={handleAddNewCar}
               className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               style={{
                 width: '148px',

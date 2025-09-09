@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { ArrowLeft, X, Upload, Loader2, FileText, Trash2, Image as ImageIcon, ChevronRight, ChevronDown } from "lucide-react";
-import { carAPI } from "@/lib/api";
+import { carAPI, batchAPI } from "@/lib/api";
 import FlagDropdown from "@/components/ui/flag-dropdown";
 import Image from "next/image";
 import SuccessPopupCard from "@/components/ui/success-popup-card";
@@ -112,6 +112,23 @@ function AddCarContent({ params }: AddCarPageProps) {
   });
   const [isCalculating, setIsCalculating] = useState(false);
   const [keywordInput, setKeywordInput] = useState('');
+  const [batchData, setBatchData] = useState<any>(null);
+
+  // Country to flag mapping
+  const countryToFlagMap: { [key: string]: { name: string; flag: string; code: string; rate: number } } = {
+    'United States': { name: "United States", flag: "/flags/usa.svg", code: "USD", rate: 200 },
+    'USA': { name: "United States", flag: "/flags/usa.svg", code: "USD", rate: 200 },
+    'US': { name: "United States", flag: "/flags/usa.svg", code: "USD", rate: 200 },
+    'Australia': { name: "Australia", flag: "/flags/australia.svg", code: "AUD", rate: 135 },
+    'AUS': { name: "Australia", flag: "/flags/australia.svg", code: "AUD", rate: 135 },
+    'Japan': { name: "Japan", flag: "/flags/japan.svg", code: "JPY", rate: 1.35 },
+    'JPN': { name: "Japan", flag: "/flags/japan.svg", code: "JPY", rate: 1.35 },
+    'UK': { name: "UK", flag: "/flags/uk.svg", code: "GBP", rate: 250 },
+    'United Kingdom': { name: "UK", flag: "/flags/uk.svg", code: "GBP", rate: 250 },
+    'Korea': { name: "Korea", flag: "/flags/korea.svg", code: "KRW", rate: 0.15 },
+    'South Korea': { name: "Korea", flag: "/flags/korea.svg", code: "KRW", rate: 0.15 },
+    'KOR': { name: "Korea", flag: "/flags/korea.svg", code: "KRW", rate: 0.15 }
+  };
 
   // Handle pre-filling form data when in edit mode
   useEffect(() => {
@@ -193,6 +210,95 @@ function AddCarContent({ params }: AddCarPageProps) {
     }
   }, [isEditMode, carDataParam, batchNumber]);
 
+  // Fetch batch data to get country of origin and set flag
+  useEffect(() => {
+    const fetchBatchData = async () => {
+      try {
+        const response = await batchAPI.getByBatchNo(batchNumber);
+        if (response.success && response.data && response.data.length > 0) {
+          const batch = response.data[0];
+          setBatchData(batch);
+          
+          // Set flag based on batch's country of origin
+          if (batch.countryOfOrigin) {
+            const countryName = batch.countryOfOrigin;
+            const flagData = countryToFlagMap[countryName];
+            
+            if (flagData) {
+              setSelectedCountry(flagData);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching batch data:', error);
+      }
+    };
+
+    if (batchNumber) {
+      fetchBatchData();
+    }
+  }, [batchNumber]);
+
+  // Function to fetch batch data and update flag when batch number is changed in the form
+  const fetchBatchDataAndUpdateFlag = async (batchNo: string) => {
+    try {
+      const response = await batchAPI.getByBatchNo(batchNo);
+      if (response.success && response.data && response.data.length > 0) {
+        const batch = response.data[0];
+        setBatchData(batch);
+        
+        // Set flag based on batch's country of origin
+        if (batch.countryOfOrigin) {
+          const countryName = batch.countryOfOrigin;
+          const flagData = countryToFlagMap[countryName];
+          
+          if (flagData) {
+            setSelectedCountry(flagData);
+          }
+        }
+      } else {
+        // If batch not found, reset flag to default
+        setSelectedCountry(null);
+        setBatchData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching batch data for batch:', batchNo, error);
+      // Reset flag on error
+      setSelectedCountry(null);
+      setBatchData(null);
+    }
+  };
+
+  // Function to handle rate changes and auto-populate other rate fields
+  const handleRateChange = (field: string, value: string) => {
+    setIsCalculating(true);
+    
+    // List of all rate fields
+    const rateFields = [
+      'auctionPriceRate',
+      'inlandChargesRate', 
+      'containerChargesRate',
+      'auctionExpensesRate',
+      'loadingChargesRate',
+      'freightSeaRate'
+    ];
+    
+    // Create updated form data with the new rate value
+    const updatedFormData = { ...formData, [field]: value };
+    
+    // Auto-populate all other rate fields with the same value
+    rateFields.forEach(rateField => {
+      if (rateField !== field) {
+        updatedFormData[rateField] = value;
+      }
+    });
+    
+    setFormData(updatedFormData);
+    
+    // Reset calculating state after a short delay
+    setTimeout(() => setIsCalculating(false), 100);
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setIsCalculating(true);
     
@@ -205,34 +311,20 @@ function AddCarContent({ params }: AddCarPageProps) {
       processedValue = value.charAt(0).toUpperCase() + value.slice(1);
     }
     
-    // Check if this is a rate field that should sync with other rate fields
-    const rateFields = [
-      'auctionPriceRate', 'inlandChargesRate', 'containerChargesRate', 
-      'auctionExpensesRate', 'loadingChargesRate', 'freightSeaRate'
-    ];
-    
-    if (rateFields.includes(field)) {
-      // Auto-sync all rate fields when any rate field is updated
-      setFormData(prev => ({
-        ...prev,
-        auctionPriceRate: processedValue,
-        inlandChargesRate: processedValue,
-        containerChargesRate: processedValue,
-        auctionExpensesRate: processedValue,
-        loadingChargesRate: processedValue,
-        freightSeaRate: processedValue
-      }));
-    } else {
-      // Normal field update
-      setFormData(prev => ({
-        ...prev,
-        [field]: processedValue
-      }));
-    }
+    // Normal field update
+    setFormData(prev => ({
+      ...prev,
+      [field]: processedValue
+    }));
     
     // Check for duplicate chassis number when chassisNumber field is updated
     if (field === 'chassisNumber' && value.trim().length > 0) {
       checkDuplicateChassisNumber(value.trim());
+    }
+    
+    // Fetch batch data and update flag when selectedBatch field is updated
+    if (field === 'selectedBatch' && value.trim().length > 0) {
+      fetchBatchDataAndUpdateFlag(value.trim());
     }
     
     // Clear calculating status after a short delay
@@ -1379,6 +1471,7 @@ function AddCarContent({ params }: AddCarPageProps) {
           <FlagDropdown
             selectedCountry={selectedCountry}
             onSelect={handleCurrencyChange}
+            hideOtherFlags={true}
           />
         </div>
 
@@ -1431,9 +1524,7 @@ function AddCarContent({ params }: AddCarPageProps) {
     {/* Rate input - starts with 1 digit width, expands to 3 digits, then fixes */}
     <DynamicInput
       value={formData.auctionPriceRate}
-      onChange={(value) =>
-        setFormData({ ...formData, auctionPriceRate: value })
-      }
+      onChange={(value) => handleRateChange('auctionPriceRate', value)}
       maxDigits={3}
     />
 
@@ -1486,7 +1577,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input - starts with initial width, increases dynamically, fixes at 3 digits */}
                 <DynamicInput
                   value={formData.inlandChargesRate}
-                  onChange={(value) => setFormData({ ...formData, inlandChargesRate: value })}
+                  onChange={(value) => handleRateChange('inlandChargesRate', value)}
                   initialWidth={60}
                   maxDigits={3}
                 />
@@ -1537,7 +1628,7 @@ function AddCarContent({ params }: AddCarPageProps) {
                 {/* Rate input - starts with 1 digit width, expands to 3 digits, then fixes */}
                 <DynamicInput
                   value={formData.containerChargesRate}
-                  onChange={(value) => setFormData({ ...formData, containerChargesRate: value })}
+                  onChange={(value) => handleRateChange('containerChargesRate', value)}
                   maxDigits={3}
                 />
 
@@ -1608,9 +1699,7 @@ function AddCarContent({ params }: AddCarPageProps) {
       {/* Rate input - expands up to 3 digits */}
       <DynamicInput
         value={formData.auctionExpensesRate}
-        onChange={(value) =>
-          setFormData({ ...formData, auctionExpensesRate: value })
-        }
+        onChange={(value) => handleRateChange('auctionExpensesRate', value)}
         maxDigits={3}
       />
 
@@ -1672,9 +1761,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
       <DynamicInput
         value={formData.loadingChargesRate}
-        onChange={(value) =>
-          setFormData({ ...formData, loadingChargesRate: value })
-        }
+        onChange={(value) => handleRateChange('loadingChargesRate', value)}
         maxDigits={3}
       />
 
@@ -1730,9 +1817,7 @@ function AddCarContent({ params }: AddCarPageProps) {
 
       <DynamicInput
         value={formData.freightSeaRate}
-        onChange={(value) =>
-          setFormData({ ...formData, freightSeaRate: value })
-        }
+        onChange={(value) => handleRateChange('freightSeaRate', value)}
         maxDigits={3}
       />
 
@@ -2615,15 +2700,7 @@ function AddCarContent({ params }: AddCarPageProps) {
         {/* Simple Header */}
 
         <div className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--Black-black-500, #000)' }}>
-          {batchNumber ? (
-            <>
-              <span className="text-gray-300">Batch {batchNumber}</span>
-              <ChevronRight className="h-5 w-5 text-gray-300" />
-              <span>Add New Car</span>
-            </>
-          ) : (
-            'Add New Car'
-          )}
+          <span>Add New Car</span>
         </div>
 
 

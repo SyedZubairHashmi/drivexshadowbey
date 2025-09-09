@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Batch } from '@/lib/models';
 import { CreateBatchInput } from '@/lib/models/types';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const { searchParams } = new URL(request.url);
     const batchNo = searchParams.get('batchNo');
@@ -14,8 +24,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: any = {};
+    // Build filter object - always filter by companyId for multi-tenant isolation
+    const filter: any = { companyId };
     
     if (batchNo) {
       filter.batchNo = batchNo;
@@ -62,6 +72,15 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const body: CreateBatchInput = await request.json();
     
     console.log('Received batch data:', JSON.stringify(body, null, 2));
@@ -76,17 +95,18 @@ export async function POST(request: NextRequest) {
 
     console.log('Validation passed, creating batch...');
 
-    // Check if batch number already exists
-    const existingBatch = await Batch.findOne({ batchNo: body.batchNo });
+    // Check if batch number already exists for this company
+    const existingBatch = await Batch.findOne({ batchNo: body.batchNo, companyId });
     if (existingBatch) {
       return NextResponse.json(
-        { success: false, error: 'Batch with this number already exists' },
+        { success: false, error: 'Batch with this number already exists for your company' },
         { status: 409 }
       );
     }
 
     // Create new batch with explicit data mapping
     const batchData = {
+      companyId,
       batchNo: body.batchNo,
       countryOfOrigin: body.countryOfOrigin,
       flagImage: body.flagImage,

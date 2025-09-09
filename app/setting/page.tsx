@@ -10,19 +10,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Edit, ChevronRight, Home, Settings, User, Bell, LogOut, Save } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { userAPI } from "@/lib/api"
+import { companyAPI } from "@/lib/api"
+import { useAuth } from "@/hooks/useAuth"
 
-interface UserProfile {
+interface CompanyProfile {
   _id: string;
-  firstName: string;
-  secondName: string;
-  email: string;
-  city: string;
-  country: string;
+  ownerName: string;
+  companyName: string;
+  companyEmail: string;
+  password: string;
   pin: string;
-  confirmPin: string;
   recoveryEmail: string;
-  image?: string;
+  role: 'company';
+  status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
 }
@@ -30,15 +30,15 @@ interface UserProfile {
 export default function ProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [userId, setUserId] = useState<string>("");
+  const [company, setCompany] = useState<CompanyProfile | null>(null);
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState({
-    firstName: "",
-    secondName: "",
-    email: "",
-    city: "",
-    country: "",
+    ownerName: "",
+    companyName: "",
+    companyEmail: "",
+    password: "",
+    confirmPassword: "",
     enterPin: "",
     confirmPin: "",
     recoveryEmail: "",
@@ -51,16 +51,24 @@ export default function ProfileSettings() {
     const newErrors: {[key: string]: string} = {};
 
     // Required field validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
+    if (!formData.ownerName.trim()) {
+      newErrors.ownerName = "Owner name is required";
     }
-    if (!formData.secondName.trim()) {
-      newErrors.secondName = "Second name is required";
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = "Company name is required";
     }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    if (!formData.companyEmail.trim()) {
+      newErrors.companyEmail = "Company email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
+      newErrors.companyEmail = "Please enter a valid email address";
+    }
+
+    // Password validation
+    if (formData.password && formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long";
+    }
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     // PIN validation
@@ -80,110 +88,52 @@ export default function ProfileSettings() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Create a test user if none exists
-  const createTestUser = async () => {
-    try {
-      const testUserData = {
-        firstName: "Admin",
-        secondName: "User",
-        email: "admin@drivexdeal.com",
-        city: "Karachi",
-        country: "Pakistan",
-        pin: "123456",
-        confirmPin: "123456",
-        recoveryEmail: "admin@drivexdeal.com"
-      };
-
-      const response = await userAPI.create(testUserData);
-      
-      if (response.success) {
-        setUserId(response.data._id);
-        setUser(response.data);
-        
-        // Don't populate form with test user data - keep fields empty
-        setFormData({
-          firstName: "",
-          secondName: "",
-          email: "",
-          city: "",
-          country: "",
-          enterPin: "",
-          confirmPin: "",
-          recoveryEmail: "",
-        });
-        
-        toast({
-          title: "Success",
-          description: "Test user created successfully"
-        });
-      } else {
-        console.error("Failed to create test user:", response.error);
-      }
-    } catch (error: any) {
-      console.error("Error creating test user:", error);
-    }
-  };
-
-  // Load user data
-  const loadUserData = async () => {
+  // Fetch company data
+  const fetchCompanyData = async () => {
     try {
       setLoading(true);
       
-      // First, try to get all users to see if any exist
-      const usersResponse = await userAPI.getAll({ limit: 1 });
+      if (!user || user.role !== 'company') {
+        console.error("No company user found");
+        setLoading(false);
+        return;
+      }
+
+      // Fetch company data using the logged-in user's ID
+      const response = await companyAPI.getById(user._id);
       
-      if (usersResponse.success && usersResponse.data.length > 0) {
-        // Use the first user found
-        const firstUser = usersResponse.data[0];
-        setUserId(firstUser._id);
-        
-        // Now get the full user data
-        const response = await userAPI.getById(firstUser._id);
-        
-        if (response.success) {
-          const userData = response.data;
-          setUser(userData);
-          
-          // Populate form with existing user data
-          setFormData({
-            firstName: userData.firstName || "",
-            secondName: userData.secondName || "",
-            email: userData.email || "",
-            city: userData.city || "",
-            country: userData.country || "",
-            enterPin: "",
-            confirmPin: "",
-            recoveryEmail: userData.recoveryEmail || "",
-          });
-          
-          // Log current PIN for debugging (remove in production)
-          console.log("Current user PIN:", userData.pin ? userData.pin : "Not set");
-          console.log("Current user confirmPin:", userData.confirmPin ? userData.confirmPin : "Not set");
-          console.log("Full user data loaded:", userData);
-        } else {
-          console.error("Failed to load user:", response.error);
-          // Create a test user if loading fails
-          await createTestUser();
-        }
+      if (response.success) {
+        setCompany(response.data);
+        setFormData({
+          ownerName: response.data.ownerName || "",
+          companyName: response.data.companyName || "",
+          companyEmail: response.data.companyEmail || "",
+          password: "",
+          confirmPassword: "",
+          enterPin: "",
+          confirmPin: "",
+          recoveryEmail: response.data.recoveryEmail || "",
+        });
       } else {
-        // No users exist, create a test user
-        console.log("No users found, creating test user...");
-        await createTestUser();
+        console.error("Failed to fetch company data:", response.error);
+        toast({
+          title: "Error",
+          description: "Failed to load company data",
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
-      console.error("Error loading user data:", error);
+      console.error("Error fetching company data:", error);
       toast({
         title: "Error",
-        description: error.message || "An error occurred while loading profile",
+        description: "An error occurred while loading company data",
         variant: "destructive"
       });
-      
-      // Try to create a test user as fallback
-      await createTestUser();
     } finally {
       setLoading(false);
     }
   };
+
 
   // Save profile settings
   const saveProfile = async () => {
@@ -196,10 +146,10 @@ export default function ProfileSettings() {
       return;
     }
 
-    if (!userId) {
+    if (!user || user.role !== 'company') {
       toast({
         title: "Error",
-        description: "No user ID available. Please refresh the page.",
+        description: "No company user found. Please login as a company.",
         variant: "destructive"
       });
       return;
@@ -208,59 +158,57 @@ export default function ProfileSettings() {
     try {
       setSaving(true);
       
-      const updateData = {
-        firstName: formData.firstName.trim(),
-        secondName: formData.secondName.trim(),
-        email: formData.email.trim(),
-        city: formData.city.trim(),
-        country: formData.country.trim(),
+      const updateData: any = {
+        ownerName: formData.ownerName.trim(),
+        companyName: formData.companyName.trim(),
+        companyEmail: formData.companyEmail.trim(),
         recoveryEmail: formData.recoveryEmail.trim() || undefined,
       };
+
+      // Add password if provided
+      if (formData.password.trim()) {
+        updateData.password = formData.password.trim();
+      }
       
-      console.log("Updating user with ID:", userId);
+      console.log("Updating company with ID:", user._id);
       console.log("Update data:", updateData);
       
-      const response = await userAPI.update(userId, updateData);
+      const response = await companyAPI.update(user._id, updateData);
 
       if (response.success) {
-        // Update local user state
-        setUser(response.data);
+        // Update local company state
+        setCompany(response.data);
         
         // Show alert message
         alert("Settings saved successfully!");
         
-        // Empty all input fields after successful save
-        setFormData({
-          firstName: "",
-          secondName: "",
-          email: "",
-          city: "",
-          country: "",
-          enterPin: "",
-          confirmPin: "",
-          recoveryEmail: "",
-        });
+        // Clear password fields after successful save
+        setFormData(prev => ({
+          ...prev,
+          password: "",
+          confirmPassword: "",
+        }));
         
         // Clear any errors
         setErrors({});
         
         toast({
           title: "Success",
-          description: "Profile updated successfully"
+          description: "Company profile updated successfully"
         });
       } else {
         console.error("Update failed:", response.error);
         toast({
           title: "Error",
-          description: response.error || "Failed to update profile",
+          description: response.error || "Failed to update company profile",
           variant: "destructive"
         });
       }
     } catch (error: any) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating company profile:", error);
       toast({
         title: "Error",
-        description: error.message || "An error occurred while updating profile",
+        description: error.message || "An error occurred while updating company profile",
         variant: "destructive"
       });
     } finally {
@@ -270,10 +218,10 @@ export default function ProfileSettings() {
 
   // Save security pin
   const saveSecurityPin = async () => {
-    if (!userId) {
+    if (!user || user.role !== 'company') {
       toast({
         title: "Error",
-        description: "No user ID available. Please refresh the page.",
+        description: "No company user found. Please login as a company.",
         variant: "destructive"
       });
       return;
@@ -314,37 +262,35 @@ export default function ProfileSettings() {
       
       const newPin = formData.enterPin.trim();
       console.log("=== PIN UPDATE DEBUG ===");
-      console.log("User ID:", userId);
+      console.log("Company ID:", user._id);
       console.log("New PIN:", newPin);
       console.log("Confirm PIN:", formData.confirmPin);
       
-      // First, let's check what the current user data looks like
-      const currentUserResponse = await userAPI.getById(userId);
-      console.log("Current user data before update:", currentUserResponse);
+      // First, let's check what the current company data looks like
+      const currentCompanyResponse = await companyAPI.getById(user._id);
+      console.log("Current company data before update:", currentCompanyResponse);
       
       // Now update the PIN
       const updateData = {
-        pin: newPin,
-        confirmPin: newPin
+        pin: newPin
       };
       
       console.log("Sending update data:", updateData);
-      console.log("User email before update:", user?.email);
-      console.log("User recoveryEmail before update:", user?.recoveryEmail);
+      console.log("Company email before update:", company?.companyEmail);
+      console.log("Company recoveryEmail before update:", company?.recoveryEmail);
       
-      const response = await userAPI.update(userId, updateData);
+      const response = await companyAPI.update(user._id, updateData);
       
       console.log("PIN update response:", response);
 
       if (response.success) {
-        console.log("PIN update successful! New user data:", response.data);
+        console.log("PIN update successful! New company data:", response.data);
         
-        // Update the local user state immediately
-        if (user) {
-          setUser({
-            ...user,
-            pin: newPin,
-            confirmPin: newPin
+        // Update the local company state immediately
+        if (company) {
+          setCompany({
+            ...company,
+            pin: newPin
           });
         }
         
@@ -356,13 +302,16 @@ export default function ProfileSettings() {
         }));
         setErrors({});
         
+        // Show alert message
+        alert(`Security PIN updated successfully to: ${newPin}`);
+        
         toast({
           title: "Success",
           description: `Security PIN updated successfully to: ${newPin}`
         });
         
         // Force a re-render by updating a timestamp
-        setUser(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
+        setCompany(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
         
         // Test: Try to verify the PIN was saved by making a test login request
         console.log("Testing PIN update with login API...");
@@ -371,7 +320,7 @@ export default function ProfileSettings() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              email: user?.email || 'admin@drivexdeal.com', 
+              email: company?.companyEmail || user?.companyEmail, 
               password: newPin 
             }),
           });
@@ -407,10 +356,10 @@ export default function ProfileSettings() {
 
   // Reset security pin
   const resetSecurityPin = async () => {
-    if (!userId) {
+    if (!user || user.role !== 'company') {
       toast({
         title: "Error",
-        description: "No user ID available. Please refresh the page.",
+        description: "No company user found. Please login as a company.",
         variant: "destructive"
       });
       return;
@@ -420,22 +369,20 @@ export default function ProfileSettings() {
       setSaving(true);
       
       console.log("=== RESET PIN DEBUG ===");
-      console.log("Resetting PIN for user:", userId);
+      console.log("Resetting PIN for company:", user._id);
       
-      const response = await userAPI.update(userId, {
-        pin: "",
-        confirmPin: ""
+      const response = await companyAPI.update(user._id, {
+        pin: ""
       });
 
       if (response.success) {
-        console.log("PIN reset successful! New user data:", response.data);
+        console.log("PIN reset successful! New company data:", response.data);
         
-        // Update the local user state immediately
-        if (user) {
-          setUser({
-            ...user,
-            pin: "",
-            confirmPin: ""
+        // Update the local company state immediately
+        if (company) {
+          setCompany({
+            ...company,
+            pin: ""
           });
         }
         
@@ -445,13 +392,17 @@ export default function ProfileSettings() {
           confirmPin: ""
         }));
         setErrors({});
+        
+        // Show alert message
+        alert("Security PIN reset successfully");
+        
         toast({
           title: "Success",
           description: "Security PIN reset successfully"
         });
         
         // Force a re-render
-        setUser(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
+        setCompany(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : null);
       } else {
         console.error("PIN reset failed:", response.error);
         toast({
@@ -472,10 +423,10 @@ export default function ProfileSettings() {
     }
   };
 
-  // Load user data on component mount
+  // Load company data on component mount
   useEffect(() => {
-    loadUserData();
-  }, []);
+    fetchCompanyData();
+  }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -510,9 +461,9 @@ export default function ProfileSettings() {
         </div>
 
         {/* Debug Info */}
-        {userId && (
+        {user && (
           <div className="text-xs text-gray-500">
-            {/* User ID: {userId} */}
+            {/* Company ID: {user._id} */}
           </div>
         )}
 
@@ -527,11 +478,11 @@ export default function ProfileSettings() {
                   <div className="relative mb-4">
                     <Avatar className="w-28 h-28 border-0 shadow-none">
                       <AvatarImage
-                        src={user?.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/setting.PNG-ITZDSniVv3RJYHvsUU1aKz6igsT5NP.png"}
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/setting.PNG-ITZDSniVv3RJYHvsUU1aKz6igsT5NP.png"
                         alt="Profile"
                       />
                       <AvatarFallback className="bg-green-600 text-white text-xl border-0">
-                        {`${user?.firstName?.[0] || ''}${user?.secondName?.[0] || ''}`.toUpperCase() || 'RA'}
+                        {`${company?.ownerName?.[0] || ''}${company?.companyName?.[0] || ''}`.toUpperCase() || 'CO'}
                       </AvatarFallback>
                     </Avatar>
                     <Button
@@ -542,9 +493,9 @@ export default function ProfileSettings() {
                     </Button>
                   </div>
                   <h2 className="text-xl font-semibold text-foreground">
-                    {user ? `${user.firstName} ${user.secondName}` : "Romail Ahmed"}
+                    {company ? `${company.ownerName} - ${company.companyName}` : "Company Profile"}
                   </h2>
-                  <p className="text-sm text-muted-foreground">{user?.email || "romail.ahmed120@gmail.com"}</p>
+                  <p className="text-sm text-muted-foreground">{company?.companyEmail || "company@example.com"}</p>
                 </div>
               </div>
 
@@ -556,16 +507,16 @@ export default function ProfileSettings() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1 flex flex-col">
                         <Label htmlFor="firstName" className="text-sm font-medium">
-                          First Name
+                          Owner Name
                         </Label>
                         <Input
-                          id="firstName"
-                          value={formData.firstName}
-                          onChange={(e) => handleInputChange("firstName", e.target.value)}
-                          className={`bg-white border-0 shadow-none ${errors.firstName ? 'border-red-500' : ''}`}
+                          id="ownerName"
+                          value={formData.ownerName}
+                          onChange={(e) => handleInputChange("ownerName", e.target.value)}
+                          className={`bg-white border-0 shadow-none ${errors.ownerName ? 'border-red-500' : ''}`}
                           style={{
                             borderRadius: "8px",
-                            border: errors.firstName ? "1px solid #EF4444" : "1px solid #D1D5DB",
+                            border: errors.ownerName ? "1px solid #EF4444" : "1px solid #D1D5DB",
                             background: "#FFF",
                             boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
                             display: "flex",
@@ -576,22 +527,22 @@ export default function ProfileSettings() {
                             alignSelf: "stretch",
                           }}
                         />
-                        {errors.firstName && (
-                          <p className="text-xs text-red-500">{errors.firstName}</p>
+                        {errors.ownerName && (
+                          <p className="text-xs text-red-500">{errors.ownerName}</p>
                         )}
                       </div>
                       <div className="space-y-1 flex flex-col">
                         <Label htmlFor="secondName" className="text-sm font-medium">
-                          Second Name
+                          Company Name
                         </Label>
                         <Input
-                          id="secondName"
-                          value={formData.secondName}
-                          onChange={(e) => handleInputChange("secondName", e.target.value)}
-                          className={`bg-white border-0 shadow-none ${errors.secondName ? 'border-red-500' : ''}`}
+                          id="companyName"
+                          value={formData.companyName}
+                          onChange={(e) => handleInputChange("companyName", e.target.value)}
+                          className={`bg-white border-0 shadow-none ${errors.companyName ? 'border-red-500' : ''}`}
                           style={{
                             borderRadius: "8px",
-                            border: errors.secondName ? "1px solid #EF4444" : "1px solid #D1D5DB",
+                            border: errors.companyName ? "1px solid #EF4444" : "1px solid #D1D5DB",
                             background: "#FFF",
                             boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
                             display: "flex",
@@ -602,21 +553,21 @@ export default function ProfileSettings() {
                             alignSelf: "stretch",
                           }}
                         />
-                        {errors.secondName && (
-                          <p className="text-xs text-red-500">{errors.secondName}</p>
+                        {errors.companyName && (
+                          <p className="text-xs text-red-500">{errors.companyName}</p>
                         )}
                       </div>
                     </div>
 
                     {/* Email Field */}
                     <div className="space-y-1 flex flex-col">
-                        <Label htmlFor="email" className="text-sm font-medium">
-                          email
+                        <Label htmlFor="companyEmail" className="text-sm font-medium">
+                          Company Email
                         </Label>
                       <Input
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        className={`bg-white border-0 shadow-none ${errors.email ? 'border-red-500' : ''}`}
+                        value={formData.companyEmail}
+                        onChange={(e) => handleInputChange("companyEmail", e.target.value)}
+                        className={`bg-white border-0 shadow-none ${errors.companyEmail ? 'border-red-500' : ''}`}
                         style={{
                             display: "flex" ,
                             height: "42px",
@@ -625,30 +576,32 @@ export default function ProfileSettings() {
                             gap: "12px",
                             alignSelf: "stretch",
                             borderRadius: "8px",
-                            border: errors.email ? "1px solid #EF4444" : "1px solid #D1D5DB",
+                            border: errors.companyEmail ? "1px solid #EF4444" : "1px solid #D1D5DB",
                             background: "#FFF",
                             boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
                           }}
                       />
-                      {errors.email && (
-                        <p className="text-xs text-red-500">{errors.email}</p>
+                      {errors.companyEmail && (
+                        <p className="text-xs text-red-500">{errors.companyEmail}</p>
                       )}
                     </div>
 
-                    {/* Location Fields */}
+                    {/* Password Fields */}
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1 flex flex-col">
-                        <Label htmlFor="city" className="text-sm font-medium">
-                          City
+                        <Label htmlFor="password" className="text-sm font-medium">
+                          Password
                         </Label>
                         <Input
-                          id="city"
-                          value={formData.city}
-                          onChange={(e) => handleInputChange("city", e.target.value)}
-                          className="bg-white border-0 shadow-none"
+                          id="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => handleInputChange("password", e.target.value)}
+                          className={`bg-white border-0 shadow-none ${errors.password ? 'border-red-500' : ''}`}
+                          placeholder="Enter new password"
                           style={{
                             borderRadius: "8px",
-                            border: "1px solid #D1D5DB",
+                            border: errors.password ? "1px solid #EF4444" : "1px solid #D1D5DB",
                             background: "#FFF",
                             boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
                             display: "flex",
@@ -659,21 +612,26 @@ export default function ProfileSettings() {
                             alignSelf: "stretch",
                           }}
                         />
+                        {errors.password && (
+                          <p className="text-xs text-red-500">{errors.password}</p>
+                        )}
                       </div>
                       <div className="space-y-1 flex flex-col">
-                        <Label htmlFor="country" className="text-sm font-medium">
-                          Country
+                        <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                          Confirm Password
                         </Label>
                         <Input
-                          id="country"
-                          value={formData.country}
-                          onChange={(e) => handleInputChange("country", e.target.value)}
-                          className="bg-white border-0 shadow-none"
+                          id="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                          className={`bg-white border-0 shadow-none ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                          placeholder="Confirm new password"
                           style={{
                             borderRadius: "8px",
-                            border: "1px solid #D1D5DB",
+                            border: errors.confirmPassword ? "1px solid #EF4444" : "1px solid #D1D5DB",
                             background: "#FFF",
-                            boxShadow: "0 1px 2px 0 r  gba(16, 24, 40, 0.05)",
+                            boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
                             display: "flex",
                             height: "42px",
                             padding: "10px 12px",
@@ -682,12 +640,16 @@ export default function ProfileSettings() {
                             alignSelf: "stretch",
                           }}
                         />
+                        {errors.confirmPassword && (
+                          <p className="text-xs text-red-500">{errors.confirmPassword}</p>
+                        )}
                       </div>
                     </div>
 
+
                     {/* Pin Fields */}
-                    <div className="space-y-4 w-ful">
-                      <div className="space-y-1 w-full" >
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1 flex flex-col">
                         <Label htmlFor="enterPin" className="text-sm font-medium">
                           Enter Pin
                         </Label>

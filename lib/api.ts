@@ -166,6 +166,11 @@ export const batchAPI = {
     return apiRequest(`/batches/${id}`);
   },
 
+  // Get a specific batch by batch number
+  getByBatchNo: async (batchNo: string) => {
+    return apiRequest(`/batches?batchNo=${batchNo}&limit=1`);
+  },
+
   // Create a new batch
   create: async (batchData: any) => {
     return apiRequest('/batches', {
@@ -360,11 +365,12 @@ export const customerAPI = {
   },
 };
 
-// User API functions
-export const userAPI = {
-  // Get all users with optional filters
+// Company API functions (replacing userAPI)
+export const companyAPI = {
+  // Get all companies with optional filters
   getAll: async (filters?: {
     search?: string;
+    status?: 'active' | 'inactive';
     limit?: number;
     page?: number;
   }) => {
@@ -378,55 +384,58 @@ export const userAPI = {
     }
     
     const queryString = params.toString();
-    const endpoint = `/users${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/companies${queryString ? `?${queryString}` : ''}`;
     
     return apiRequest(endpoint);
   },
 
-  // Get a specific user by ID
+  // Get a specific company by ID
   getById: async (id: string) => {
-    return apiRequest(`/users/${id}`);
+    return apiRequest(`/companies/${id}`);
   },
 
-  // Create a new user
-  create: async (userData: any) => {
-    return apiRequest('/users', {
+  // Create a new company
+  create: async (companyData: any) => {
+    return apiRequest('/companies', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(companyData),
     });
   },
 
-  // Update a user
-  update: async (id: string, userData: any) => {
-    return apiRequest(`/users/${id}`, {
+  // Update a company
+  update: async (id: string, companyData: any) => {
+    return apiRequest(`/companies/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(companyData),
     });
   },
 
-  // Delete a user
+  // Delete a company
   delete: async (id: string) => {
-    return apiRequest(`/users/${id}`, {
+    return apiRequest(`/companies/${id}`, {
       method: 'DELETE',
     });
   },
 
-  // Format user data for display
-  formatUserData: (user: any) => {
+  // Update company status
+  updateStatus: async (id: string, status: 'active' | 'inactive') => {
+    return apiRequest(`/companies/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  // Format company data for display
+  formatCompanyData: (company: any) => {
     return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      profilePicture: user.profilePicture,
-      phone: user.phone,
-      address: user.address,
-      department: user.department,
-      isActive: user.isActive,
-      lastLogin: user.lastLogin,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      id: company._id,
+      ownerName: company.ownerName,
+      companyName: company.companyName,
+      companyEmail: company.companyEmail,
+      status: company.status,
+      recoveryEmail: company.recoveryEmail,
+      createdAt: company.createdAt,
+      updatedAt: company.updatedAt,
     };
   },
 };

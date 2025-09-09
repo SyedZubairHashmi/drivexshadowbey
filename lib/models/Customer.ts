@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 // 🔹 Interface
 export interface ICustomer extends Document {
+  companyId: mongoose.Types.ObjectId; // Multi-tenant field
   vehicle: {
     companyName: string;
     model: string;
@@ -39,10 +40,11 @@ export interface ICustomer extends Document {
 // 🔹 Schema
 const CustomerSchema: Schema = new Schema(
   {
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
     vehicle: {
       companyName: { type: String, required: true },
       model: { type: String, required: true },
-      chassisNumber: { type: String, required: true, unique: true },
+      chassisNumber: { type: String, required: true },
     },
     customer: {
       name: { type: String, required: true },
@@ -104,6 +106,9 @@ CustomerSchema.pre('findOneAndUpdate', function(next) {
   }
   next();
 });
+
+// Compound unique index: chassisNumber must be unique within each company
+CustomerSchema.index({ companyId: 1, 'vehicle.chassisNumber': 1 }, { unique: true });
 
 // 🔹 Model
 export default mongoose.models.Customer ||

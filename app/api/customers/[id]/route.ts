@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Customer from '@/lib/models/Customer';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/customers/[id] - Get a specific customer by ID
 export async function GET(
@@ -10,7 +11,16 @@ export async function GET(
   try {
     await connectDB();
     
-    const customer = await Customer.findById(params.id).lean();
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const customer = await Customer.findOne({ _id: params.id, companyId }).lean();
     
     if (!customer) {
       return NextResponse.json(
@@ -40,6 +50,15 @@ export async function PUT(
 ) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const body = await request.json();
     
@@ -96,15 +115,16 @@ export async function PUT(
       );
     }
 
-    // Check if chassis number already exists in another customer
+    // Check if chassis number already exists in another customer for this company
     const existingCustomer = await Customer.findOne({ 
+      companyId,
       'vehicle.chassisNumber': body.vehicle.chassisNumber,
       _id: { $ne: params.id }
     });
 
     if (existingCustomer) {
       return NextResponse.json(
-        { success: false, error: 'Customer with this chassis number already exists' },
+        { success: false, error: 'Customer with this chassis number already exists for your company' },
         { status: 409 }
       );
     }
@@ -195,7 +215,16 @@ export async function DELETE(
   try {
     await connectDB();
     
-    const deletedCustomer = await Customer.findByIdAndDelete(params.id);
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
+    const deletedCustomer = await Customer.findOneAndDelete({ _id: params.id, companyId });
     
     if (!deletedCustomer) {
       return NextResponse.json(

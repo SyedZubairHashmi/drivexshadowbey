@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Investor from '@/lib/models/Investor';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // POST /api/investors - Create a new investor
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
+    
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const body = await request.json();
     
@@ -86,8 +96,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if investor with same email or ID already exists
+    // Check if investor with same email or ID already exists for this company
     const existingInvestor = await Investor.findOne({
+      companyId,
       $or: [
         { emailAddress: body.emailAddress },
         { investorId: body.investorId }
@@ -96,24 +107,25 @@ export async function POST(request: NextRequest) {
 
     if (existingInvestor) {
       return NextResponse.json(
-        { success: false, error: 'Investor with this email or ID already exists' },
+        { success: false, error: 'Investor with this email or ID already exists for your company' },
         { status: 409 }
       );
     }
 
-    // Find the batch by batch number and add investor to it
+    // Find the batch by batch number and companyId
     const Batch = (await import('@/lib/models')).Batch;
-    const existingBatch = await Batch.findOne({ batchNo: body.batchNo });
+    const existingBatch = await Batch.findOne({ batchNo: body.batchNo, companyId });
     
     if (!existingBatch) {
       return NextResponse.json(
-        { success: false, error: `Batch with number "${body.batchNo}" not found. Please create the batch first.` },
+        { success: false, error: `Batch with number "${body.batchNo}" not found for your company. Please create the batch first.` },
         { status: 404 }
       );
     }
 
     // Create new investor
     const investor = new Investor({
+      companyId,
       name: body.name,
       contactNumber: body.contactNumber,
       emailAddress: body.emailAddress,
@@ -160,6 +172,15 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     
+    // Get company ID from authentication
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const { searchParams } = new URL(request.url);
     const batchNo = searchParams.get('batchNo');
     const email = searchParams.get('email');
@@ -171,8 +192,8 @@ export async function GET(request: NextRequest) {
 
     console.log('API received params:', { batchNo, email, search, name, limit, page });
 
-    // Build filter object
-    const filter: any = {};
+    // Build filter object - always filter by companyId for multi-tenant isolation
+    const filter: any = { companyId };
     
     if (batchNo) {
       filter.batchNo = batchNo;
