@@ -63,9 +63,10 @@ interface PinModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPinSubmit: (pin: string) => void;
+  isLoading?: boolean;
 }
 
-function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
+function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalProps) {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
 
@@ -82,8 +83,8 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
              <div 
          className="bg-white rounded-xl border border-gray-300 flex flex-col gap-5"
                    style={{
-            width: "550px",
-            height: "338px",
+            width: "530px",
+            height: "265px",
             top: "280px",
             left: "460px",
             borderWidth: "1px",
@@ -93,8 +94,12 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
             padding: "20px"
           }}
        >
-                 <div className="flex justify-between items-start">
-           <div></div> {/* Empty space on top left */}
+         <div className="flex justify-between items-center">
+           <h2 
+             className="text-black font-medium text-3xl"
+           >
+             Safety Alert
+           </h2>
            <button
              onClick={onClose}
              className="text-black-500 hover:text-gray-700 flex items-center justify-center"
@@ -110,38 +115,15 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
            </button>
          </div>
          
-         <h2 
-           className="text-black"
-           style={{
-             fontFamily:"Helvetica Now Display",
-             fontWeight: 500,
-             fontStyle: "normal",
-             fontSize: "30px",
-             lineHeight: "50%",
-             letterSpacing: "0%",
-             verticalAlign: "middle"
-           }}
-         >
-           Safety Alert
-         </h2>
-         
          <p 
-           className="text-black-600"
-           style={{
-             fontFamily: "Helvetica Now Display",
-             fontWeight: 400,
-             fontStyle: "normal",
-             fontSize: "18px",
-             lineHeight: "100%",
-             letterSpacing: "2%"
-           }}
+           className="text-black-600 text-lg mt-[-20px]"
          >
            Safety Pin required
          </p>
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className="block text-lg text-black-500 mb-2">
+            <label className="block text-sm text-black-500 mb-2">
               Enter your Pin Number
             </label>
             <div className="relative">
@@ -187,17 +169,25 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
           
                      <button
              type="submit"
-             className="text-white transition-colors w-full"
+             disabled={isLoading}
+             className={`text-white transition-colors w-full flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
              style={{
                height: "45px",
                maxHeight: "45px",
                gap: "15px",
-               opacity: 1,
+               opacity: isLoading ? 0.7 : 1,
                borderRadius: "12px",
                backgroundColor: "#00674F"
              }}
            >
-            Enter
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Loading...
+              </div>
+            ) : (
+              "Enter"
+            )}
           </button>
         </form>
       </div>
@@ -217,6 +207,7 @@ export function SecureStatCard({
   const { user } = useAuth();
   const [showPinModal, setShowPinModal] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEyeClick = () => {
     if (!isUnlocked) {
@@ -227,18 +218,19 @@ export function SecureStatCard({
   };
 
   const handlePinSubmit = async (pin: string) => {
-    if (!user || !user.email) {
+    if (!user) {
       alert("User not authenticated. Please login again.");
       return;
     }
 
+    setIsLoading(true);
     try {
       const response = await fetch('/api/auth/validate-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: user.email, pin }),
+        body: JSON.stringify({ password: pin }),
       });
 
       const data = await response.json();
@@ -252,6 +244,8 @@ export function SecureStatCard({
     } catch (error) {
       console.error('Error validating PIN:', error);
       alert("Error validating PIN. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -317,6 +311,7 @@ export function SecureStatCard({
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         onPinSubmit={handlePinSubmit}
+        isLoading={isLoading}
       />
     </>
   );
