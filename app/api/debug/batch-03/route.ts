@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Batch from '@/lib/models/Batch';
 import Car from '@/lib/models/Car';
 import Customer from '@/lib/models/Customer';
-import { getCompanyIdFromRequest } from '@/lib/auth';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/debug/batch-03 - Debug specific batch 03
 export async function GET(request: NextRequest) {

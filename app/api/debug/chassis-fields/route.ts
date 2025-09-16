@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Car from '@/lib/models/Car';
 import Customer from '@/lib/models/Customer';
-import { getCompanyIdFromRequest } from '@/lib/auth';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/debug/chassis-fields - Debug chassis field names
 export async function GET(request: NextRequest) {

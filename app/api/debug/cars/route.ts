@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Car from '@/lib/models/Car';
-import { getCompanyIdFromRequest } from '@/lib/auth';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // GET /api/debug/cars - Debug car data
 export async function GET(request: NextRequest) {

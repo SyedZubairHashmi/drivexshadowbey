@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Batch from '@/lib/models/Batch';
 import Car from '@/lib/models/Car';
 import Customer from '@/lib/models/Customer';
-import { getCompanyIdFromRequest } from '@/lib/auth';
+import { getCompanyIdFromRequest } from '@/lib/auth-utils';
 
 // POST /api/debug/test-batch-03-sale-price - Test sale price calculation for batch 03
 export async function POST(request: NextRequest) {
