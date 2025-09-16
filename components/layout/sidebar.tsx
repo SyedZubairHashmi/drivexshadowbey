@@ -68,11 +68,12 @@ const navigation = [
     ),
     submenu: [
       { name: "Batch Investment", href: "/investors/batch-investment" },
+      { name: "Profit Distribution", href: "/investors/profit-distribution" },
     ],
   },
   { 
     name: "Analytics", 
-    href: "#", 
+    href: "/analytics", 
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="23" viewBox="0 0 22 23" fill="none">
         <path d="M10.0833 3.53271C5.95838 3.98871 2.75 7.48586 2.75 11.7324C2.75 16.2887 6.44365 19.9824 11 19.9824C15.2465 19.9824 18.7437 16.774 19.1996 12.649H10.0833V3.53271Z" stroke="black" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -98,22 +99,39 @@ export function Sidebar() {
   const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
   const pathname = usePathname();
 
-  // Add custom scrollbar styles
+  // Add hidden scrollbar styles with smooth scrolling
   const scrollbarStyles = `
     .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
+      width: 0px;
+      background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #F3F4F6;
-      border-radius: 3px;
+      background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #D1D5DB;
-      border-radius: 3px;
+      background: transparent;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #9CA3AF;
+    .custom-scrollbar {
+      -ms-overflow-style: none;  /* Internet Explorer 10+ */
+      scrollbar-width: none;  /* Firefox */
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
     }
+    .custom-scrollbar * {
+      scroll-behavior: smooth;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
   `;
 
   const toggleSubmenu = (itemName: string) => {
@@ -250,7 +268,7 @@ export function Sidebar() {
               console.log("Add Sold Car button clicked");
             }}
           >
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
           Add Sold Car
           </Link>
       </div>
@@ -265,8 +283,6 @@ export function Sidebar() {
             marginTop: '34px',
             overflowY: 'auto',
             overflowX: 'hidden',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#D1D5DB #F3F4F6',
             padding: '0 12px'
           }}>
         {navigation.map((item) => {
@@ -290,6 +306,7 @@ export function Sidebar() {
                       backgroundColor: 'transparent',
                       cursor: 'pointer',
                       marginBottom: '8px',
+                      transition: 'all 0.2s ease-in-out',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -330,6 +347,7 @@ export function Sidebar() {
                       color: isActive ? '#000000' : '#00000080',
                       textDecoration: 'none',
                       marginBottom: '8px',
+                      transition: 'all 0.2s ease-in-out',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -350,7 +368,14 @@ export function Sidebar() {
               )}
 
               {item.submenu && isSubmenuOpen && (
-                  <div style={{ marginLeft: '32px', marginTop: '8px', marginBottom: '8px' }}>
+                  <div 
+                    style={{ 
+                      marginLeft: '32px', 
+                      marginTop: '8px', 
+                      marginBottom: '8px',
+                      animation: 'slideDown 0.2s ease-out',
+                    }}
+                  >
                   {item.submenu.map((subItem) => (
                     <Link
                       key={subItem.name}
@@ -365,6 +390,8 @@ export function Sidebar() {
                           lineHeight: '120%',
                           textDecoration: 'none',
                           marginBottom: '4px',
+                          transition: 'all 0.15s ease-in-out',
+                          borderRadius: '6px',
                         }}
                     >
                       {subItem.name}

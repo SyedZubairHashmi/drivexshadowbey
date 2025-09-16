@@ -102,7 +102,6 @@ The dashboard currently uses mock data with 11 sample companies:
 - [ ] Bulk operations (bulk status change, bulk delete)
 - [ ] Export functionality (CSV, PDF)
 - [ ] Advanced filtering options
-- [ ] Company analytics/statistics
 - [ ] Integration with main dashboard data
 
 ## Development Notes

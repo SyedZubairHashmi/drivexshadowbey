@@ -1189,9 +1189,6 @@ export default function InvestorsPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-semibold text-gray-900">Batch {batch.batchNo}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(batch.countryOfOrigin)}`}>
-                      {batch.countryOfOrigin || 'Unknown'}
-                    </span>
                     <Button
                       variant="outline"
                       size="sm"

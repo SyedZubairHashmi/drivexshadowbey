@@ -13,4 +13,9 @@ const companySchema = new mongoose.Schema({
   recoveryEmail: { type: String },
 }, { timestamps: true });
 
-export default mongoose.models.Company || mongoose.model("Company", companySchema);
+// Clear any existing model to prevent cache issues
+if (mongoose.models.Company) {
+  delete mongoose.models.Company;
+}
+
+export default mongoose.model("Company", companySchema);

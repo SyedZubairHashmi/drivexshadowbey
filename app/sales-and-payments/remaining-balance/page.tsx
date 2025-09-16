@@ -4,7 +4,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Plus, MoreVertical } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,7 +16,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { customerAPI } from "@/lib/api";
+import { customerAPI, batchAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 interface Customer {
@@ -85,6 +85,8 @@ export default function RemainingBalancePage() {
       if (response.success) {
         setCustomers(response.data);
         console.log("Customers fetched successfully:", response.data);
+        // Update batch total sale prices after fetching customers
+        await updateBatchSalePrices(response.data);
       } else {
         setError(response.error || "Failed to fetch customers");
       }
@@ -93,6 +95,29 @@ export default function RemainingBalancePage() {
       setError(error.message || "An error occurred while fetching customers");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Update batch total sale prices
+  const updateBatchSalePrices = async (customersData: Customer[]) => {
+    try {
+      // Get unique batch numbers from customers (we need to find cars first)
+      // For now, we'll get all batches and update their sale prices
+      const batchesResponse = await batchAPI.getAll();
+      if (batchesResponse.success) {
+        for (const batch of batchesResponse.data) {
+          try {
+            await batchAPI.calculateSalePrice(batch._id);
+            // Also calculate revenue after sale price update
+            await batchAPI.calculateRevenue(batch._id);
+            console.log(`Updated sale price and revenue for batch ${batch.batchNo}`);
+          } catch (error) {
+            console.error(`Error updating sale price for batch ${batch.batchNo}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error updating batch sale prices:", error);
     }
   };
 
@@ -231,21 +256,6 @@ export default function RemainingBalancePage() {
                 />
               </div>
 
-              <Button 
-                variant="outline" 
-                size="sm"
-                style={{
-                  height: "41px",
-                  borderRadius: "12px",
-                  gap: "10px",
-                  padding: "12px",
-                  borderWidth: "1px",
-                  color: "#00000099"
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
             </div>
 
             <div className="flex gap-2">
@@ -410,6 +420,7 @@ export default function RemainingBalancePage() {
                     <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Chassis Number</TableHead>
                     <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Cars Purchased</TableHead>
                     <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Last Purchased Date</TableHead>
+                    <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Sale Price</TableHead>
                     <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Total Spend</TableHead>
                     <TableHead style={{ padding: '8px 16px', color: '#00000099', textAlign: 'left' }}>Remaining Balance</TableHead>
                   </TableRow>
@@ -437,6 +448,9 @@ export default function RemainingBalancePage() {
                       </TableCell>
                       <TableCell style={{ padding: '8px 16px', textAlign: 'left' }}>
                         Rs {(customer.sale.salePrice || 0).toLocaleString()}
+                      </TableCell>
+                      <TableCell style={{ padding: '8px 16px', textAlign: 'left' }}>
+                        Rs {(customer.sale.paidAmount || 0).toLocaleString()}
                       </TableCell>
                       <TableCell style={{ padding: '8px 16px', textAlign: 'left' }}>
                         <div className="flex items-center justify-between">

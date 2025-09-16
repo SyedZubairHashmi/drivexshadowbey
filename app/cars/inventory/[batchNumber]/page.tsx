@@ -59,6 +59,8 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
         setCars(carsResponse.data);
         setAllBatches(batchesResponse.data);
         console.log("Cars loaded:", carsResponse.data.length);
+        // Update batch total cost after fetching cars
+        await updateBatchTotalCost(batchNumber);
       } else {
         console.error("API error:", carsResponse.error);
         setError(carsResponse.error || "Failed to fetch cars");
@@ -68,6 +70,25 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
       setError(error.message || "An error occurred while fetching cars");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Calculate and update batch total cost
+  const updateBatchTotalCost = async (batchNo: string) => {
+    try {
+      // Get batch data to find the batch ID
+      const batchResponse = await batchAPI.getByBatchNo(batchNo);
+      if (batchResponse.success && batchResponse.data.length > 0) {
+        const batchId = batchResponse.data[0]._id;
+        
+        // Use the new API to calculate and update total cost
+        await batchAPI.calculateTotalCost(batchId);
+        // Also calculate revenue after cost update
+        await batchAPI.calculateRevenue(batchId);
+        console.log("Batch total cost and revenue updated for batch:", batchNo);
+      }
+    } catch (error) {
+      console.error("Error updating batch total cost:", error);
     }
   };
 
@@ -110,6 +131,53 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
     router.push(`/sales-and-payments/invoice?carId=${car.id}&batchNumber=${batchNumber}`);
   };
 
+  const handleChangeStatus = async (car: Car, newStatus: string) => {
+    try {
+      console.log("BatchDetailPage: Changing status for car:", car._id, "to:", newStatus);
+      
+      const carId = car._id || car.id;
+      if (!carId) {
+        console.error('No car ID found for status update:', car);
+        return false;
+      }
+
+      const response = await fetch(`/api/cars/${carId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to update car status:', errorData);
+        alert(`Failed to update status: ${errorData.error || 'Unknown error'}`);
+        return false;
+      }
+
+      const result = await response.json();
+      console.log('Car status updated successfully:', result);
+      
+      // Update the local state to reflect the change
+      setCars(prevCars => 
+        prevCars.map(c => 
+          c._id === carId || c.id === carId 
+            ? { ...c, status: newStatus }
+            : c
+        )
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating car status:', error);
+      alert('Failed to update car status. Please try again.');
+      return false;
+    }
+  };
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -128,6 +196,7 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
     
     return sortedBatches[0]?.batchNo === batchNumber;
   };
+
 
 
 
@@ -214,60 +283,100 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
             onStatusFilterChange={setStatusFilter}
           />
 
-          {/* Car Table */}
-          <div className="mt-6">
-            <div style={{ height: '710px', overflow: 'hidden' }}>
-              <CarTable
-                cars={currentCars}
-                batchNumber={batchNumber}
-                onGenerateInvoice={handleGenerateInvoice}
-              />
+          {/* Car Table with Pagination */}
+          <div className="mt-6 bg-white">
+            <div style={{ overflow: 'hidden' }}>
+              <div className="[&_.relative]:overflow-hidden">
+                <CarTable
+                  cars={currentCars}
+                  batchNumber={batchNumber}
+                  onGenerateInvoice={handleGenerateInvoice}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center gap-4 justify-center">
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
-              </button>
-              
-              {/* Page numbers */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {/* Total Batch Cost */}
+            <div className="flex justify-end mt-4">
+              <span className="text-[18px] font-semibold text-black-900">Total Cost = </span>
+              <span className="text-[16px] text-black-600">
+                PKR {cars.reduce((total, car) => {
+                  // Calculate total cost for each car using the same logic as the virtual field
+                  const f = car.financing;
+                  if (!f) return total;
+                  
+                  const carTotalCost = (
+                    (f.auctionPrice?.totalAmount || 0) +
+                    (f.auctionExpenses?.totalAmount || 0) +
+                    (f.inlandCharges?.totalAmount || 0) +
+                    (f.loadingCharges?.totalAmount || 0) +
+                    (f.containerCharges?.totalAmount || 0) +
+                    (f.freightSea?.totalAmount || 0) +
+                    (f.variantDuty || 0) +
+                    (f.passportCharges || 0) +
+                    (f.servicesCharges || 0) +
+                    (f.transportCharges || 0) +
+                    (f.repairCharges || 0) +
+                    (f.miscellaneousCharges || 0) +
+                    (f.vehicleValueCif || 0) +
+                    (f.landingCharges || 0) +
+                    (f.customsDuty || 0) +
+                    (f.salesTax || 0) +
+                    (f.federalExciseDuty || 0) +
+                    (f.incomeTax || 0) +
+                    (f.freightAndStorageCharges || 0) +
+                    (f.demurrage || 0) +
+                    (f.ageOfVehicle || 0)
+                  );
+                  
+                  return total + carTotalCost;
+                }, 0).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-4">
                 <button
-                  key={page}
-                  className={`text-sm ${
-                    currentPage === page
-                      ? 'bg-[#00674F] text-white'
-                      : 'text-black  bg-transparent'
-                  }`}
-                  style={{
-                    width: '26px',
-                    height: '25px',
-                    borderRadius: '1000px',
-                    opacity: 1,
-                    padding: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onClick={() => handlePageChange(page)}
+                  className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
                 >
-                  {page}
+                  <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
                 </button>
-              ))}
-              
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-              >
-                <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
-              </button>
+                
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    className={`text-sm ${
+                      currentPage === page
+                        ? 'bg-[#00674F] text-white'
+                        : 'text-black  bg-transparent'
+                    }`}
+                    style={{
+                      width: '26px',
+                      height: '25px',
+                      borderRadius: '1000px',
+                      opacity: 1,
+                      padding: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button
+                  className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

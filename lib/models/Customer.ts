@@ -1,5 +1,30 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+// 🔹 Payment Interface for installment tracking
+export interface IPayment {
+  _id?: mongoose.Types.ObjectId;
+  paymentDate: Date;
+  amountPaid: number; // Amount paid in this installment
+  remainingAfterPayment: number; // Remaining balance after this payment
+  totalPaidUpToDate: number; // Total paid amount up to this payment
+  paymentMethod: {
+    type: "Cash" | "Bank" | "Cheque" | "BankDeposit";
+    details: {
+      bankName?: string;
+      ibanNo?: string;
+      accountNo?: string;
+      chequeNo?: string;
+      chequeClearanceDate?: Date;
+      slipNo?: string;
+    };
+  };
+  status: "Completed" | "Pending" | "Failed";
+  installmentNumber?: number; // Track which installment this is (1st, 2nd, etc.)
+  note?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 // 🔹 Interface
 export interface ICustomer extends Document {
   companyId: mongoose.Types.ObjectId; // Multi-tenant field
@@ -14,27 +39,16 @@ export interface ICustomer extends Document {
     email?: string;
     address?: string;
   };
-  sale: {
-    saleDate: Date;
-    salePrice: number;
-    paidAmount: number;
-    remainingAmount: number; // Calculated automatically: salePrice - paidAmount
-    paymentMethod: {
-      type: "Cash" | "Bank" | "Cheque" | "BankDeposit";
-      details: {
-        // For Cash → no extra fields
-        bankName?: string;     // For Bank, Cheque, BankDeposit
-        ibanNo?: string;       // For Bank
-        accountNo?: string;    // For Bank
-        chequeNo?: string;     // For Cheque
-        chequeClearanceDate?: Date; // For Cheque
-        slipNo?: string;       // For BankDeposit
-      };
+    sale: {
+      saleDate: Date;
+      salePrice: number;
+      paidAmount: number; // Total amount paid across all installments
+      remainingAmount: number; // Calculated automatically: salePrice - paidAmount
+      paymentStatus: "Completed" | "Pending";
+      note?: string;
+      document?: string;
     };
-    paymentStatus: "Completed" | "Pending" | "inprogress";
-    note?: string;
-    document?: string;
-  };
+  payments: IPayment[]; // 🆕 All installment records
 }
 
 // 🔹 Schema
@@ -57,8 +71,22 @@ const CustomerSchema: Schema = new Schema(
       salePrice: { type: Number, required: true },
       paidAmount: { type: Number, required: true, default: 0 },
       remainingAmount: { type: Number, required: false }, // Will be calculated automatically
-      
-      // 🔹 Payment Method as Object
+      paymentStatus: {
+        type: String,
+        enum: ["Completed", "Pending"],
+        default: "Pending",
+      },
+      note: { type: String }, // optional
+      document: { type: String }, // file path or URL
+    },
+    
+    // 🆕 Payment History Array - Enhanced installment tracking
+    payments: [{
+      paymentDate: { type: Date, required: true, default: Date.now },
+      amountPaid: { type: Number, required: true }, // Amount paid in this installment
+      remainingAfterPayment: { type: Number, required: true }, // Remaining balance after this payment
+      totalPaidUpToDate: { type: Number, required: true }, // Total paid amount up to this payment
+      installmentNumber: { type: Number }, // Track which installment this is (1st, 2nd, etc.)
       paymentMethod: {
         type: {
           type: String,
@@ -74,42 +102,105 @@ const CustomerSchema: Schema = new Schema(
           slipNo: { type: String },
         },
       },
-
-      paymentStatus: {
+      status: {
         type: String,
-        enum: ["Completed", "Pending", "inprogress"],
-        default: "Pending",
+        enum: ["Completed", "Pending", "Failed"],
+        default: "Completed",
       },
-      note: { type: String }, // optional
-      document: { type: String }, // file path or URL
-    },
+      note: { type: String },
+    }],
   },
   { timestamps: true }
 );
 
-// Pre-save middleware to automatically calculate remaining amount
+// Pre-save middleware to automatically calculate remaining amount and update payment tracking
 CustomerSchema.pre('save', function(next) {
-  const salePrice = Number(this.sale.salePrice) || 0;
-  const paidAmount = Number(this.sale.paidAmount) || 0;
+  const doc = this as any;
+  const salePrice = Number(doc.sale.salePrice) || 0;
   
-  this.sale.remainingAmount = salePrice - paidAmount;
+  // Calculate total paid amount from ALL payments (not just completed ones)
+  const totalPaidFromPayments = doc.payments
+    ?.reduce((sum: number, payment: any) => sum + (Number(payment.amountPaid) || 0), 0) || 0;
+  
+  // Update overall sale amounts
+  doc.sale.paidAmount = totalPaidFromPayments;
+  doc.sale.remainingAmount = salePrice - totalPaidFromPayments;
+  
+  // Update payment status based on remaining amount
+  if (doc.sale.remainingAmount <= 0) {
+    doc.sale.paymentStatus = "Completed";
+  } else {
+    doc.sale.paymentStatus = "Pending";
+  }
+  
+  // Update payment tracking fields for each payment
+  if (doc.payments && doc.payments.length > 0) {
+    let runningTotal = 0;
+    doc.payments.forEach((payment: any, index: number) => {
+      runningTotal += Number(payment.amountPaid) || 0;
+      payment.totalPaidUpToDate = runningTotal;
+      payment.remainingAfterPayment = salePrice - runningTotal;
+      payment.installmentNumber = index + 1;
+    });
+  }
+  
   next();
 });
 
-// Pre-update middleware to automatically calculate remaining amount
-CustomerSchema.pre('findOneAndUpdate', function(next) {
-  const update = this.getUpdate() as any;
-  if (update['sale.salePrice'] !== undefined || update['sale.paidAmount'] !== undefined) {
-    const salePrice = Number(update['sale.salePrice']) || 0;
-    const paidAmount = Number(update['sale.paidAmount']) || 0;
-    update['sale.remainingAmount'] = salePrice - paidAmount;
+
+// Post-update middleware to recalculate amounts when payments are updated
+CustomerSchema.post('findOneAndUpdate', async function(doc) {
+  if (doc) {
+    const docAny = doc as any;
+    const salePrice = Number(docAny.sale.salePrice) || 0;
+    
+    // Calculate total paid amount from ALL payments (not just completed ones)
+    const totalPaidFromPayments = docAny.payments
+      ?.reduce((sum: number, payment: any) => sum + (Number(payment.amountPaid) || 0), 0) || 0;
+    
+    const paidAmount = totalPaidFromPayments;
+    const remainingAmount = salePrice - paidAmount;
+    
+    // Determine payment status
+    let paymentStatus = "Pending";
+    if (remainingAmount <= 0) {
+      paymentStatus = "Completed";
+    }
+    
+    // Update payment tracking fields for each payment
+    if (docAny.payments && docAny.payments.length > 0) {
+      let runningTotal = 0;
+      docAny.payments.forEach((payment: any, index: number) => {
+        runningTotal += Number(payment.amountPaid) || 0;
+        payment.totalPaidUpToDate = runningTotal;
+        payment.remainingAfterPayment = salePrice - runningTotal;
+        payment.installmentNumber = index + 1;
+      });
+    }
+    
+    // Update the document if amounts have changed
+    if (docAny.sale.paidAmount !== paidAmount || 
+        docAny.sale.remainingAmount !== remainingAmount || 
+        docAny.sale.paymentStatus !== paymentStatus) {
+      await docAny.updateOne({
+        'sale.paidAmount': paidAmount,
+        'sale.remainingAmount': remainingAmount,
+        'sale.paymentStatus': paymentStatus,
+        'payments': docAny.payments
+      });
+    }
   }
-  next();
 });
+
 
 // Compound unique index: chassisNumber must be unique within each company
 CustomerSchema.index({ companyId: 1, 'vehicle.chassisNumber': 1 }, { unique: true });
 
+
 // 🔹 Model
-export default mongoose.models.Customer ||
-  mongoose.model<ICustomer>("Customer", CustomerSchema);
+// Clear any existing model to prevent cache issues
+if (mongoose.models.Customer) {
+  delete mongoose.models.Customer;
+}
+
+export default mongoose.model<ICustomer>("Customer", CustomerSchema);

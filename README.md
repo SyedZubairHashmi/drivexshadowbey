@@ -9,7 +9,6 @@ A comprehensive car auction management system built with Next.js, TypeScript, an
 - **Batch Management**: Organize cars into batches for efficient processing
 - **Sales & Payments**: Track payments and financial transactions
 - **Investor Management**: Manage investor relationships and investments
-- **Analytics**: Performance insights and reporting
 - **Responsive Design**: Works seamlessly on desktop and mobile
 
 ## Getting Started
@@ -44,7 +43,6 @@ npm run dev
 │   ├── cars/             # Car management pages
 │   ├── sales/            # Sales and payments
 │   ├── investors/        # Investor management
-│   ├── analytics/        # Analytics and reporting
 │   └── settings/         # Application settings
 ├── components/           # Reusable components
 │   ├── layout/          # Layout components

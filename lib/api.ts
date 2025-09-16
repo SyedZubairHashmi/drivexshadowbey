@@ -193,6 +193,60 @@ export const batchAPI = {
       method: 'DELETE',
     });
   },
+
+  // Update batch financial values
+  updateFinancial: async (id: string, financialData: {
+    totalCost?: number;
+    totalSalePrice?: number;
+    totalInvestment?: number;
+    totalExpense?: number;
+  }) => {
+    return apiRequest(`/batches/${id}/financial`, {
+      method: 'PUT',
+      body: JSON.stringify(financialData),
+    });
+  },
+
+  // Get batch financial values
+  getFinancial: async (id: string) => {
+    return apiRequest(`/batches/${id}/financial`);
+  },
+
+  // Calculate and update batch total sale price
+  calculateSalePrice: async (id: string) => {
+    return apiRequest(`/batches/${id}/calculate-sale-price`, {
+      method: 'POST',
+    });
+  },
+
+  // Calculate and update batch total cost
+  calculateTotalCost: async (id: string) => {
+    return apiRequest(`/batches/${id}/calculate-total-cost`, {
+      method: 'POST',
+    });
+  },
+
+  // Calculate and update batch total investment
+  calculateTotalInvestment: async (id: string) => {
+    return apiRequest(`/batches/${id}/calculate-total-investment`, {
+      method: 'POST',
+    });
+  },
+
+  // Update batch total expense
+  updateExpense: async (id: string, totalExpense: number) => {
+    return apiRequest(`/batches/${id}/update-expense`, {
+      method: 'PUT',
+      body: JSON.stringify({ totalExpense }),
+    });
+  },
+
+  // Calculate and update batch revenue
+  calculateRevenue: async (id: string) => {
+    return apiRequest(`/batches/${id}/calculate-revenue`, {
+      method: 'POST',
+    });
+  },
 };
 
 // Utility functions for data formatting

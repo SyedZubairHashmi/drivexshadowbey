@@ -39,7 +39,6 @@ npm run dev -- -p 3001
 - ✅ Batch management system
 - ✅ Sales and payments tracking
 - ✅ Investor management
-- ✅ Analytics page
 - ✅ Settings configuration
 - ✅ Responsive design
 - ✅ Modern UI components

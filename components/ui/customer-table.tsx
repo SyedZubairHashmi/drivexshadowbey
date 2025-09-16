@@ -3,7 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatusBadge } from "./status-badge"
 import { CustomerActionMenu } from "./customer-action-menu"
-import { Search, Filter } from "lucide-react"
+import { Search } from "lucide-react"
 import { Button } from "./button"
 import { Input } from "./input"
 import {
@@ -54,13 +54,14 @@ interface Customer {
 
 interface CustomerTableProps {
   customers: Customer[]
-  onEdit?: (customer: Customer) => void
+  onGenerateInvoice?: (customer: Customer) => void
+  onPaymentHistory?: (customer: Customer) => void
+  onUpdatePayment?: (customer: Customer) => void
   onDelete?: (customer: Customer) => void
   onView?: (customer: Customer) => void
-  onChangeStatus?: (customer: Customer) => void
 }
 
-export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeStatus }: CustomerTableProps) {
+export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, onUpdatePayment, onDelete, onView }: CustomerTableProps) {
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [companyFilter, setCompanyFilter] = useState('');
@@ -114,21 +115,6 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
             />
           </div>
 
-          <Button 
-            variant="outline" 
-            size="sm"
-            style={{
-              height: "41px",
-              borderRadius: "12px",
-              gap: "10px",
-              padding: "12px",
-              borderWidth: "1px",
-              color: "#00000099"
-            }}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
         </div>
 
         <div className="flex gap-2">
@@ -290,6 +276,7 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Number</TableHead>
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Car Purchased</TableHead>
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Last Date Purchased</TableHead>
+              <TableHead style={{ height: '45px', padding: '8px 16px' }}>Sale Price</TableHead>
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Total Spend</TableHead>
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Remaining Balance</TableHead>
               <TableHead style={{ height: '45px', padding: '8px 16px' }}>Status</TableHead>
@@ -318,7 +305,10 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                   {customer.sale.saleDate ? new Date(customer.sale.saleDate).toLocaleDateString() : 'N/A'}
                 </TableCell>
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>
-                   Rs {(customer.sale.salePrice || 0).toLocaleString()}
+                  Rs {(customer.sale.salePrice || 0).toLocaleString()}
+                </TableCell>
+                <TableCell style={{ height: '40px', padding: '8px 16px' }}>
+                   Rs {(customer.sale.paidAmount || 0).toLocaleString()}
                 </TableCell>
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   Rs {(customer.sale.remainingAmount || 0).toLocaleString()}
@@ -329,23 +319,11 @@ export function CustomerTable({ customers, onEdit, onDelete, onView, onChangeSta
                 <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                   <CustomerActionMenu
                     customer={customer}
-                    onEdit={() => onEdit?.(customer)}
+                    onGenerateInvoice={() => onGenerateInvoice?.(customer)}
+                    onPaymentHistory={() => onPaymentHistory?.(customer)}
+                    onUpdatePayment={() => onUpdatePayment?.(customer)}
                     onDelete={() => onDelete?.(customer)}
                     onView={() => onView?.(customer)}
-                    onChangeStatus={async (newStatus) => {
-                      console.log("CustomerTable: Status changed to:", newStatus, "for customer:", customer._id);
-                      // Update the customer's status locally first
-                      const updatedCustomer = {
-                        ...customer,
-                        sale: {
-                          ...customer.sale,
-                          paymentStatus: newStatus
-                        }
-                      };
-                      const success = await onChangeStatus?.(updatedCustomer);
-                      console.log("CustomerTable: Parent onChangeStatus result:", success);
-                      return success || false;
-                    }}
                   />
                 </TableCell>
               </TableRow>

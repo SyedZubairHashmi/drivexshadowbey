@@ -36,6 +36,31 @@ export interface Investor {
   status: "Active" | "Inactive"
 }
 
+export interface CustomerPayment {
+  _id?: string;
+  paymentDate: string;
+  amount: number; // Keep for backward compatibility
+  amountPaid: number; // New field from API
+  remainingAfterPayment: number; // New field from API
+  totalPaidUpToDate: number; // New field from API
+  installmentNumber?: number; // New field from API
+  paymentMethod: {
+    type: "Cash" | "Bank" | "Cheque" | "BankDeposit";
+    details?: {
+      bankName?: string;
+      ibanNo?: string;
+      accountNo?: string;
+      chequeNo?: string;
+      chequeClearanceDate?: string;
+      slipNo?: string;
+    };
+  };
+  status: "Completed" | "Pending" | "Failed";
+  note?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Customer {
   _id: string;
   vehicle: {
@@ -69,6 +94,7 @@ export interface Customer {
     note?: string;
     document?: string;
   };
+  payments?: CustomerPayment[]; // 🆕 Payment history array
   createdAt: string;
   updatedAt: string;
 }

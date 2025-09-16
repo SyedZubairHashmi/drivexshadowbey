@@ -5,9 +5,12 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, ChevronRight, Eye, MoreVertical, Plus } from "lucide-react";
+import { Search, ChevronRight, Eye, MoreVertical, Plus, Users, DollarSign, Car, TrendingUp, Calendar } from "lucide-react";
 import { UpdatePaymentModal } from "@/components/ui/update-payment-modal";
-import { investorAPI } from "@/lib/api";
+import { investorAPI, batchAPI } from "@/lib/api";
+import { SecureStatCard } from "@/components/ui/secure-stat-card";
+import { HeaderStatCard } from "@/components/ui/header-stat-card";
+import { ExpenseEditModal } from "@/components/ui/expense-edit-modal";
 
 interface PaymentHistory {
   _id: string;
@@ -52,6 +55,54 @@ export default function PaymentHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBatchNo, setSelectedBatchNo] = useState<string | null>(null);
+  const [batchData, setBatchData] = useState<any>(null);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [currentExpense, setCurrentExpense] = useState(0);
+
+  // Fetch batch data
+  const fetchBatchData = async (batchNo: string) => {
+    try {
+      const response = await batchAPI.getByBatchNo(batchNo);
+      if (response.success && response.data.length > 0) {
+        setBatchData(response.data[0]);
+        console.log("Batch data fetched:", response.data[0]);
+        console.log("Total sale price:", response.data[0].totalSalePrice);
+      }
+    } catch (error) {
+      console.error("Error fetching batch data:", error);
+    }
+  };
+
+  // Fetch all batch data (for when no specific batch is selected)
+  const fetchAllBatchData = async () => {
+    try {
+      const response = await batchAPI.getAll();
+      if (response.success && response.data.length > 0) {
+        // Calculate sale price and revenue for all batches
+        for (const batch of response.data) {
+          try {
+            await batchAPI.calculateSalePrice(batch._id);
+            await batchAPI.calculateRevenue(batch._id);
+            console.log(`Updated sale price and revenue for batch ${batch.batchNo}`);
+          } catch (error) {
+            console.error(`Error updating batch ${batch.batchNo}:`, error);
+          }
+        }
+        
+        // Fetch updated batch data after calculations
+        const updatedResponse = await batchAPI.getAll();
+        if (updatedResponse.success && updatedResponse.data.length > 0) {
+          // For now, let's use the first batch or aggregate data
+          // You might want to modify this based on your business logic
+          const firstBatch = updatedResponse.data[0];
+          setBatchData(firstBatch);
+          console.log("All batch data fetched, using first batch:", firstBatch);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching all batch data:", error);
+    }
+  };
 
   // Fetch payment history data with batch filter
   const fetchPayments = async (batchNo?: string | null) => {
@@ -63,6 +114,8 @@ export default function PaymentHistoryPage() {
       const filters: any = {};
       if (batchNo) {
         filters.batchNo = batchNo;
+        // Fetch batch data for car count
+        await fetchBatchData(batchNo);
       }
       
       console.log('Fetching payments with filters:', filters);
@@ -76,6 +129,13 @@ export default function PaymentHistoryPage() {
           console.log('First payment batch:', response.data[0]?.batchNo);
         }
         setPayments(response.data);
+        // Update batch total investment after fetching payments
+        if (batchNo) {
+          await updateBatchTotalInvestment(batchNo);
+        } else {
+          // If no specific batch, fetch all batch data
+          await fetchAllBatchData();
+        }
       } else {
         setError(response.error || "Failed to fetch payment history");
       }
@@ -84,6 +144,46 @@ export default function PaymentHistoryPage() {
       setError(error.message || "An error occurred while fetching payment history");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Calculate and update batch total investment
+  const updateBatchTotalInvestment = async (batchNo: string) => {
+    try {
+      // Get batch data to find the batch ID
+      const batchResponse = await batchAPI.getByBatchNo(batchNo);
+      if (batchResponse.success && batchResponse.data.length > 0) {
+        const batchId = batchResponse.data[0]._id;
+        
+        // Use the new API to calculate and update total investment
+        await batchAPI.calculateTotalInvestment(batchId);
+        console.log("Batch total investment updated for batch:", batchNo);
+      }
+    } catch (error) {
+      console.error("Error updating batch total investment:", error);
+    }
+  };
+
+  // Handle expense edit
+  const handleExpenseEdit = () => {
+    setCurrentExpense(batchData?.totalExpense || 0);
+    setShowExpenseModal(true);
+  };
+
+  // Save expense
+  const handleSaveExpense = async (amount: number) => {
+    try {
+      if (batchData) {
+        await batchAPI.updateExpense(batchData._id, amount);
+        // Refresh batch data
+        if (selectedBatchNo) {
+          await fetchBatchData(selectedBatchNo);
+        }
+        console.log("Expense updated successfully:", amount);
+      }
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      throw error;
     }
   };
 
@@ -151,6 +251,59 @@ export default function PaymentHistoryPage() {
             </Button>
           </div>
 
+          {/* Stats Cards */}
+          <div className="space-y-4">
+            {/* First Row - 4 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <HeaderStatCard
+                title="Investors"
+                value={payments.length}
+                icon={Users}
+              />
+              <SecureStatCard
+                title="Investment Amount"
+                value={`Rs ${(batchData?.totalInvestment || 0).toLocaleString()}`}
+                icon={DollarSign}
+              />
+              <SecureStatCard
+                title="Total Cost of Batch"
+                value={`Rs ${(batchData?.totalCost || 0).toLocaleString()}`}
+                icon={Car}
+              />
+              <SecureStatCard
+                title="Total Sale Price of Batch"
+                value={`Rs ${(batchData?.totalSalePrice || 0).toLocaleString()}`}
+                icon={TrendingUp}
+              />
+            </div>
+
+            {/* Second Row - 4 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <SecureStatCard
+                title="Batch Revenue"
+                value={`Rs ${(batchData?.totalRevenue || 0).toLocaleString()}`}
+                icon={TrendingUp}
+              />
+              <SecureStatCard
+                title="Batch Profit"
+                value={`Rs ${(batchData?.profit || 0).toLocaleString()}`}
+                icon={DollarSign}
+              />
+              <SecureStatCard
+                title="Batch Expense"
+                value={`Rs ${(batchData?.totalExpense || 0).toLocaleString()}`}
+                icon={Calendar}
+                showEditButton={true}
+                onEdit={handleExpenseEdit}
+              />
+              <HeaderStatCard
+                title="Cars Purchased"
+                value={batchData?.cars?.length || 0}
+                icon={Car}
+              />
+            </div>
+          </div>
+
           {/* Search and Filter */}
           <div className="flex items-center gap-4  ">
               <div 
@@ -176,21 +329,6 @@ export default function PaymentHistoryPage() {
                   }}
                 />
               </div>
-            <Button
-              variant="outline"
-                size="sm"
-              style={{
-                  height: "41px",
-                  borderRadius: "12px",
-                  gap: "10px",
-                  padding: "12px",
-                  borderWidth: "1px",
-                  color: "#0000008F"
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
           </div>
 
           {/* Table */}
@@ -200,11 +338,11 @@ export default function PaymentHistoryPage() {
                 <TableRow>
                   <TableHead >S.No</TableHead>
                   <TableHead >Investor Name</TableHead>
+                  <TableHead >Last Date Payment</TableHead>
                   <TableHead >Total Invest Amount</TableHead>
                   <TableHead >% Share</TableHead>
                   <TableHead >Amount Invested</TableHead>
                   <TableHead >Remaining Amount</TableHead>
-                  <TableHead >Share (Expected)</TableHead>
                   <TableHead >Payment Status</TableHead>
                   <TableHead >Actions</TableHead>
                 </TableRow>
@@ -236,11 +374,11 @@ export default function PaymentHistoryPage() {
                     <TableRow key={payment._id} style={{ height: '49px' }}>
                     <TableCell className="text-black-500">{index + 1}</TableCell>
                       <TableCell className="font-medium text-blakc-500">{payment.name}</TableCell>
+                      <TableCell className="text-black-500">{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A'}</TableCell>
                       <TableCell className="text-black-500">PKR {payment.investAmount.toLocaleString()}</TableCell>
                       <TableCell className="text-black-500">{payment.percentageShare}%</TableCell>
                       <TableCell className="text-black-500">PKR {payment.amountPaid.toLocaleString()}</TableCell>
                       <TableCell className="text-black-500">PKR {payment.remainingAmount.toLocaleString()}</TableCell>
-                      <TableCell className="text-black-500">PKR {(payment.investAmount * payment.percentageShare / 100).toLocaleString()}</TableCell>
                     <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.paymentMethod.type)}`}>
                           {payment.paymentMethod.type.charAt(0).toUpperCase() + payment.paymentMethod.type.slice(1)}
@@ -269,6 +407,14 @@ export default function PaymentHistoryPage() {
         isOpen={showUpdatePaymentModal}
         onClose={() => setShowUpdatePaymentModal(false)}
         onSubmit={handleUpdatePayment}
+      />
+
+      {/* Expense Edit Modal */}
+      <ExpenseEditModal
+        isOpen={showExpenseModal}
+        onClose={() => setShowExpenseModal(false)}
+        onSave={handleSaveExpense}
+        currentAmount={currentExpense}
       />
     </MainLayout>
   );

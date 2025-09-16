@@ -88,12 +88,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     console.log('Received customer data:', JSON.stringify(body, null, 2));
+    console.log('Payments array:', JSON.stringify(body.payments, null, 2));
     
     // Validate required fields
     const requiredFields = [
       'vehicle.companyName', 'vehicle.model', 'vehicle.chassisNumber',
       'customer.name', 'customer.phoneNumber',
-      'sale.salePrice', 'sale.paymentMethod.type'
+      'sale.salePrice'
     ];
     
     for (const field of requiredFields) {
@@ -106,13 +107,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate payment method type
-    const validPaymentMethods = ['Cash', 'Bank', 'Cheque', 'BankDeposit'];
-    if (!validPaymentMethods.includes(body.sale.paymentMethod.type)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid payment method type' },
-        { status: 400 }
-      );
+    // Validate payment method type from payments array
+    if (body.payments && body.payments.length > 0) {
+      const validPaymentMethods = ['Cash', 'Bank', 'Cheque', 'BankDeposit'];
+      const firstPayment = body.payments[0];
+      if (firstPayment.paymentMethod && !validPaymentMethods.includes(firstPayment.paymentMethod.type)) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid payment method type' },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate payment status
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new customer
-    const customer = new Customer({
+    const customerData = {
       companyId,
       vehicle: {
         companyName: body.vehicle.companyName,
@@ -173,16 +177,16 @@ export async function POST(request: NextRequest) {
         saleDate: body.sale.saleDate || new Date(),
         salePrice: salePrice,
         paidAmount: paidAmount,
-        paymentMethod: {
-          type: body.sale.paymentMethod.type,
-          details: body.sale.paymentMethod.details || {},
-        },
         paymentStatus: body.sale.paymentStatus || 'Pending',
         note: body.sale.note,
         document: body.sale.document,
       },
-    });
+      payments: body.payments || [],
+    };
 
+    console.log('Customer data to save:', JSON.stringify(customerData, null, 2));
+    
+    const customer = new Customer(customerData);
     const savedCustomer = await customer.save();
 
     return NextResponse.json({
@@ -193,10 +197,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Error creating customer:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+      const validationErrors = Object.values(error.errors).map((err: any) => ({
+        field: err.path,
+        message: err.message,
+        value: err.value
+      }));
+      console.error('Validation errors:', validationErrors);
       return NextResponse.json(
         { success: false, error: 'Validation failed', details: validationErrors },
         { status: 400 }

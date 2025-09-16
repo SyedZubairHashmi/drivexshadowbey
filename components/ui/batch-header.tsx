@@ -180,29 +180,6 @@ export function BatchHeader({
             </div>
           )}
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          {batchData && (
-            <div 
-              style={{
-                // width: "121px",
-                height: "25px",
-                borderRadius: "1000px",
-                opacity: 1,
-                gap: "10px",
-                paddingTop: "4px",
-                paddingRight: "13px",
-                paddingBottom: "4px",
-                paddingLeft: "13px",
-                backgroundColor: "#F3F4F6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "12px",
-                color: "#374151",
-              }}
-            >
-              {countryName}
-            </div>
-          )}
 
           {/* Transit Status Badge - Show if title contains "Transit" */}
           {title.includes('Transit') && (
@@ -333,23 +310,6 @@ export function BatchHeader({
               />
             </div>
 
-            <Button 
-              variant="outline" 
-              size="sm"
-              style={{
-                height: "41px",
-                borderRadius: "12px",
-                gap: "10px",
-                padding: "12px",
-                borderWidth: "1px",
-                border: "1px solid #0000001F",
-                color: "#00000099",
-                fontWeight: "500"
-              }}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
           </div>
 
           <div className="flex gap-2">

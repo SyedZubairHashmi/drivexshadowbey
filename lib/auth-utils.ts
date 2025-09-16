@@ -44,3 +44,12 @@ export function getUserFromRequest(request: NextRequest): any | null {
     return null;
   }
 }
+
+
+
+
+
+
+
+
+

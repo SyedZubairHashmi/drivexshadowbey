@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IPayment, ICustomer } from "@/lib/models/Customer";
 
 interface SoldCarFormData {
   // Step 1: Car Details
@@ -32,7 +33,7 @@ interface SoldCarFormData {
   emailAddress: string;
   address: string;
   
-  // Step 3: Sale Details
+  // Step 3: Sale Details (for new customer model)
   saleDate: string;
   salePrice: number;
   paidAmount: number;
@@ -101,6 +102,7 @@ function SoldCarsContent() {
   // Payment method dropdown state
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
   const [showPaymentStatusDropdown, setShowPaymentStatusDropdown] = useState(false);
+  
 
   // Chassis number dropdown state
   const [showChassisDropdown, setShowChassisDropdown] = useState(false);
@@ -117,7 +119,6 @@ function SoldCarsContent() {
   const paymentStatuses = [
     { value: "Completed", label: "Completed" },
     { value: "Pending", label: "Pending" },
-    { value: "In Progress", label: "In Progress" },
   ];
 
   useEffect(() => {
@@ -254,6 +255,7 @@ function SoldCarsContent() {
     }));
   };
 
+
   // Fetch available cars for chassis number dropdown
   const fetchAvailableCars = async () => {
     try {
@@ -372,6 +374,18 @@ function SoldCarsContent() {
 
 
   const handleNextStep = () => {
+    // Validate step 3 (payment details) before proceeding to step 4
+    if (currentStep === 3) {
+      if (!formData.paymentMethod.type) {
+        alert('Please select a payment method');
+        return;
+      }
+      if (!formData.paymentStatus) {
+        alert('Please select a payment status');
+        return;
+      }
+    }
+    
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
@@ -396,9 +410,13 @@ function SoldCarsContent() {
       address: '',
       saleDate: '',
       salePrice: 0,
-      paymentMethod: '',
-      paymentStatus: '',
+      paidAmount: 0,
       remainingBalance: 0,
+      paymentMethod: {
+        type: '',
+        details: {}
+      },
+      paymentStatus: '',
       notes: '',
       salesAgreement: null,
       additionalDocuments: []
@@ -416,6 +434,19 @@ function SoldCarsContent() {
     try {
       setIsSubmitting(true); // Start loading
       console.log('Form submitted:', formData);
+      
+      // Validate required fields
+      if (!formData.paymentMethod.type) {
+        alert('Please select a payment method');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (!formData.paymentStatus) {
+        alert('Please select a payment status');
+        setIsSubmitting(false);
+        return;
+      }
       
       // First, find the car by chassis number and update its status to 'sold'
       const carsResponse = await carAPI.getAll({ limit: 1000 });
@@ -449,6 +480,31 @@ function SoldCarsContent() {
         }
       }
       
+      // Calculate remaining amount after payment
+      const remainingAfterPayment = formData.salePrice - formData.paidAmount;
+
+      // Create payment installment from form data using new IPayment interface
+      const paymentInstallment: IPayment = {
+        paymentDate: new Date(formData.saleDate), // Date from UI → payments.paymentDate
+        amountPaid: formData.paidAmount, // Amount Paid from UI → payments.amountPaid
+        remainingAfterPayment: remainingAfterPayment, // Calculated remaining → payments.remainingAfterPayment
+        totalPaidUpToDate: formData.paidAmount, // Same as amountPaid for first installment
+        installmentNumber: 1,
+        paymentMethod: {
+          type: formData.paymentMethod.type as "Cash" | "Bank" | "Cheque" | "BankDeposit", // Payment Method from UI → payments.paymentMethod.type
+          details: { // Payment Method Details from UI → payments.paymentMethod.details
+            bankName: formData.paymentMethod.details.bankName,
+            ibanNo: formData.paymentMethod.details.ibanNo,
+            accountNo: formData.paymentMethod.details.accountNo,
+            chequeNo: formData.paymentMethod.details.chequeNo,
+            chequeClearanceDate: formData.paymentMethod.details.chequeClearanceDate ? new Date(formData.paymentMethod.details.chequeClearanceDate) : undefined,
+            slipNo: formData.paymentMethod.details.slipNo,
+          }
+        },
+        status: formData.paymentStatus as "Completed" | "Pending" | "Failed", // Status from UI → payments.status
+        note: formData.notes
+      };
+
       // Prepare customer data for API using the new structure
       const customerData = {
         vehicle: {
@@ -463,18 +519,14 @@ function SoldCarsContent() {
           address: formData.address,
         },
         sale: {
-          saleDate: formData.saleDate,
-          salePrice: formData.salePrice,
-          paidAmount: formData.paidAmount,
-          remainingAmount: formData.remainingBalance,
-          paymentMethod: {
-            type: formData.paymentMethod.type,
-            details: formData.paymentMethod.details
-          },
-          paymentStatus: formData.paymentStatus,
+          saleDate: new Date(formData.saleDate),
+          salePrice: formData.salePrice, // Sale Price from UI → sale.salePrice
+          paidAmount: formData.paidAmount, // Will be calculated automatically by database middleware
+          paymentStatus: formData.paymentStatus as "Completed" | "Pending", // Will be calculated automatically
           note: formData.notes,
           document: formData.salesAgreement ? formData.salesAgreement.name : undefined,
         },
+        payments: [paymentInstallment]
       };
 
       // Save customer data using the new API structure
@@ -1178,18 +1230,13 @@ function SoldCarsContent() {
       case 1: return '458px';
       case 2: return '458px';
       case 3: {
-        // Dynamic height based on payment method for step 3
-        switch (formData.paymentMethod.type) {
-          case "Bank":
-            return '780px'; // Bank has 3 additional fields
-          case "Cheque":
-            return '780px'; // Cheque has 3 additional fields
-          case "BankDeposit":
-            return '720px'; // Bank Deposit has 2 additional fields
-          case "Cash":
-          default:
-            return '630px'; // Cash has no additional fields
-        }
+        // Dynamic height based on payment method
+        const baseHeight = 630; // Base height for step 3
+        const methodHeight = formData.paymentMethod.type === "Bank" ? 100 : 
+                           formData.paymentMethod.type === "Cheque" ? 100 : 
+                           formData.paymentMethod.type === "BankDeposit" ? 80 : 0;
+        
+        return `${baseHeight + methodHeight}px`;
       }
       case 4: return '656px';
       default: return '358px';
@@ -1524,7 +1571,14 @@ function SoldCarsContent() {
             </div>
 
             {/* Content */}
-            <div className="flex-1">
+            <div 
+              className="flex-1 scrollbar-hide"
+              style={{
+                overflowY: 'auto',
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE and Edge
+              }}
+            >
               {currentStep === 1 && renderStep1()}
               {currentStep === 2 && renderStep2()}
               {currentStep === 3 && renderStep3()}

@@ -661,7 +661,7 @@ export default function ProfileSettings() {
                             className={`bg-white w-full border-0 shadow-none ${errors.enterPin ? 'border-red-500' : ''}`}
                             type="password"
                             placeholder="Enter your new PIN (min 4 characters)"
-                            maxLength={4}
+                            maxLength={6}
                             style={{
                                 display: "flex" ,
                                 height: "42px",
@@ -698,7 +698,7 @@ export default function ProfileSettings() {
                           className={`bg-white border-0 shadow-none ${errors.confirmPin ? 'border-red-500' : ''}`}
                           type="password"
                           placeholder="Confirm your new PIN"
-                          maxLength={4}
+                          maxLength={6}
                           style={{
                             display: "flex" ,
                             height: "42px",

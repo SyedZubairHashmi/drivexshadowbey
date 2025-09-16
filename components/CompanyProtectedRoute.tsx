@@ -45,3 +45,12 @@ export function CompanyProtectedRoute({ children }: CompanyProtectedRouteProps) 
   return <>{children}</>;
 }
 
+
+
+
+
+
+
+
+
+

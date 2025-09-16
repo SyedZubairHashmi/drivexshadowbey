@@ -13,7 +13,7 @@ const EyeWithLine = () => (
     viewBox="0 0 24 23"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ opacity: 1 }}
+    style={{ opacity: 0.4 }}
   >
     <path
       d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"
@@ -44,7 +44,7 @@ const EyeWithoutLine = () => (
   >
     <path
       d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"
-      fill="black"
+      fill="#141414"
     />
   </svg>
 );
@@ -57,16 +57,17 @@ interface SecureStatCardProps {
   className?: string;
   isBlurred?: boolean;
   onToggleBlur?: () => void;
+  showEditButton?: boolean;
+  onEdit?: () => void;
 }
 
 interface PinModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPinSubmit: (pin: string) => void;
-  isLoading?: boolean;
 }
 
-function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalProps) {
+function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
 
@@ -83,8 +84,8 @@ function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalP
              <div 
          className="bg-white rounded-xl border border-gray-300 flex flex-col gap-5"
                    style={{
-            width: "530px",
-            height: "265px",
+            width: "550px",
+            height: "280px",
             top: "280px",
             left: "460px",
             borderWidth: "1px",
@@ -94,9 +95,17 @@ function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalP
             padding: "20px"
           }}
        >
-         <div className="flex justify-between items-center">
+         <div className="flex justify-between items-center ">
            <h2 
-             className="text-black font-medium text-3xl"
+             className="text-black"
+             style={{
+               fontWeight: 500,
+               fontStyle: "normal",
+               fontSize: "30px",
+               lineHeight: "50%",
+               letterSpacing: "0%",
+               verticalAlign: "middle"
+             }}
            >
              Safety Alert
            </h2>
@@ -116,14 +125,21 @@ function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalP
          </div>
          
          <p 
-           className="text-black-600 text-lg mt-[-20px]"
+           className="text-black-600"
+           style={{
+             fontWeight: 400,
+             fontStyle: "normal",
+             fontSize: "18px",
+             lineHeight: "100%",
+             letterSpacing: "2%"
+           }}
          >
            Safety Pin required
          </p>
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm text-black-500 mb-2">
+            <label className="block text-lg text-black-500 mb-2">
               Enter your Pin Number
             </label>
             <div className="relative">
@@ -169,25 +185,17 @@ function PinModal({ isOpen, onClose, onPinSubmit, isLoading = false }: PinModalP
           
                      <button
              type="submit"
-             disabled={isLoading}
-             className={`text-white transition-colors w-full flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+             className="text-white transition-colors w-full"
              style={{
                height: "45px",
                maxHeight: "45px",
                gap: "15px",
-               opacity: isLoading ? 0.7 : 1,
+               opacity: 1,
                borderRadius: "12px",
                backgroundColor: "#00674F"
              }}
            >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Loading...
-              </div>
-            ) : (
-              "Enter"
-            )}
+            Enter
           </button>
         </form>
       </div>
@@ -203,11 +211,12 @@ export function SecureStatCard({
   className,
   isBlurred = true,
   onToggleBlur,
+  showEditButton = false,
+  onEdit,
 }: SecureStatCardProps) {
   const { user } = useAuth();
   const [showPinModal, setShowPinModal] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleEyeClick = () => {
     if (!isUnlocked) {
@@ -218,19 +227,18 @@ export function SecureStatCard({
   };
 
   const handlePinSubmit = async (pin: string) => {
-    if (!user) {
-      alert("User not authenticated. Please login again.");
+    if (!user || !user._id) {
+      alert("Company not authenticated. Please login again.");
       return;
     }
 
-    setIsLoading(true);
     try {
       const response = await fetch('/api/auth/validate-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password: pin }),
+        body: JSON.stringify({ companyId: user._id, pin }),
       });
 
       const data = await response.json();
@@ -244,8 +252,6 @@ export function SecureStatCard({
     } catch (error) {
       console.error('Error validating PIN:', error);
       alert("Error validating PIN. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -272,13 +278,14 @@ export function SecureStatCard({
           <div className="text-sm text-black-500">{title}</div>
           <button
             onClick={handleEyeClick}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="transition-colors"
             style={{ 
               width: "24px", 
               height: "23px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center"
+              justifyContent: "center",
+              color: "#141414"
             }}
           >
             {isUnlocked ? (
@@ -290,12 +297,43 @@ export function SecureStatCard({
         </div>
         
         <div className="flex justify-between items-end w-full">
-          <div 
-            className={`text-2xl font-bold text-black transition-all duration-300 ${
-              !isUnlocked ? 'blur-sm' : ''
-            }`}
-          >
-            {displayValue}
+          <div className="flex items-center gap-2">
+            <div 
+              className={`text-2xl font-bold transition-all duration-300 ${
+                !isUnlocked ? 'blur-sm' : ''
+              }`}
+              style={{ color: "#141414" }}
+            >
+              {displayValue}
+            </div>
+            {showEditButton && isUnlocked && (
+              <button
+                onClick={onEdit}
+                className="transition-colors"
+                style={{ 
+                  width: "16px", 
+                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#141414"
+                }}
+              >
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            )}
           </div>
           {subtitle && (
             <p className={`text-[10px] text-gray-500 transition-all duration-300 ${
@@ -311,7 +349,6 @@ export function SecureStatCard({
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         onPinSubmit={handlePinSubmit}
-        isLoading={isLoading}
       />
     </>
   );

@@ -81,5 +81,9 @@ InvestorSchema.pre('findOneAndUpdate', function(next) {
 InvestorSchema.index({ companyId: 1, emailAddress: 1 }, { unique: true });
 InvestorSchema.index({ companyId: 1, investorId: 1 }, { unique: true });
 
-export default mongoose.models.Investor ||
-  mongoose.model<Investor>("Investor", InvestorSchema);
+// Clear any existing model to prevent cache issues
+if (mongoose.models.Investor) {
+  delete mongoose.models.Investor;
+}
+
+export default mongoose.model<Investor>("Investor", InvestorSchema);

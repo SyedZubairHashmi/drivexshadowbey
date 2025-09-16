@@ -98,9 +98,20 @@ export default function CustomersPage() {
     setCurrentPage(page);
   };
 
-  const handleEditCustomer = (customer: Customer) => {
-    console.log("Edit customer:", customer);
-    // TODO: Implement edit customer functionality
+  const handleGenerateInvoice = (customer: Customer) => {
+    console.log("Generate invoice for customer:", customer);
+    // TODO: Implement generate invoice functionality
+  };
+
+  const handlePaymentHistory = (customer: Customer) => {
+    console.log("View payment history for customer:", customer);
+    router.push(`/sales-and-payments/customers/${customer._id}`);
+  };
+
+  const handleUpdatePayment = (customer: Customer) => {
+    console.log("Update payment for customer:", customer);
+    // Refresh the customers data after payment update
+    fetchCustomers();
   };
 
   const handleDeleteCustomer = (customer: Customer) => {
@@ -111,20 +122,6 @@ export default function CustomersPage() {
   const handleViewCustomer = (customer: Customer) => {
     console.log("View customer:", customer);
     // TODO: Implement view customer functionality
-  };
-
-  const handleStatusChange = async (customer: Customer): Promise<boolean> => {
-    console.log("CustomerPage: Status change requested for customer:", customer);
-    try {
-      // Refresh the customers list to show updated data
-      console.log("CustomerPage: Refreshing customers list...");
-      await fetchCustomers();
-      console.log("CustomerPage: Customers refreshed successfully after status change");
-      return true; // Return true if refresh was successful
-    } catch (error) {
-      console.error("CustomerPage: Error refreshing customers:", error);
-      return false; // Return false if refresh failed
-    }
   };
 
   if (loading) {
@@ -172,7 +169,7 @@ export default function CustomersPage() {
               lineHeight: '30px',
               letterSpacing: '0%'
             }}>
-              Customers
+              Customer Management
             </h1>
             <Button 
               onClick={handleAddNewCustomer}
@@ -202,10 +199,11 @@ export default function CustomersPage() {
             <div className="[&_.relative]:overflow-hidden">
               <CustomerTable 
                 customers={currentCustomers} 
-                onEdit={handleEditCustomer}
+                onGenerateInvoice={handleGenerateInvoice}
+                onPaymentHistory={handlePaymentHistory}
+                onUpdatePayment={handleUpdatePayment}
                 onDelete={handleDeleteCustomer}
                 onView={handleViewCustomer}
-                onChangeStatus={handleStatusChange}
               />
             </div>
           </div>

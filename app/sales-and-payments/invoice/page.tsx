@@ -4,7 +4,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Plus,MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,7 +16,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { customerAPI } from "@/lib/api";
+import { customerAPI, batchAPI } from "@/lib/api";
 
 interface Customer {
   _id: string;
@@ -36,6 +36,16 @@ interface Customer {
     salePrice: number;
     paidAmount: number;
     remainingAmount: number;
+    paymentStatus: string;
+    note?: string;
+    document?: string;
+  };
+  payments?: Array<{
+    _id?: string;
+    paymentDate: string;
+    amountPaid: number;
+    remainingAfterPayment: number;
+    totalPaidUpToDate: number;
     paymentMethod: {
       type: string;
       details?: {
@@ -47,10 +57,12 @@ interface Customer {
         slipNo?: string;
       };
     };
-    paymentStatus: string;
+    status: string;
+    installmentNumber?: number;
     note?: string;
-    document?: string;
-  };
+    createdAt?: string;
+    updatedAt?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,6 +95,8 @@ export default function InvoicePage() {
       if (response.success) {
         setCustomers(response.data);
         console.log("Customers fetched successfully:", response.data);
+        // Update batch total sale prices after fetching customers
+        await updateBatchSalePrices(response.data);
       } else {
         setError(response.error || "Failed to fetch customers");
       }
@@ -91,6 +105,29 @@ export default function InvoicePage() {
       setError(error.message || "An error occurred while fetching customers");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Update batch total sale prices
+  const updateBatchSalePrices = async (customersData: Customer[]) => {
+    try {
+      // Get unique batch numbers from customers (we need to find cars first)
+      // For now, we'll get all batches and update their sale prices
+      const batchesResponse = await batchAPI.getAll();
+      if (batchesResponse.success) {
+        for (const batch of batchesResponse.data) {
+          try {
+            await batchAPI.calculateSalePrice(batch._id);
+            // Also calculate revenue after sale price update
+            await batchAPI.calculateRevenue(batch._id);
+            console.log(`Updated sale price and revenue for batch ${batch.batchNo}`);
+          } catch (error) {
+            console.error(`Error updating sale price for batch ${batch.batchNo}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error updating batch sale prices:", error);
     }
   };
 
@@ -233,21 +270,6 @@ export default function InvoicePage() {
                 />
               </div>
 
-              <Button 
-                variant="outline" 
-                size="sm"
-                style={{
-                  height: "41px",
-                  borderRadius: "12px",
-                  gap: "10px",
-                  padding: "12px",
-                  borderWidth: "1px",
-                  color: "#00000099"
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
             </div>
 
             <div className="flex gap-2">
@@ -443,7 +465,10 @@ export default function InvoicePage() {
                         {customer.sale.saleDate ? new Date(customer.sale.saleDate).toLocaleDateString() : 'N/A'}
                       </TableCell>
                       <TableCell style={{ padding: '8px 16px' }}>
-                        {customer.sale.paymentMethod.type || 'N/A'}
+                        {customer.payments && customer.payments.length > 0 
+                          ? customer.payments[customer.payments.length - 1].paymentMethod?.type || 'N/A'
+                          : 'N/A'
+                        }
                       </TableCell>
                       <TableCell style={{ padding: '8px 16px' }}>
                         Rs {(customer.sale.salePrice || 0).toLocaleString()}

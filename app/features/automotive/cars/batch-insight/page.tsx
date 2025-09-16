@@ -150,27 +150,6 @@ function BatchInsightHeader({ batch, isExpanded, onToggle }: BatchInsightHeaderP
           <h2 className="text-xl font-semibold text-gray-900">
             Batch {batch.batchNo}
           </h2>
-          <div 
-            style={{
-              width: "121px",
-              height: "25px",
-              borderRadius: "1000px",
-              opacity: 1,
-              gap: "10px",
-              paddingTop: "4px",
-              paddingRight: "10px",
-              paddingBottom: "4px",
-              paddingLeft: "10px",
-              backgroundColor: "#F3F4F6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              color: "#374151",
-            }}
-          >
-            {countryName}
-          </div>
         </div>
 
         <Button
@@ -217,21 +196,6 @@ function BatchInsightHeader({ batch, isExpanded, onToggle }: BatchInsightHeaderP
               />
             </div>
 
-            <Button 
-              variant="outline" 
-              size="sm"
-              style={{
-                height: "41px",
-                borderRadius: "12px",
-                gap: "10px",
-                padding: "12px",
-                borderWidth: "1px",
-                color: "#00000099"
-              }}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
           </div>
 
           <div className="flex gap-2">

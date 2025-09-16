@@ -7,5 +7,10 @@ const adminSchema = new mongoose.Schema({
   role: { type: String, enum: ["admin"], default: "admin" },
 }, { timestamps: true });
 
-export default mongoose.models.Admin || mongoose.model("Admin", adminSchema);
+// Clear any existing model to prevent cache issues
+if (mongoose.models.Admin) {
+  delete mongoose.models.Admin;
+}
+
+export default mongoose.model("Admin", adminSchema);
 

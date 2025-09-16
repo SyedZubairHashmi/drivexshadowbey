@@ -59,6 +59,8 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
         setCars(carsResponse.data);
         setAllBatches(batchesResponse.data);
         console.log("Cars loaded:", carsResponse.data.length);
+        // Update batch total cost after fetching cars
+        await updateBatchTotalCost(batchNumber);
       } else {
         console.error("API error:", carsResponse.error);
         setError(carsResponse.error || "Failed to fetch cars");
@@ -68,6 +70,25 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
       setError(error.message || "An error occurred while fetching cars");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Calculate and update batch total cost
+  const updateBatchTotalCost = async (batchNo: string) => {
+    try {
+      // Get batch data to find the batch ID
+      const batchResponse = await batchAPI.getByBatchNo(batchNo);
+      if (batchResponse.success && batchResponse.data.length > 0) {
+        const batchId = batchResponse.data[0]._id;
+        
+        // Use the new API to calculate and update total cost
+        await batchAPI.calculateTotalCost(batchId);
+        // Also calculate revenue after cost update
+        await batchAPI.calculateRevenue(batchId);
+        console.log("Batch total cost and revenue updated for batch:", batchNo);
+      }
+    } catch (error) {
+      console.error("Error updating batch total cost:", error);
     }
   };
 
@@ -225,9 +246,47 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
             </div>
           </div>
 
+          {/* Total Batch Cost */}
+          <div className="flex justify-end mt-4">
+            <span className="text-[18px] font-semibold text-black-900">Total Cost = </span>
+            <span className="text-[16px] text-black-600">
+              PKR {cars.reduce((total, car) => {
+                // Calculate total cost for each car using the same logic as the virtual field
+                const f = car.financing;
+                if (!f) return total;
+                
+                const carTotalCost = (
+                  (f.auctionPrice?.totalAmount || 0) +
+                  (f.auctionExpenses?.totalAmount || 0) +
+                  (f.inlandCharges?.totalAmount || 0) +
+                  (f.loadingCharges?.totalAmount || 0) +
+                  (f.containerCharges?.totalAmount || 0) +
+                  (f.freightSea?.totalAmount || 0) +
+                  (f.variantDuty || 0) +
+                  (f.passportCharges || 0) +
+                  (f.servicesCharges || 0) +
+                  (f.transportCharges || 0) +
+                  (f.repairCharges || 0) +
+                  (f.miscellaneousCharges || 0) +
+                  (f.vehicleValueCif || 0) +
+                  (f.landingCharges || 0) +
+                  (f.customsDuty || 0) +
+                  (f.salesTax || 0) +
+                  (f.federalExciseDuty || 0) +
+                  (f.incomeTax || 0) +
+                  (f.freightAndStorageCharges || 0) +
+                  (f.demurrage || 0) +
+                  (f.ageOfVehicle || 0)
+                );
+                
+                return total + carTotalCost;
+              }, 0).toLocaleString()}
+            </span>
+          </div>
+
           {/* Pagination */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center gap-4 justify-center">
+          <div className="flex justify-center">
+            <div className="flex items-center gap-4">
               <button
                 className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={currentPage === 1}
