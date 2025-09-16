@@ -286,7 +286,7 @@ export default function PaymentHistoryPage() {
               />
               <SecureStatCard
                 title="Batch Profit"
-                value={`Rs ${(batchData?.profit || 0).toLocaleString()}`}
+                value={`Rs ${(((batchData?.profit ?? ((batchData?.totalRevenue || 0) - (batchData?.totalExpense || 0))) || 0).toLocaleString())}`}
                 icon={DollarSign}
               />
               <SecureStatCard

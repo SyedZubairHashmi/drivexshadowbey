@@ -17,6 +17,55 @@ import {
 import { useEffect, useState } from "react";
 import { batchAPI } from "@/lib/api";
 
+// Local flag renderers to match batch header behavior
+const FlagJP = () => (
+  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="Japan flag" role="img">
+    <path fill="#fff" d="M0 0h3v2H0z"/>
+    <circle cx="1.5" cy="1" r="0.5" fill="#bc002d"/>
+  </svg>
+);
+const FlagUS = () => (
+  <svg viewBox="0 0 7410 3900" className="h-4 w-6" aria-label="United States flag" role="img">
+    <path fill="#b22234" d="M0 0h7410v3900H0z"/>
+    <path stroke="#fff" strokeWidth="300" d="M0 450h7410M0 1050h7410M0 1650h7410M0 2250h7410M0 2850h7410M0 3450h7410"/>
+    <path fill="#3c3b6e" d="M0 0h2964v2100H0z"/>
+  </svg>
+);
+const FlagGB = () => (
+  <svg viewBox="0 0 60 30" className="h-4 w-6" aria-label="United Kingdom flag" role="img">
+    <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+    <clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+    <g clipPath="url(#s)">
+      <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
+      <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#t)" stroke="#C8102E" strokeWidth="4"/>
+      <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
+      <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+    </g>
+  </svg>
+);
+const FlagAU = () => (
+  <svg viewBox="0 0 1200 600" className="h-4 w-6" aria-label="Australia flag" role="img">
+    <rect width="1200" height="600" fill="#00247D"/>
+  </svg>
+);
+const FlagKR = () => (
+  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="South Korea flag" role="img">
+    <path fill="#fff" d="M0 0h3v2H0z"/>
+    <g transform="translate(1.5 1)">
+      <circle r="0.5" fill="#cd2e3a"/>
+      <path d="M0-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1z" fill="#0047a0"/>
+    </g>
+  </svg>
+);
+const FLAG_COMPONENTS: { [key: string]: React.ComponentType } = {
+  JP: FlagJP,
+  US: FlagUS,
+  GB: FlagGB,
+  AU: FlagAU,
+  KR: FlagKR,
+};
+
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState({
     batchProfit: 620000,
@@ -38,6 +87,37 @@ export default function AnalyticsPage() {
     ]
   });
   const [loading, setLoading] = useState(true);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<any | null>(null);
+  const [isBatchMenuOpen, setIsBatchMenuOpen] = useState(false);
+
+  const computeBatchAnalytics = (batch: any, allBatches: any[]) => {
+    if (!batch) return;
+    const totalCars = Array.isArray(batch.cars) ? batch.cars.length : 0;
+    const soldCars = Array.isArray(batch.cars)
+      ? batch.cars.filter((c: any) => (c?.status || '').toString().toLowerCase() === 'sold').length
+      : 0;
+    const remainingCars = Math.max(totalCars - soldCars, 0);
+
+    const totalRevenue = Number(batch.totalRevenue) || 0;
+    const totalExpense = Number(batch.totalExpense) || 0;
+    const investment = Number(batch.totalInvestment) || 0;
+    const profit = Number(batch.profit) || (totalRevenue - totalExpense);
+
+    const latestBatchNo = allBatches && allBatches.length > 0 ? allBatches[0].batchNo : '';
+
+    setAnalyticsData(prev => ({
+      ...prev,
+      batchProfit: profit,
+      investmentAmount: investment,
+      batchRevenue: totalRevenue,
+      totalCarsSold: soldCars,
+      remainingCars: remainingCars,
+      totalBatches: allBatches?.length || 0,
+      newArrivalBatch: latestBatchNo,
+      batchExpense: totalExpense,
+    }));
+  };
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -62,7 +142,16 @@ export default function AnalyticsPage() {
       // Fetch all batches
       const batchesResponse = await batchAPI.getAll();
       if (batchesResponse.success) {
-        const batches = batchesResponse.data;
+        const batches = batchesResponse.data || [];
+        setBatches(batches);
+        if (batches.length > 0 && !selectedBatch) {
+          setSelectedBatch(batches[0]);
+          computeBatchAnalytics(batches[0], batches);
+        } else if (selectedBatch) {
+          // Refresh metrics with possibly updated data
+          const refreshed = batches.find((b: any) => b._id === selectedBatch._id) || selectedBatch;
+          computeBatchAnalytics(refreshed, batches);
+        }
         
         // Calculate totals using the updated batch data
         const totalProfit = batches.reduce((sum: number, batch: any) => sum + (batch.profit || 0), 0);
@@ -74,14 +163,7 @@ export default function AnalyticsPage() {
         // Calculate total sale price from all batches
         const batchTotalSalePrice = batches.reduce((sum: number, batch: any) => sum + (batch.totalSalePrice || 0), 0);
         
-        setAnalyticsData(prev => ({
-          ...prev,
-          batchProfit: totalProfit,
-          investmentAmount: totalInvestment,
-          batchRevenue: totalRevenue, // Use calculated total revenue (sale price - cost price)
-          totalCarsSold,
-          totalBatches
-        }));
+        // Keep aggregate totals if needed in future; per-batch metrics set above
       }
     } catch (error) {
       console.error("Error fetching analytics data:", error);
@@ -215,21 +297,72 @@ export default function AnalyticsPage() {
           </div>
 
   {/* Batch Selector Dropdown (right side) */}
-  <div
-    style={{
-      display: "flex",
-      padding: "10px",
-      alignItems: "center",
-      gap: "12px",
-      borderRadius: "8px",
-      border: "1px solid rgba(0, 0, 0, 0.24)",
-      background: "#FFF",
-    }}
-  >
-            <Flag className="w-4 h-4" />
-            <span>Batch 05</span>
-            <ChevronDown className="w-4 h-4" />
+  <div style={{ position: 'relative' }}>
+    <button
+      type="button"
+      onClick={() => setIsBatchMenuOpen(v => !v)}
+      style={{
+        display: "flex",
+        padding: "10px",
+        alignItems: "center",
+        gap: "12px",
+        borderRadius: "8px",
+        border: "1px solid rgba(0, 0, 0, 0.24)",
+        background: "#FFF",
+      }}
+    >
+      {(() => {
+        const FlagComp = selectedBatch?.flagImage ? (FLAG_COMPONENTS as any)[selectedBatch.flagImage] : null;
+        return FlagComp ? <FlagComp /> : <Flag className="w-4 h-4" />;
+      })()}
+      <span>{selectedBatch ? `Batch ${selectedBatch.batchNo}` : 'Select Batch'}</span>
+      <ChevronDown className="w-4 h-4" />
+    </button>
+
+    {isBatchMenuOpen && batches && batches.length > 0 && (
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          marginTop: '8px',
+          background: '#FFF',
+          border: '1px solid rgba(0,0,0,0.12)',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          zIndex: 20,
+          minWidth: '180px',
+          padding: '6px',
+        }}
+      >
+        {batches.map((b: any) => (
+          <div
+            key={b._id}
+            onClick={() => {
+              setSelectedBatch(b);
+              setIsBatchMenuOpen(false);
+              computeBatchAnalytics(b, batches);
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 10px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.backgroundColor = '#F7F7F7')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent')}
+          >
+            {(() => {
+              const FlagComp = b.flagImage ? (FLAG_COMPONENTS as any)[b.flagImage] : null;
+              return FlagComp ? <FlagComp /> : <Flag className="w-4 h-4" />;
+            })()}
+            <span style={{ fontSize: '14px', color: '#111' }}>{`Batch ${b.batchNo}`}</span>
           </div>
+        ))}
+      </div>
+    )}
+  </div>
         </div>
 
         {/* 6 Cards Section */}
@@ -273,7 +406,8 @@ export default function AnalyticsPage() {
           {/* Left Side - Analytics */}
           <div style={{
             display: 'flex',
-            width: '650px',
+            width: '60%',
+            height: '50%',
             padding: '28px',
             flexDirection: 'column',
             alignItems: 'flex-start',
@@ -335,7 +469,7 @@ export default function AnalyticsPage() {
           {/* Right Side - Payments */}
           <div style={{
             display: 'flex',
-            width: '430px',
+            width: '40%',
             padding: '24px 28px',
             flexDirection: 'column',
             alignItems: 'center',
