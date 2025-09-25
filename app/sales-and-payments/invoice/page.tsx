@@ -81,6 +81,11 @@ export default function InvoicePage() {
   const [importYearFilter, setImportYearFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  // Dropdown option sources
+  const gradeOptions = ["6", "5", "4.5", "4", "3.5", "3", "2.5", "2"];
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => String(currentYear - i));
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -136,21 +141,54 @@ export default function InvoicePage() {
     // TODO: Implement add new invoice functionality
   };
 
-  // Filter customers based on search and filter criteria
-  const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = searchTerm === '' || 
-      customer.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.customer.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.vehicle.chassisNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.vehicle.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.vehicle.model.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCompany = companyFilter === '' || companyFilter === 'all' || customer.vehicle.companyName === companyFilter;
-    const matchesGrade = gradeFilter === '' || gradeFilter === 'all' || customer.vehicle.model.includes(gradeFilter);
-    const matchesImportYear = importYearFilter === '' || importYearFilter === 'all' || customer.vehicle.importYear?.toString() === importYearFilter;
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || customer.sale.paymentStatus === statusFilter;
-    
-    return matchesSearch && matchesCompany && matchesGrade && matchesImportYear && matchesStatus;
+  // Filter customers based on search and filter criteria (case-insensitive & safe)
+  const filteredCustomers = customers.filter((customer) => {
+    const customerName = customer.customer?.name || '';
+    const phoneNumber = customer.customer?.phoneNumber || '';
+    const chassis = customer.vehicle?.chassisNumber || '';
+    const companyName = customer.vehicle?.companyName || '';
+    const model = customer.vehicle?.model || '';
+    const paymentStatus = customer.sale?.paymentStatus || '';
+    const derivedImportYear = (customer as any).vehicle?.importYear
+      ? String((customer as any).vehicle.importYear)
+      : (customer.sale?.saleDate ? String(new Date(customer.sale.saleDate).getFullYear()) : '');
+
+    const q = (searchTerm || '').toLowerCase();
+    const matchesSearch =
+      q === '' ||
+      customerName.toLowerCase().includes(q) ||
+      phoneNumber.toLowerCase().includes(q) ||
+      chassis.toLowerCase().includes(q) ||
+      companyName.toLowerCase().includes(q) ||
+      model.toLowerCase().includes(q);
+
+    const matchesCompany =
+      companyFilter === '' ||
+      companyFilter === 'all' ||
+      companyName.toLowerCase() === companyFilter.toLowerCase();
+
+    const matchesGrade =
+      gradeFilter === '' ||
+      gradeFilter === 'all' ||
+      model.toLowerCase().includes(gradeFilter.toLowerCase());
+
+    const matchesImportYear =
+      importYearFilter === '' ||
+      importYearFilter === 'all' ||
+      derivedImportYear === importYearFilter;
+
+    const matchesStatus =
+      statusFilter === '' ||
+      statusFilter === 'all' ||
+      paymentStatus.toLowerCase() === statusFilter.toLowerCase();
+
+    return (
+      matchesSearch &&
+      matchesCompany &&
+      matchesGrade &&
+      matchesImportYear &&
+      matchesStatus
+    );
   });
 
   // Calculate pagination
@@ -358,12 +396,12 @@ export default function InvoicePage() {
                 >
                   <SelectValue placeholder="Grade" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Grades</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                </SelectContent>
+              <SelectContent>
+                <SelectItem value="all">All Grades</SelectItem>
+                {gradeOptions.map((g) => (
+                  <SelectItem key={g} value={g}>{g}</SelectItem>
+                ))}
+              </SelectContent>
               </Select>
 
               <Select value={importYearFilter} onValueChange={setImportYearFilter}>
@@ -385,12 +423,12 @@ export default function InvoicePage() {
                 >
                   <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  <SelectItem value="2026">2026</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -412,11 +450,11 @@ export default function InvoicePage() {
                 >
                   <SelectValue placeholder="Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                </SelectContent>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+              </SelectContent>
               </Select>
             </div>
           </div>

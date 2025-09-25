@@ -40,13 +40,35 @@ export function BatchCarsSection({
   const [showAddCarModal, setShowAddCarModal] = useState(false);
   const [internalIsExpanded, setInternalIsExpanded] = useState(true);
 
+  // Filters state for batch sections
+  const [searchTerm, setSearchTerm] = useState('');
+  const [companyFilter, setCompanyFilter] = useState('');
+  const [gradeFilter, setGradeFilter] = useState('');
+  const [importYearFilter, setImportYearFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
   // Use external state if provided, otherwise use internal state
   const isExpanded = externalIsExpanded !== undefined ? externalIsExpanded : internalIsExpanded;
   const handleToggle = externalOnToggle || (() => setInternalIsExpanded(!internalIsExpanded));
 
-  // Use all cars passed from parent (no limit)
-  const filteredCars = cars;
-  console.log(filteredCars)
+  // Apply dropdown filters
+  const filteredCars = cars.filter((car: any) => {
+    const q = (searchTerm || '').toLowerCase();
+    const carName = (car.carName || '').toLowerCase();
+    const company = (car.company || '').toLowerCase();
+    const chassis = (car.chasisNumber || '').toLowerCase();
+    const auctionGrade = car.auctionGrade != null ? String(car.auctionGrade) : '';
+    const importYear = car.importYear != null ? String(car.importYear) : '';
+    const status = (car.status || '').toLowerCase();
+
+    const matchesSearch = q === '' || carName.includes(q) || company.includes(q) || chassis.includes(q);
+    const matchesCompany = companyFilter === '' || companyFilter === 'all' || company === companyFilter.toLowerCase();
+    const matchesGrade = gradeFilter === '' || gradeFilter === 'all' || auctionGrade === gradeFilter;
+    const matchesImportYear = importYearFilter === '' || importYearFilter === 'all' || importYear === importYearFilter;
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || status === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesCompany && matchesGrade && matchesImportYear && matchesStatus;
+  });
 
   const handleAddNewCar = (carData: any) => {
     console.log("Add new car:", carData);
@@ -75,6 +97,17 @@ export function BatchCarsSection({
         batchNumber={batchNumber}
         isLatestBatch={isLatestBatch}
         batchData={batchData}
+        // Filters wiring
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        companyFilter={companyFilter}
+        onCompanyFilterChange={setCompanyFilter}
+        gradeFilter={gradeFilter}
+        onGradeFilterChange={setGradeFilter}
+        importYearFilter={importYearFilter}
+        onImportYearFilterChange={setImportYearFilter}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
       />
 
       {/* Table with smooth transition */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -149,8 +150,17 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Black area (hidden on mobile) */}
-      <div className="hidden md:block w-[40%]"></div>
+      {/* Right visual area (image on desktop) */}
+      <div className="hidden md:block w-[40%] relative rounded-xl overflow-hidden">
+        <Image
+          src="/shadowbey.png"
+          alt="Login visual"
+          fill
+          priority
+          sizes="(min-width: 768px) 40vw, 0vw"
+          style={{ objectFit: "cover" }}
+        />
+      </div>
     </div>
   );
 }
