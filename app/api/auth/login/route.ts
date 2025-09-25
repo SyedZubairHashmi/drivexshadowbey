@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import { Admin, Company } from '@/lib/models';
+import { Admin, Company, SubUser } from '@/lib/models';
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -55,46 +55,109 @@ export async function POST(request: NextRequest) {
       return response;
     }
 
-    // Fallback: try company (by companyEmail)
+    // Try company (by companyEmail)
     const company = await Company.findOne({ companyEmail: emailMatcher });
-    if (!company || !company.password || company.password !== password) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid email or password' },
-        { status: 401 }
-      );
+    if (company) {
+      if (!company.password || company.password !== password) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
+
+      // Block inactive companies
+      if (company.status !== 'active') {
+        return NextResponse.json(
+          { success: false, error: 'Company account is inactive. Please contact support.' },
+          { status: 403 }
+        );
+      }
+
+      const companyResponse = {
+        _id: company._id,
+        ownerName: company.ownerName,
+        companyName: company.companyName,
+        companyEmail: company.companyEmail,
+        status: company.status,
+        recoveryEmail: company.recoveryEmail,
+        role: 'company' as const,
+        createdAt: company.createdAt,
+        updatedAt: company.updatedAt,
+      };
+
+      const response = NextResponse.json({ success: true, data: companyResponse, message: 'Login successful' });
+      
+      // Set user data in cookie for middleware access
+      response.cookies.set('user', JSON.stringify(companyResponse), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      
+      return response;
     }
 
-    // Block inactive companies
-    if (company.status !== 'active') {
-      return NextResponse.json(
-        { success: false, error: 'Company account is inactive. Please contact support.' },
-        { status: 403 }
-      );
+    // Try subuser (by email)
+    const subuser = await SubUser.findOne({ email: emailMatcher }).populate('companyId');
+    if (subuser) {
+      if (!subuser.password || subuser.password !== password) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
+
+      // Get company information
+      const company = await Company.findById(subuser.companyId);
+      if (!company || company.status !== 'active') {
+        return NextResponse.json(
+          { success: false, error: 'Company account is inactive or not found' },
+          { status: 403 }
+        );
+      }
+
+      const subuserResponse = {
+        _id: subuser._id,
+        name: subuser.name,
+        email: subuser.email,
+        role: 'subuser' as const,
+        userRole: subuser.role || 'Staff', // The role like Accountant, Staff, etc.
+        companyId: subuser.companyId,
+        companyName: company.companyName,
+        branch: subuser.branch,
+        access: subuser.access,
+        createdAt: subuser.createdAt,
+        updatedAt: subuser.updatedAt,
+      };
+
+      const response = NextResponse.json({ success: true, data: subuserResponse, message: 'Login successful' });
+      
+      // Set user data in cookie for middleware access
+      response.cookies.set('user', JSON.stringify(subuserResponse), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      // Set subuser access cookie to allow route-level permissions in middleware
+      if (subuser.access) {
+        response.cookies.set('subuser_access', JSON.stringify(subuser.access), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7
+        });
+      }
+      
+      return response;
     }
 
-    const companyResponse = {
-      _id: company._id,
-      ownerName: company.ownerName,
-      companyName: company.companyName,
-      companyEmail: company.companyEmail,
-      status: company.status,
-      recoveryEmail: company.recoveryEmail,
-      role: 'company' as const,
-      createdAt: company.createdAt,
-      updatedAt: company.updatedAt,
-    };
-
-    const response = NextResponse.json({ success: true, data: companyResponse, message: 'Login successful' });
-    
-    // Set user data in cookie for middleware access
-    response.cookies.set('user', JSON.stringify(companyResponse), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    });
-    
-    return response;
+    // If no user found
+    return NextResponse.json(
+      { success: false, error: 'Invalid email or password' },
+      { status: 401 }
+    );
 
   } catch (error: any) {
     console.error('Error during login:', error);

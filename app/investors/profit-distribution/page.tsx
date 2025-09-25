@@ -60,7 +60,6 @@ const getStatusColor = (status: string) => {
 
 export default function ProfitDistributionPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [profitDistributions, setProfitDistributions] = useState<ProfitDistribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,12 +116,19 @@ export default function ProfitDistributionPage() {
 
   // Calculate profit distributions
   const calculateProfitDistributions = (investors: Investor[], batchData: any): ProfitDistribution[] => {
-    if (!batchData || !batchData.profit) {
+    if (!batchData) {
+      return [];
+    }
+
+    // Calculate profit using the same fallback logic as the all investors page
+    const calculatedProfit = batchData.profit ?? ((batchData.totalRevenue || 0) - (batchData.totalExpense || 0));
+    
+    if (!calculatedProfit || calculatedProfit <= 0) {
       return [];
     }
 
     return investors.map((investor, index) => {
-      const profitDistribution = (investor.percentageShare / 100) * batchData.profit;
+      const profitDistribution = (investor.percentageShare / 100) * calculatedProfit;
       const remainingProfit = profitDistribution; // Assuming no profit has been distributed yet
       
       return {
@@ -177,20 +183,11 @@ export default function ProfitDistributionPage() {
     setShowExpenseModal(true);
   };
 
-  // Filter investors based on search term and status
-  const filteredInvestors = investors.filter(investor => {
-    const matchesSearch = investor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         investor.investorId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || investor.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  // Filter profit distributions based on search term and status
+  // Filter profit distributions based on search term only
   const filteredProfitDistributions = profitDistributions.filter(distribution => {
     const matchesSearch = distribution.investorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          distribution.investorId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || distribution.profileStatus === filterStatus;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   if (loading) {
@@ -294,7 +291,7 @@ export default function ProfitDistributionPage() {
             />
             <SecureStatCard
               title="Batch Profit"
-              value={`Rs ${(batchData?.profit || 0).toLocaleString()}`}
+              value={`Rs ${(((batchData?.profit ?? ((batchData?.totalRevenue || 0) - (batchData?.totalExpense || 0))) || 0).toLocaleString())}`}
               icon={DollarSign}
             />
             <SecureStatCard
@@ -312,7 +309,7 @@ export default function ProfitDistributionPage() {
           </div>
         </div>
 
-        {/* Search and Filter */}
+        {/* Search */}
         <div className="flex items-center gap-4">
           <div 
             className="flex items-center"
@@ -337,16 +334,6 @@ export default function ProfitDistributionPage() {
               }}
             />
           </div>
-          
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-          </select>
         </div>
 
         {/* Table */}
@@ -378,7 +365,6 @@ export default function ProfitDistributionPage() {
                     <TableCell>
                       <div>
                         <div className="font-medium text-gray-900">{distribution.investorName}</div>
-                        <div className="text-sm text-gray-500">ID: {distribution.investorId}</div>
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">

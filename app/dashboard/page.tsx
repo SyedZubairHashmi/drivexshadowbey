@@ -7,11 +7,13 @@ import { SecureStatCard } from "@/components/ui/secure-stat-card";
 import { BatchCarsSection } from "@/components/batch/BatchCarsSection";
 import { Header } from "@/components/layout/header";
 import { CompanyProtectedRoute } from "@/components/CompanyProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 import { carAPI, batchAPI } from "@/lib/api";
 import type { Car } from "@/types";
 
 
 export default function DashboardPage() {
+  const { user, hasAccess } = useAuth();
   const [expandedBatch, setExpandedBatch] = useState<string>("");
   const [collapsedStates, setCollapsedStates] = useState<{ [key: string]: boolean }>({});
   const [batches, setBatches] = useState<any[]>([]);
@@ -154,6 +156,8 @@ export default function DashboardPage() {
     }
   };
 
+  // Subusers now see the same dashboard as company users
+
   return (
     <CompanyProtectedRoute>
       <MainLayout>
@@ -162,35 +166,37 @@ export default function DashboardPage() {
 
         <Header/>
         
-        {/* Header Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ">
-          <HeaderStatCard
-            title="Total Cars Sold"
-            value={stats.totalCarsSold}
-            subtitle="sold in 2023 | Jan-Aug"
-          />
-          <SecureStatCard
-            title="Total Revenue"
-            value={`Rs ${stats.totalRevenue.toLocaleString()}`}
-          />
-          <SecureStatCard
-            title="Total Profit"
-            value={`Rs ${stats.totalProfit.toLocaleString()}`}
-          />
-          <HeaderStatCard
-            title="Cars in Stock"
-            value={stats.carsInStock}
-          />
-          <HeaderStatCard
-            title="Cars in transit"
-            value={stats.carsInTransit}
-            subtitle="ETA within 2-6 weeks"
-          />
-          <SecureStatCard
-            title="Pending Payments"
-            value={`Rs ${stats.pendingPayments.toLocaleString()}`}
-          />
-        </div>
+        {/* Header Stats Cards - Hide only when dashboardUnits is explicitly false */}
+        {!(user?.role === 'subuser' && user?.access?.dashboardUnits === false) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ">
+            <HeaderStatCard
+              title="Total Cars Sold"
+              value={stats.totalCarsSold}
+              subtitle="sold in 2023 | Jan-Aug"
+            />
+            <SecureStatCard
+              title="Total Revenue"
+              value={`Rs ${stats.totalRevenue.toLocaleString()}`}
+            />
+            <SecureStatCard
+              title="Total Profit"
+              value={`Rs ${stats.totalProfit.toLocaleString()}`}
+            />
+            <HeaderStatCard
+              title="Cars in Stock"
+              value={stats.carsInStock}
+            />
+            <HeaderStatCard
+              title="Cars in transit"
+              value={stats.carsInTransit}
+              subtitle="ETA within 2-6 weeks"
+            />
+            <SecureStatCard
+              title="Pending Payments"
+              value={`Rs ${stats.pendingPayments.toLocaleString()}`}
+            />
+          </div>
+        )}
         </div>
 
         {/* Latest Batch Section - Fixed height, no scrolling */}

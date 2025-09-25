@@ -11,6 +11,7 @@ const companySchema = new mongoose.Schema({
   // Optional fields for company settings
   pin: { type: String, default: "123456" },
   recoveryEmail: { type: String },
+  image: { type: String }, // Profile picture URL
 }, { timestamps: true });
 
 // Clear any existing model to prevent cache issues

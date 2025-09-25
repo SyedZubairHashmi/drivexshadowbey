@@ -435,6 +435,8 @@ export function Sidebar() {
               return user.name ? user.name.charAt(0).toUpperCase() : 'A';
             } else if (user.role === 'company') {
               return user.ownerName ? user.ownerName.charAt(0).toUpperCase() : 'C';
+            } else if (user.role === 'subuser') {
+              return user.name ? user.name.charAt(0).toUpperCase() : 'S';
             }
             return 'U';
           })() : 'U'}
@@ -454,6 +456,8 @@ export function Sidebar() {
                 return user.name || 'Admin';
               } else if (user.role === 'company') {
                 return user.ownerName || 'Company';
+              } else if (user.role === 'subuser') {
+                return user.name || 'Team Member';
               }
               return 'User';
             })() : 'User'}
@@ -472,6 +476,8 @@ export function Sidebar() {
                 return user.email || 'admin@example.com';
               } else if (user.role === 'company') {
                 return user.companyEmail || 'company@example.com';
+              } else if (user.role === 'subuser') {
+                return user.email || 'user@example.com';
               }
               return 'user@example.com';
             })() : 'user@example.com'}

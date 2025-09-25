@@ -227,8 +227,16 @@ export function SecureStatCard({
   };
 
   const handlePinSubmit = async (pin: string) => {
-    if (!user || !user._id) {
-      alert("Company not authenticated. Please login again.");
+    if (!user) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
+    // For subusers, use companyId; for company users, use their own _id
+    const companyId = user.role === 'subuser' ? user.companyId : user._id;
+    
+    if (!companyId) {
+      alert("Company information not found. Please login again.");
       return;
     }
 
@@ -238,7 +246,7 @@ export function SecureStatCard({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ companyId: user._id, pin }),
+        body: JSON.stringify({ companyId, pin }),
       });
 
       const data = await response.json();

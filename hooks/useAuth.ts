@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 interface User {
   _id: string;
-  role: 'company' | 'admin';
+  role: 'company' | 'admin' | 'subuser';
   // Company fields
   ownerName?: string;
   companyName?: string;
@@ -15,6 +15,19 @@ interface User {
   // Admin fields
   name?: string;
   email?: string;
+  // Subuser fields
+  userRole?: string; // The role like Accountant, Staff, etc.
+  companyId?: string;
+  branch?: string;
+  access?: {
+    carManagement: boolean;
+    analytics: boolean;
+    setting: boolean;
+    sales: boolean;
+    customers: boolean;
+    investors: boolean;
+    dashboardUnits: boolean;
+  };
 }
 
 export function useAuth() {
@@ -68,6 +81,22 @@ export function useAuth() {
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
   const isCompany = user?.role === 'company';
+  const isSubuser = user?.role === 'subuser';
+
+  // Helper function to check if user has access to a specific feature
+  const hasAccess = (feature: string): boolean => {
+    if (!user) return false;
+    
+    // Admin and company users have full access
+    if (user.role === 'admin' || user.role === 'company') return true;
+    
+    // Subusers have limited access based on their permissions
+    if (user.role === 'subuser' && user.access) {
+      return user.access[feature as keyof typeof user.access] === true;
+    }
+    
+    return false;
+  };
 
   return {
     user,
@@ -75,6 +104,8 @@ export function useAuth() {
     isAuthenticated,
     isAdmin,
     isCompany,
+    isSubuser,
+    hasAccess,
     login,
     logout
   };

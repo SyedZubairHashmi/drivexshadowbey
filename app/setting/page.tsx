@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Edit, ChevronRight, Home, Settings, User, Bell, LogOut, Save } from "lucide-react"
+import { Edit, ChevronRight, Home, Settings, User, Bell, LogOut, Save, X } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 import { companyAPI } from "@/lib/api"
 import { useAuth } from "@/hooks/useAuth"
@@ -21,6 +22,7 @@ interface CompanyProfile {
   password: string;
   pin: string;
   recoveryEmail: string;
+  image?: string;
   role: 'company';
   status: 'active' | 'inactive';
   createdAt: string;
@@ -32,6 +34,24 @@ export default function ProfileSettings() {
   const [saving, setSaving] = useState(false);
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const { user } = useAuth();
+  const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
+  const [isProfileUploadOpen, setIsProfileUploadOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [teamForm, setTeamForm] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    role: "",
+    branch: "",
+  });
+  const [teamAccess, setTeamAccess] = useState({
+    analytics: true,
+    sales: false,
+    customers: true,
+    carManagement: true,
+    investors: false,
+    dashboardUnits: false,
+  });
   
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -423,8 +443,12 @@ export default function ProfileSettings() {
     }
   };
 
-  // Load company data on component mount
+  // Load company data on component mount (skip for subusers)
   useEffect(() => {
+    if (user?.role === 'subuser') {
+      setLoading(false);
+      return;
+    }
     fetchCompanyData();
   }, [user]);
 
@@ -433,6 +457,148 @@ export default function ProfileSettings() {
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  }
+
+  const handleTeamFormChange = (field: keyof typeof teamForm, value: string) => {
+    setTeamForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  const toggleAccess = (field: keyof typeof teamAccess) => {
+    setTeamAccess(prev => ({ ...prev, [field]: !prev[field] }));
+  }
+
+  const saveTeamMember = async () => {
+    if (!user || !company) {
+      toast({
+        title: "Error",
+        description: "User or company information not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!teamForm.fullName || !teamForm.email || !teamForm.password || !teamForm.role) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      const subUserData = {
+        companyId: company._id,
+        name: teamForm.fullName,
+        email: teamForm.email,
+        password: teamForm.password,
+        role: teamForm.role,
+        branch: teamForm.branch || undefined,
+        access: teamAccess
+      };
+
+      console.log("Sending subuser data:", subUserData);
+      
+      const response = await fetch('/api/subusers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+        body: JSON.stringify(subUserData),
+      });
+
+      console.log("Response status:", response.status);
+      const result = await response.json();
+      console.log("Response result:", result);
+
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Team member added successfully"
+        });
+    setIsAddTeamOpen(false);
+        setTeamForm({ fullName: "", email: "", password: "", role: "", branch: "" });
+        setTeamAccess({ analytics: true, sales: false, customers: true, carManagement: true, investors: false, dashboardUnits: false });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to add team member",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving team member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add team member",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  }
+
+  const saveProfilePicture = async () => {
+    if (!selectedFile || !company) {
+      toast({
+        title: "Error",
+        description: "Please select a file first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      const response = await fetch(`/api/companies/${company._id}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update the company state with the new image
+        setCompany(prev => prev ? { ...prev, image: result.data.image } : null);
+        
+        toast({
+          title: "Success",
+          description: "Profile picture updated successfully"
+        });
+        setIsProfileUploadOpen(false);
+        setSelectedFile(null);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to upload profile picture",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload profile picture",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -449,15 +615,123 @@ export default function ProfileSettings() {
     );
   }
 
+  // Subuser view: show basic profile info (name, email, role, branch)
+  if (user && user.role === 'subuser') {
+    return (
+      <MainLayout>
+        <div className="flex flex-col flex-1 gap-5 mt-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-lg">
+              <span>Settings</span>
+              <ChevronRight className="w-4 h-4" />
+              <span className="text-foreground font-medium">Profile</span>
+            </div>
+          </div>
+          <div className="flex max-w-full items-start gap-5 mr-8">
+            <Card className="overflow-hidden flex-1 border-0 shadow-none bg-transparent">
+              <div className="flex">
+                <div className="w-80 pl-3 pr-3 bg-white">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative mb-4">
+                      <Avatar className="w-28 h-28 border-0 shadow-none">
+                        <AvatarImage
+                          src="/placeholder-user.jpg"
+                          alt="Profile"
+                        />
+                        <AvatarFallback className="bg-green-600 text-white text-xl border-0">
+                          {(user.name || user.email || 'SU').slice(0,2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {user.name || 'Team Member'}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <div className="mt-2 text-xs text-gray-600">
+                      <div>Role: {user.userRole || 'Staff'}</div>
+                      {user.branch ? <div>Branch: {user.branch}</div> : null}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 relative">
+                  <div className="pl-5">
+                    <div className="space-y-5">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium">Email</Label>
+                        <Input value={user.email || ''} readOnly className="bg-white border-0 shadow-none" style={{
+                          borderRadius: "8px",
+                          border: "1px solid #D1D5DB",
+                          background: "#FFF",
+                          boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
+                          display: "flex",
+                          height: "42px",
+                          padding: "10px 12px",
+                          alignItems: "center",
+                          gap: "12px",
+                          alignSelf: "stretch",
+                        }} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                          <Label className="text-sm font-medium">Role</Label>
+                          <Input value={user.userRole || 'Staff'} readOnly className="bg-white border-0 shadow-none" style={{
+                            borderRadius: "8px",
+                            border: "1px solid #D1D5DB",
+                            background: "#FFF",
+                            boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
+                            display: "flex",
+                            height: "42px",
+                            padding: "10px 12px",
+                            alignItems: "center",
+                            gap: "12px",
+                            alignSelf: "stretch",
+                          }} />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-sm font-medium">Branch</Label>
+                          <Input value={user.branch || ''} readOnly className="bg-white border-0 shadow-none" style={{
+                            borderRadius: "8px",
+                            border: "1px solid #D1D5DB",
+                            background: "#FFF",
+                            boxShadow: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
+                            display: "flex",
+                            height: "42px",
+                            padding: "10px 12px",
+                            alignItems: "center",
+                            gap: "12px",
+                            alignSelf: "stretch",
+                          }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 gap-5 mt-4">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-lg">
-          <span>Settings</span>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-foreground font-medium">Profile Settings</span>
+        {/* Breadcrumb and Add Team Member Button */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-lg">
+            <span>Settings</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-foreground font-medium">Profile Settings</span>
+          </div>
+          <Button 
+            className="bg-[#00674F] hover:bg-[#00674F] text-white px-6 rounded-xl border-0"
+            style={{ width: "190px" }}
+            onClick={() => setIsAddTeamOpen(true)}
+          >
+            Add Team Member
+          </Button>
         </div>
 
         {/* Debug Info */}
@@ -478,7 +752,7 @@ export default function ProfileSettings() {
                   <div className="relative mb-4">
                     <Avatar className="w-28 h-28 border-0 shadow-none">
                       <AvatarImage
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/setting.PNG-ITZDSniVv3RJYHvsUU1aKz6igsT5NP.png"
+                        src={company?.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/setting.PNG-ITZDSniVv3RJYHvsUU1aKz6igsT5NP.png"}
                         alt="Profile"
                       />
                       <AvatarFallback className="bg-green-600 text-white text-xl border-0">
@@ -488,6 +762,7 @@ export default function ProfileSettings() {
                     <Button
                       size="sm"
                       className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-black hover:bg-gray-800 p-0 border-0"
+                      onClick={() => setIsProfileUploadOpen(true)}
                     >
                       <Edit className="w-4 h-4 text-white" />
                     </Button>
@@ -790,6 +1065,264 @@ export default function ProfileSettings() {
           </Card>
         </div>
       </div>
+      {isAddTeamOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }}>
+          <div
+            className="relative"
+            style={{
+              display: "inline-flex",
+              padding: "20px",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "35px",
+              borderRadius: "8px",
+              background: "#FFF",
+              width: "70%"
+            }}
+          >
+            <div className="w-full flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Add Team Member</h3>
+              <button
+                onClick={() => setIsAddTeamOpen(false)}
+                className="flex items-center justify-center"
+                style={{ width: "35px", height: "35px", flexShrink: 0, borderRadius: "35px", background: "var(--Dark-Blue-dark-blue-50, #E6E6EB)" }}
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="w-full" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingLeft: "10px"}}>
+              {/* Left: Inputs */}
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label>Enter Full Name</Label>
+                  <Input
+                    value={teamForm.fullName}
+                    onChange={(e) => handleTeamFormChange("fullName", e.target.value)}
+                    style={{ width: "540px", height: "50px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)", background: "#FFF",paddingLeft: '20px' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Enter Email</Label>
+                  <Input
+                    value={teamForm.email}
+                    onChange={(e) => handleTeamFormChange("email", e.target.value)}
+                    style={{ width: "540px", height: "50px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)", background: "#FFF", paddingLeft: '20px' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={teamForm.password}
+                    onChange={(e) => handleTeamFormChange("password", e.target.value)}
+                    style={{ width: "540px", height: "50px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)", background: "#FFF", paddingLeft: '20px' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Enter Role</Label>
+                  <Input
+                    value={teamForm.role}
+                    onChange={(e) => handleTeamFormChange("role", e.target.value)}
+                    style={{ width: "540px", height: "50px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)", background: "#FFF", paddingLeft: '20px' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Branch</Label>
+                  <Input
+                    value={teamForm.branch}
+                    onChange={(e) => handleTeamFormChange("branch", e.target.value)}
+                    style={{ width: "540px", height: "50px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)", background: "#FFF", paddingLeft: '20px' }}
+                  />
+                </div>
+                <div>
+                  <Button 
+                    onClick={saveTeamMember} 
+                    disabled={saving}
+                    className="bg-[#00674F] hover:bg-[#00674F] text-white rounded-xl border-0" 
+                    style={{ height: "48px", width: "540px" }}
+                  >
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right: Team Access */}
+              <div className="flex flex-col items-center" style={{ 
+                display: "flex",
+                padding: "20px 20px",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "12px",
+                borderRadius: "12px",
+                border: "1px solid rgba(0, 0, 0, 0.12)",
+                background: "#FFF",
+                boxShadow: "0 6px 15px 0 rgba(0, 0, 0, 0.05)"
+              }}>
+                <h4 className="text-base font-semibold mb-2">Team Access</h4>
+
+                {[
+                  { key: "analytics", label: "Analytics" },
+                  { key: "sales", label: "Sales and receipts" },
+                  { key: "customers", label: "Customers" },
+                  { key: "carManagement", label: "Car Management" },
+                  { key: "investors", label: "Investors" },
+                  { key: "dashboardUnits", label: "Dashboard Units" },
+                ].map((item) => (
+                  <div
+                    key={item.key}
+                    className="flex items-center justify-between w-full"
+                    style={{ width: "360px", height: "52px", padding: "12px 8px 12px 16px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.12)" }}
+                  >
+                    <span className="text-sm">{item.label}</span>
+                    <Switch 
+                      checked={(teamAccess as any)[item.key]} 
+                      onCheckedChange={() => toggleAccess(item.key as any)}
+                      className="data-[state=checked]:bg-[#00674F]"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile Picture Upload Modal */}
+      {isProfileUploadOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }}>
+          <div
+            style={{
+              display: "flex",
+              width: "520px",
+              padding: "24px",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "40px",
+              borderRadius: "8px",
+              background: "#FFF",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+            }}
+          >
+            {/* Close Button */}
+            <div className="w-full flex justify-end">
+              <button
+                onClick={() => setIsProfileUploadOpen(false)}
+                style={{
+                  width: "35px",
+                  height: "35px",
+                  flexShrink: 0,
+                  background: "#00000014",
+                  borderRadius: "50%",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none">
+                  <circle cx="17.5" cy="17.5" r="17.5" fill="black" fillOpacity="0.08"/>
+                  <path d="M13.2578 22.0978L22.0966 13.259" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22.0966 22.0968L13.2578 13.258" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Browse/Upload Area */}
+            <div
+              style={{
+                display: "flex",
+                width: "472px",
+                padding: "15px 135px 13px 128px",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "12px",
+                borderRadius: "12px",
+                border: "1.5px dashed rgba(0, 0, 0, 0.24)",
+                background: "#FFF"
+              }}
+            >
+              {/* Image Icon */}
+              <div
+                style={{
+                  display: "flex",
+                  height: "45px",
+                  maxHeight: "45px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "15px",
+                  flex: "1 0 0"
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 45 45" fill="none">
+                  <path d="M39.7083 5.29167V39.7083H5.29167V5.29167H39.7083ZM39.7083 0.375H5.29167C2.5875 0.375 0.375 2.5875 0.375 5.29167V39.7083C0.375 42.4125 2.5875 44.625 5.29167 44.625H39.7083C42.4125 44.625 44.625 42.4125 44.625 39.7083V5.29167C44.625 2.5875 42.4125 0.375 39.7083 0.375ZM27.7608 22.1558L20.3858 31.6696L15.125 25.3025L7.75 34.7917H37.25L27.7608 22.1558Z" fill="black"/>
+                </svg>
+              </div>
+
+              {/* File Name */}
+              <div style={{ textAlign: "center" }}>
+                {selectedFile ? (
+                  <p style={{ fontSize: "14px", color: "#000", margin: 0 }}>
+                    {selectedFile.name}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+                    No file selected
+                  </p>
+                )}
+              </div>
+
+              {/* Browse Files Button */}
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  style={{ display: "none" }}
+                  id="profile-upload"
+                />
+                <label htmlFor="profile-upload">
+                  <button
+                    style={{
+                      display: "flex",
+                      padding: "8px 14px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "10px",
+                      borderRadius: "1000px",
+                      background: "#8080801F",
+                      color: "#000",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "14px"
+                    }}
+                  >
+                    Browse Files
+                  </button>
+                </label>
+              </div>
+            </div>
+
+            {/* Save Changes Button */}
+            <div className="w-full">
+              <Button
+                onClick={saveProfilePicture}
+                disabled={saving || !selectedFile}
+                className="w-full"
+                style={{
+                  borderRadius: "12px",
+                  background: "#00674F",
+                  height: "48px"
+                }}
+              >
+                {saving ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   )
 }

@@ -9,7 +9,7 @@ interface CompanyProtectedRouteProps {
 }
 
 export function CompanyProtectedRoute({ children }: CompanyProtectedRouteProps) {
-  const { user, loading, isAuthenticated, isCompany } = useAuth();
+  const { user, loading, isAuthenticated, isCompany, isSubuser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -17,12 +17,12 @@ export function CompanyProtectedRoute({ children }: CompanyProtectedRouteProps) 
       if (!isAuthenticated) {
         // Not logged in, redirect to login
         router.push('/login');
-      } else if (!isCompany) {
-        // Logged in but not company, redirect to admin dashboard
+      } else if (!isCompany && !isSubuser) {
+        // Logged in but neither company nor subuser, redirect to admin dashboard
         router.push('/admin');
       }
     }
-  }, [loading, isAuthenticated, isCompany, router]);
+  }, [loading, isAuthenticated, isCompany, isSubuser, router]);
 
   // Show loading while checking authentication
   if (loading) {
@@ -37,11 +37,11 @@ export function CompanyProtectedRoute({ children }: CompanyProtectedRouteProps) 
   }
 
   // Show nothing while redirecting
-  if (!isAuthenticated || !isCompany) {
+  if (!isAuthenticated || (!isCompany && !isSubuser)) {
     return null;
   }
 
-  // User is authenticated and is company, show the protected content
+  // User is authenticated and is company or subuser, show the protected content
   return <>{children}</>;
 }
 

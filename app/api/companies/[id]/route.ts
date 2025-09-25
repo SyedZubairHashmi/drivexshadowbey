@@ -51,7 +51,7 @@ export async function PUT(
     const body = await request.json();
     
     // Get fields from body
-    const { ownerName, companyName, companyEmail, password, pin, recoveryEmail } = body;
+    const { ownerName, companyName, companyEmail, password, pin, recoveryEmail, image } = body;
     
     // Check if company exists first
     const existingCompany = await Company.findById(params.id);
@@ -103,6 +103,9 @@ export async function PUT(
     }
     if (recoveryEmail !== undefined) {
       updateData.recoveryEmail = recoveryEmail;
+    }
+    if (image !== undefined) {
+      updateData.image = image;
     }
     if (body.status !== undefined) {
       updateData.status = body.status;

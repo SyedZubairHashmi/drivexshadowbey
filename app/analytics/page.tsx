@@ -66,6 +66,15 @@ const FLAG_COMPONENTS: { [key: string]: React.ComponentType } = {
   KR: FlagKR,
 };
 
+interface PaymentData {
+  name: string;
+  amount: number;
+  status: string;
+  timestamp: Date;
+  customerId?: string;
+  vehicleModel?: string;
+}
+
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState({
     batchProfit: 620000,
@@ -75,16 +84,10 @@ export default function AnalyticsPage() {
     remainingCars: 12,
     mostSoldModel: "Toyota Corolla 2020",
     totalBatches: 7,
-    newArrivalBatch: "06, 02 Batch",
+    newArrivalBatch: "4, 5 Batch",
     batchExpense: 4000000,
     totalPayment: 15250000,
-    payments: [
-      { name: "Svetlana", amount: 28500000, status: "Completed" },
-      { name: "Isabella", amount: 29000000, status: "Pending" },
-      { name: "Ahmed", amount: 15000000, status: "Completed" },
-      { name: "Maria", amount: 22000000, status: "Completed" },
-      { name: "John", amount: 18000000, status: "Pending" }
-    ]
+    payments: [] as PaymentData[]
   });
   const [loading, setLoading] = useState(true);
   const [batches, setBatches] = useState<any[]>([]);
@@ -105,6 +108,9 @@ export default function AnalyticsPage() {
     const profit = Number(batch.profit) || (totalRevenue - totalExpense);
 
     const latestBatchNo = allBatches && allBatches.length > 0 ? allBatches[0].batchNo : '';
+    const nextBatchNumbers = allBatches && allBatches.length > 0 
+      ? `${allBatches.length + 1}, ${allBatches.length + 2} Batch`
+      : '';
 
     setAnalyticsData(prev => ({
       ...prev,
@@ -114,7 +120,7 @@ export default function AnalyticsPage() {
       totalCarsSold: soldCars,
       remainingCars: remainingCars,
       totalBatches: allBatches?.length || 0,
-      newArrivalBatch: latestBatchNo,
+      newArrivalBatch: nextBatchNumbers,
       batchExpense: totalExpense,
     }));
   };
@@ -164,6 +170,51 @@ export default function AnalyticsPage() {
         const batchTotalSalePrice = batches.reduce((sum: number, batch: any) => sum + (batch.totalSalePrice || 0), 0);
         
         // Keep aggregate totals if needed in future; per-batch metrics set above
+      }
+
+      // Fetch real customer payment data
+      try {
+        const customersResponse = await fetch('/api/customers', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (customersResponse.ok) {
+          const customersData = await customersResponse.json();
+          if (customersData.success && customersData.data) {
+            // Extract customer data with total spend
+            const customerPayments = customersData.data
+              .filter((customer: any) => customer.sale && customer.sale.paidAmount > 0)
+              .map((customer: any) => {
+                return {
+                  name: customer.customer?.name || 'Unknown Customer',
+                  amount: Number(customer.sale?.paidAmount) || 0,
+                  status: customer.sale?.paymentStatus || 'Pending',
+                  timestamp: new Date(customer.sale?.saleDate || new Date()),
+                  customerId: customer._id,
+                  vehicleModel: customer.vehicle?.model || 'Unknown Model'
+                };
+              })
+              .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+              .slice(0, 10); // Show only latest 10 customers
+
+            // Calculate total payment amount
+            const totalPaymentAmount = customersData.data.reduce((sum: number, customer: any) => {
+              return sum + (customer.sale?.paidAmount || 0);
+            }, 0);
+
+            setAnalyticsData(prev => ({
+              ...prev,
+              payments: customerPayments || [],
+              totalPayment: totalPaymentAmount || 0
+            }));
+          }
+        }
+      } catch (paymentError) {
+        console.error('Error fetching customer payments:', paymentError);
       }
     } catch (error) {
       console.error("Error fetching analytics data:", error);
@@ -403,19 +454,21 @@ export default function AnalyticsPage() {
 
         {/* Bottom Section - Analytics and Payments */}
         <div className="flex gap-6 w-full">
-          {/* Left Side - Analytics */}
-          <div style={{
-            display: 'flex',
-            width: '60%',
-            height: '50%',
-            padding: '28px',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '29px',
-            borderRadius: '16px',
-            border: '1px solid rgba(0, 0, 0, 0.12)',
-            background: '#FFF'
-          }}>
+          {/* Left Side - Chart Cards Stacked Vertically */}
+          <div className="flex flex-col gap-6 w-3/5">
+            {/* Sold Cars Ratio */}
+            <div style={{
+              display: 'flex',
+              width: '100%',
+              height: '248px',
+              padding: '28px',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '29px',
+              borderRadius: '16px',
+              border: '1px solid rgba(0, 0, 0, 0.12)',
+              background: '#FFF'
+            }}>
             <h3 style={{
               color: '#000',
               fontSize: '18px',
@@ -438,32 +491,187 @@ export default function AnalyticsPage() {
 
               {/* Legend */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F' }}></div>
-                  <span className="text-sm">TOYOTA</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.6 }}></div>
-                  <span className="text-sm">BMW</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.5 }}></div>
-                  <span className="text-sm">TESLA</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.2 }}></div>
-                  <span className="text-sm">MERCEDES</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.8 }}></div>
-                  <span className="text-sm">AUDI</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.4 }}></div>
-                  <span className="text-sm">VOLKSWAGEN</span>
+                {/* 2 Column Layout */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  {/* Column 1 */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F' }}></div>
+                    <span className="text-sm">TOYOTA</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.6 }}></div>
+                    <span className="text-sm">BMW</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.5 }}></div>
+                    <span className="text-sm">TESLA</span>
+                  </div>
+                  
+                  {/* Column 2 */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.2 }}></div>
+                    <span className="text-sm">MERCEDES</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.8 }}></div>
+                    <span className="text-sm">AUDI</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.4 }}></div>
+                    <span className="text-sm">VOLKSWAGEN</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Car Segment */}
+          <div style={{
+            display: 'flex',
+            width: '100%',
+            height: '248px',
+            padding: '28px',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '29px',
+            borderRadius: '16px',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            background: '#FFF'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%'
+            }}>
+              <h3 style={{
+                color: '#000',
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0
+              }}>
+                Car Segment
+              </h3>
+              <span style={{
+                color: '#000',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}>
+                Type-wise
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-8">
+              {/* Pie Chart */}
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="139" height="140" viewBox="0 0 139 140" fill="none">
+                  <path d="M93.3796 135.297C110.188 129.137 123.968 116.723 131.843 100.647C139.717 84.5702 141.079 66.0735 135.643 49.0172C130.207 31.9609 118.393 17.6632 102.668 9.10832C86.9431 0.553456 68.5214 -1.59744 51.2484 3.10459L60.1811 35.9193C68.994 33.5203 78.3929 34.6177 86.416 38.9825C94.4392 43.3473 100.467 50.6421 103.24 59.3444C106.014 68.0466 105.319 77.4839 101.301 85.6862C97.2832 93.8886 90.2527 100.222 81.6769 103.365L93.3796 135.297Z" fill="#FF6B35" fillOpacity="0.2"/>
+                  <path d="M138.871 70.1021C138.871 83.8352 134.799 97.2598 127.169 108.678C119.539 120.097 108.695 128.997 96.0073 134.252C83.3196 139.508 69.3584 140.883 55.8893 138.203C42.4201 135.524 30.0479 128.911 20.3372 119.2L44.3851 95.1525C49.3396 100.107 55.652 103.481 62.5241 104.848C69.3962 106.215 76.5193 105.513 82.9927 102.832C89.466 100.151 94.9989 95.61 98.8916 89.7841C102.784 83.9582 104.862 77.1089 104.862 70.1021H138.871Z" fill="#FF6B35" fillOpacity="0.5"/>
+                  <path d="M69.4355 0.666656C53.0697 0.666656 37.2299 6.4474 24.7112 16.9888C12.1925 27.5302 3.79962 42.1547 1.01355 58.2816C-1.77252 74.4085 1.22731 91.0012 9.48368 105.132C17.7401 119.262 30.7223 130.022 46.1395 135.513L57.5496 103.475C49.6836 100.674 43.06 95.184 38.8475 87.9745C34.635 80.765 33.1045 72.2993 34.526 64.0712C35.9474 55.8431 40.2296 48.3815 46.6167 43.0032C53.0039 37.6249 61.0855 34.6755 69.4355 34.6755V0.666656Z" fill="#FF6B35"/>
+                  <path d="M138.922 70.1021C138.922 52.2005 132.008 34.9906 119.623 22.0646C107.238 9.13851 90.3394 1.49524 72.4541 0.730068C54.5689 -0.0351004 37.0792 6.13697 23.6356 17.958C10.192 29.7791 1.83343 46.3356 0.304494 64.1717L34.1891 67.0764C34.9691 57.9762 39.2338 49.5289 46.0928 43.4977C52.9519 37.4665 61.8753 34.3174 71.0005 34.7078C80.1257 35.0982 88.7476 38.9979 95.0664 45.5929C101.385 52.1879 104.913 60.9685 104.913 70.1021H138.922Z" fill="#FF6B35" fillOpacity="0.7"/>
+                </svg>
+              </div>
+
+              {/* Legend */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35' }}></div>
+                  <span className="text-sm">SEDAN</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.7 }}></div>
+                  <span className="text-sm">SUV</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.5 }}></div>
+                  <span className="text-sm">HATCHBACK</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.3 }}></div>
+                  <span className="text-sm">COUPE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Car Engine Type */}
+          <div style={{
+            display: 'flex',
+            width: '100%',
+            height: '248px',
+            padding: '28px',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '29px',
+            borderRadius: '16px',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            background: '#FFF'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%'
+            }}>
+              <h3 style={{
+                color: '#000',
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0
+              }}>
+                Car Engine Type
+              </h3>
+              <span style={{
+                color: '#000',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}>
+                Fuel-wise
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-8">
+              {/* Pie Chart */}
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="139" height="140" viewBox="0 0 139 140" fill="none">
+                  <path d="M93.3796 135.297C110.188 129.137 123.968 116.723 131.843 100.647C139.717 84.5702 141.079 66.0735 135.643 49.0172C130.207 31.9609 118.393 17.6632 102.668 9.10832C86.9431 0.553456 68.5214 -1.59744 51.2484 3.10459L60.1811 35.9193C68.994 33.5203 78.3929 34.6177 86.416 38.9825C94.4392 43.3473 100.467 50.6421 103.24 59.3444C106.014 68.0466 105.319 77.4839 101.301 85.6862C97.2832 93.8886 90.2527 100.222 81.6769 103.365L93.3796 135.297Z" fill="#4A90E2" fillOpacity="0.2"/>
+                  <path d="M138.871 70.1021C138.871 83.8352 134.799 97.2598 127.169 108.678C119.539 120.097 108.695 128.997 96.0073 134.252C83.3196 139.508 69.3584 140.883 55.8893 138.203C42.4201 135.524 30.0479 128.911 20.3372 119.2L44.3851 95.1525C49.3396 100.107 55.652 103.481 62.5241 104.848C69.3962 106.215 76.5193 105.513 82.9927 102.832C89.466 100.151 94.9989 95.61 98.8916 89.7841C102.784 83.9582 104.862 77.1089 104.862 70.1021H138.871Z" fill="#4A90E2" fillOpacity="0.5"/>
+                  <path d="M69.4355 0.666656C53.0697 0.666656 37.2299 6.4474 24.7112 16.9888C12.1925 27.5302 3.79962 42.1547 1.01355 58.2816C-1.77252 74.4085 1.22731 91.0012 9.48368 105.132C17.7401 119.262 30.7223 130.022 46.1395 135.513L57.5496 103.475C49.6836 100.674 43.06 95.184 38.8475 87.9745C34.635 80.765 33.1045 72.2993 34.526 64.0712C35.9474 55.8431 40.2296 48.3815 46.6167 43.0032C53.0039 37.6249 61.0855 34.6755 69.4355 34.6755V0.666656Z" fill="#4A90E2"/>
+                  <path d="M138.922 70.1021C138.922 52.2005 132.008 34.9906 119.623 22.0646C107.238 9.13851 90.3394 1.49524 72.4541 0.730068C54.5689 -0.0351004 37.0792 6.13697 23.6356 17.958C10.192 29.7791 1.83343 46.3356 0.304494 64.1717L34.1891 67.0764C34.9691 57.9762 39.2338 49.5289 46.0928 43.4977C52.9519 37.4665 61.8753 34.3174 71.0005 34.7078C80.1257 35.0982 88.7476 38.9979 95.0664 45.5929C101.385 52.1879 104.913 60.9685 104.913 70.1021H138.922Z" fill="#4A90E2" fillOpacity="0.7"/>
+                </svg>
+              </div>
+
+              {/* Legend */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2' }}></div>
+                  <span className="text-sm">PETROL</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.7 }}></div>
+                  <span className="text-sm">DIESEL</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.5 }}></div>
+                  <span className="text-sm">HYBRID</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.2 }}></div>
+                  <span className="text-sm">ELECTRIC</span>
+                </div>
+              </div>
+            </div>
+          </div>
           </div>
 
           {/* Right Side - Payments */}
@@ -505,12 +713,15 @@ export default function AnalyticsPage() {
             </div>
 
             <p className="text-sm text-gray-600 text-center">
-              Track all payments by amount, and status.
+              Track customer total spend and payment status.
             </p>
 
             {/* Payment List */}
             <div className="w-full space-y-3">
-              {analyticsData.payments.map((payment, index) => (
+              {analyticsData.payments.length > 0 ? (
+                analyticsData.payments
+                  .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                  .map((payment, index) => (
                 <div
                   key={index}
                   style={{
@@ -525,8 +736,8 @@ export default function AnalyticsPage() {
                   }}
                 >
                   <div>
-                    <div className="font-medium text-gray-900">{payment.name}</div>
-                    <div className="text-sm text-gray-600">Rs {payment.amount.toLocaleString()}</div>
+                    <div className="font-medium text-gray-900">{payment.name || 'Unknown Customer'}</div>
+                    <div className="text-sm text-gray-600">Rs {payment.amount ? payment.amount.toLocaleString() : '0'}</div>
                   </div>
                   <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                     payment.status === 'Completed' 
@@ -536,7 +747,12 @@ export default function AnalyticsPage() {
                     {payment.status}
                   </div>
                 </div>
-              ))}
+                  ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No payment data available</p>
+                </div>
+              )}
             </div>
 
             {/* View All Payments Button */}
@@ -545,6 +761,7 @@ export default function AnalyticsPage() {
             </button>
           </div>
         </div>
+
       </div>
     </MainLayout>
   );
