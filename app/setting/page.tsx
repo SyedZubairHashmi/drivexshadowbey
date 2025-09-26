@@ -35,6 +35,8 @@ export default function ProfileSettings() {
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const { user } = useAuth();
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [visiblePasswords, setVisiblePasswords] = useState<{ [key: string]: boolean }>({});
   const [isProfileUploadOpen, setIsProfileUploadOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [teamForm, setTeamForm] = useState({
@@ -52,6 +54,53 @@ export default function ProfileSettings() {
     investors: false,
     dashboardUnits: false,
   });
+
+  // Function to fetch team members
+  const fetchTeamMembers = async () => {
+    try {
+      if (!user) return;
+      
+      const companyId = user.role === 'subuser' ? user.companyId : user._id;
+      
+      if (!companyId) return;
+      
+      const response = await fetch('/api/users/team-members', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-company-id': companyId,
+        } as HeadersInit,
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTeamMembers(data.data || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    }
+  };
+
+  // Function to toggle password visibility
+  const togglePasswordVisibility = (memberId: string) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [memberId]: !prev[memberId]
+    }));
+  };
+
+  // Function to get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
   
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -450,6 +499,7 @@ export default function ProfileSettings() {
       return;
     }
     fetchCompanyData();
+    fetchTeamMembers();
   }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
@@ -1323,6 +1373,64 @@ export default function ProfileSettings() {
           </div>
         </div>
       )}
+
+      {/* Team Members Section */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Team</h2>
+        <div className="space-y-4">
+          {teamMembers.length > 0 ? (
+            teamMembers.map((member) => (
+              <div key={member._id} className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+                {/* Profile Circle */}
+                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-semibold text-lg">
+                    {getInitials(member.name || 'Unknown')}
+                  </span>
+                </div>
+                
+                {/* Member Details */}
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 text-base">
+                    {member.name || 'Unknown User'}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-1">
+                    {member.role === 'subuser' ? 'Team Member' : member.role || 'User'}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">
+                      {visiblePasswords[member._id] ? member.password || 'No password' : '*************'}
+                    </span>
+                    <button
+                      onClick={() => togglePasswordVisibility(member._id)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {visiblePasswords[member._id] ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Edit Button */}
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Edit now
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No team members found</p>
+            </div>
+          )}
+        </div>
+      </div>
     </MainLayout>
   )
 }

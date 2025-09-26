@@ -189,8 +189,63 @@ CustomerSchema.post('findOneAndUpdate', async function(doc) {
         'payments': docAny.payments
       });
     }
+
+    // Recalculate batch total sale price after customer update
+    try {
+      await recalculateBatchSalePrice(doc);
+    } catch (error) {
+      console.error('Error recalculating batch sale price after customer update:', error);
+    }
   }
 });
+
+// Post-save middleware to recalculate batch total sale price when customer is created
+CustomerSchema.post('save', async function(doc) {
+  try {
+    await recalculateBatchSalePrice(doc);
+  } catch (error) {
+    console.error('Error recalculating batch sale price after customer save:', error);
+  }
+});
+
+// Helper function to recalculate batch sale price
+async function recalculateBatchSalePrice(customer: any) {
+  try {
+    const { calculateBatchTotalSalePrice } = await import('@/lib/utils/batchCalculations');
+    const connectDB = (await import('@/lib/mongodb')).default;
+    await connectDB();
+
+    // Find the car associated with this customer by either chasisNumber (car) or chassisNumber (customer)
+    const Car = (await import('@/lib/models/Car')).default;
+    const targetChassis = customer?.vehicle?.chassisNumber || customer?.vehicle?.chasisNumber;
+    if (!targetChassis) {
+      return;
+    }
+
+    const car = await Car.findOne({
+      companyId: customer.companyId,
+      $or: [
+        { chasisNumber: targetChassis },
+        { chassisNumber: targetChassis }
+      ]
+    });
+
+    if (car && car.batchNo) {
+      // Find the batch for this car
+      const Batch = (await import('@/lib/models/Batch')).default;
+      const batch = await Batch.findOne({
+        companyId: customer.companyId,
+        batchNo: car.batchNo
+      });
+
+      if (batch) {
+        await calculateBatchTotalSalePrice(batch._id.toString());
+      }
+    }
+  } catch (error) {
+    console.error('Error in recalculateBatchSalePrice:', error);
+  }
+}
 
 
 // Compound unique index: chassisNumber must be unique within each company

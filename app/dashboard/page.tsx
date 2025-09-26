@@ -11,6 +11,27 @@ import { useAuth } from "@/hooks/useAuth";
 import { carAPI, batchAPI } from "@/lib/api";
 import type { Car } from "@/types";
 
+// Function to format large numbers in Indian format (lacs, crores)
+const formatIndianCurrency = (amount: number): string => {
+  console.log('formatIndianCurrency input:', amount);
+  
+  if (amount >= 10000000) { // 1 crore or more
+    const crores = amount / 10000000;
+    const result = `${Math.round(crores)} Cr`;
+    console.log('Crores result:', result);
+    return result;
+  } else if (amount >= 100000) { // 1 lakh or more
+    const lacs = amount / 100000;
+    const result = `${Math.round(lacs)} Lac`;
+    console.log('Lacs result:', result);
+    return result;
+  } else {
+    const result = amount.toLocaleString();
+    console.log('Normal result:', result);
+    return result;
+  }
+};
+
 
 export default function DashboardPage() {
   const { user, hasAccess } = useAuth();
@@ -39,10 +60,15 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch batches and cars in parallel
-      const [batchesResponse, carsResponse] = await Promise.all([
+      // Fetch batches, cars, and customers in parallel
+      const [batchesResponse, carsResponse, customersResponse] = await Promise.all([
         batchAPI.getAll(),
-        carAPI.getAll()
+        carAPI.getAll(),
+        fetch('/api/customers', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        }).then(res => res.json())
       ]);
 
       if (batchesResponse.success && carsResponse.success) {
@@ -59,25 +85,44 @@ export default function DashboardPage() {
         setBatches(sortedBatches);
         setCars(carsData);
 
-        // Calculate dashboard stats
+        // Calculate dashboard stats from all batches
+        const totalRevenue = batchesData.reduce((sum: number, batch: any) => {
+          return sum + (batch.totalRevenue || 0);
+        }, 0);
+
+        const totalProfit = batchesData.reduce((sum: number, batch: any) => {
+          const profit = batch.profit || ((batch.totalRevenue || 0) - (batch.totalExpense || 0));
+          return sum + profit;
+        }, 0);
+
+        // Calculate pending payments from customers
+        let pendingPayments = 0;
+        let pendingPaymentsCustomers = 0;
+        
+        if (customersResponse.success && customersResponse.data) {
+          const customers = customersResponse.data;
+          pendingPayments = customers
+            .filter((customer: any) => 
+              customer.sale && 
+              customer.sale.paymentStatus && 
+              customer.sale.paymentStatus.toLowerCase() === 'pending'
+            )
+            .reduce((sum: number, customer: any) => {
+              const pendingAmount = (customer.sale.salePrice || 0) - (customer.sale.paidAmount || 0);
+              return sum + Math.max(0, pendingAmount);
+            }, 0);
+
+          pendingPaymentsCustomers = customers.filter((customer: any) => 
+            customer.sale && 
+            customer.sale.paymentStatus && 
+            customer.sale.paymentStatus.toLowerCase() === 'pending'
+          ).length;
+        }
+
+        // Calculate car stats
         const totalCarsSold = carsData.filter((car: any) => 
           car.status === 'sold' || car.status === 'Sold'
         ).length;
-
-        const totalRevenue = carsData
-          .filter((car: any) => car.status === 'sold' || car.status === 'Sold')
-          .reduce((sum: number, car: any) => {
-            const salePrice = car.saleInfo?.salePrice || car.financing?.totalCost || 0;
-            return sum + salePrice;
-          }, 0);
-
-        const totalProfit = carsData
-          .filter((car: any) => car.status === 'sold' || car.status === 'Sold')
-          .reduce((sum: number, car: any) => {
-            const salePrice = car.saleInfo?.salePrice || car.financing?.totalCost || 0;
-            const totalCost = car.financing?.totalCost || 0;
-            return sum + (salePrice - totalCost);
-          }, 0);
 
         const carsInStock = carsData.filter((car: any) => 
           car.status === 'available' || car.status === 'warehouse' || 
@@ -90,14 +135,32 @@ export default function DashboardPage() {
           car.status === 'in-transit' || car.status === 'In-Transit'
         ).length;
 
+        // Debug logging
+        console.log('Dashboard Stats:', {
+          totalRevenue,
+          totalProfit,
+          pendingPayments,
+          totalRevenueFormatted: formatIndianCurrency(totalRevenue),
+          totalProfitFormatted: formatIndianCurrency(totalProfit),
+          pendingPaymentsFormatted: formatIndianCurrency(pendingPayments)
+        });
+
+        // Test the function with known values
+        console.log('Test formatting:', {
+          test1M: formatIndianCurrency(1000000), // Should show "10 Lac"
+          test15M: formatIndianCurrency(1500000), // Should show "15 Lac" 
+          test100M: formatIndianCurrency(10000000), // Should show "1 Cr"
+          test50L: formatIndianCurrency(500000), // Should show "5 Lac"
+        });
+
         setStats({
           totalCarsSold,
           totalRevenue,
           totalProfit,
           carsInStock,
           carsInTransit,
-          pendingPayments: 0, // Will be calculated based on business logic
-          pendingPaymentsCustomers: 0, // Will be calculated based on business logic
+          pendingPayments,
+          pendingPaymentsCustomers,
         });
 
         // Set the latest batch as expanded by default
@@ -176,11 +239,11 @@ export default function DashboardPage() {
             />
             <SecureStatCard
               title="Total Revenue"
-              value={`Rs ${stats.totalRevenue.toLocaleString()}`}
+              value={`PKR ${formatIndianCurrency(stats.totalRevenue)}`}
             />
             <SecureStatCard
               title="Total Profit"
-              value={`Rs ${stats.totalProfit.toLocaleString()}`}
+              value={`PKR ${formatIndianCurrency(stats.totalProfit)}`}
             />
             <HeaderStatCard
               title="Cars in Stock"
@@ -193,7 +256,7 @@ export default function DashboardPage() {
             />
             <SecureStatCard
               title="Pending Payments"
-              value={`Rs ${stats.pendingPayments.toLocaleString()}`}
+              value={`PKR ${formatIndianCurrency(stats.pendingPayments)}`}
             />
           </div>
         )}

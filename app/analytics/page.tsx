@@ -4,6 +4,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SecureStatCard } from "@/components/ui/secure-stat-card";
 import { HeaderStatCard } from "@/components/ui/header-stat-card";
+import { ExpenseEditModal } from "@/components/ui/expense-edit-modal";
 import { 
   TrendingUp, 
   DollarSign, 
@@ -12,10 +13,68 @@ import {
   Calendar,
   Edit3,
   ChevronDown,
+  ChevronUp,
   Flag
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { batchAPI } from "@/lib/api";
+
+// Function to format large numbers in Indian format (lacs, crores)
+const formatIndianCurrency = (amount: number): string => {
+  if (amount >= 10000000) { // 1 crore or more
+    const crores = amount / 10000000;
+    return `${Math.round(crores)} Cr`;
+  } else if (amount >= 100000) { // 1 lakh or more
+    const lacs = amount / 100000;
+    return `${Math.round(lacs)} Lac`;
+  } else {
+    return amount.toLocaleString();
+  }
+};
+
+// Simple Pie Chart Component
+const SimplePieChart = ({ data, colors }: { data: { name: string; count: number; color: string }[], colors: string[] }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center">
+        <span className="text-gray-500 text-sm">No Data</span>
+      </div>
+    );
+  }
+
+  const total = data.reduce((sum, item) => sum + item.count, 0);
+  let cumulativePercentage = 0;
+
+  return (
+    <div className="w-34 h-34 relative">
+      <svg width="139" height="178" viewBox="0 0 130 128" className="transform -rotate-90">
+        {data.map((item, index) => {
+          const percentage = (item.count / total) * 100;
+          const circumference = 2 * Math.PI * 50; // radius = 50
+          const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+          const strokeDashoffset = -((cumulativePercentage / 100) * circumference);
+          
+          cumulativePercentage += percentage;
+          
+          return (
+            <circle
+              key={index}
+              cx="65"
+              cy="65"
+              r="50"
+              fill="none"
+              stroke={colors[index % colors.length]}
+              strokeWidth="30"
+              strokeDasharray={strokeDasharray}
+              strokeDashoffset={strokeDashoffset}
+              className="transition-all duration-300"
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
 
 // Local flag renderers to match batch header behavior
 const FlagJP = () => (
@@ -87,14 +146,220 @@ export default function AnalyticsPage() {
     newArrivalBatch: "4, 5 Batch",
     batchExpense: 4000000,
     totalPayment: 15250000,
-    payments: [] as PaymentData[]
+    payments: [] as PaymentData[],
+    // Real chart data
+    companyWiseData: [] as { name: string; count: number; color: string }[],
+    segmentWiseData: [] as { name: string; count: number; color: string }[],
+    engineWiseData: [] as { name: string; count: number; color: string }[]
   });
   const [loading, setLoading] = useState(true);
   const [batches, setBatches] = useState<any[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<any | null>(null);
   const [isBatchMenuOpen, setIsBatchMenuOpen] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [currentExpense, setCurrentExpense] = useState(0);
 
-  const computeBatchAnalytics = (batch: any, allBatches: any[]) => {
+  // Handle expense edit
+  const handleExpenseEdit = () => {
+    setCurrentExpense(selectedBatch?.totalExpense || 0);
+    setShowExpenseModal(true);
+  };
+
+  // Save expense
+  const handleSaveExpense = async (amount: number) => {
+    try {
+      if (selectedBatch) {
+        await batchAPI.updateExpense(selectedBatch._id, amount);
+        // Refresh batch data
+        await fetchAnalyticsData();
+        console.log("Expense updated successfully:", amount);
+      }
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      throw error;
+    }
+  };
+
+  // Function to process sold cars data for charts
+  const processSoldCarsData = async (batch: any) => {
+    if (!batch) return;
+
+    try {
+      // Get all cars in this batch
+      const carsResponse = await fetch(`/api/cars?batchNo=${batch.batchNo}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!carsResponse.ok) return;
+
+      const carsData = await carsResponse.json();
+      const cars = carsData.success ? carsData.data : [];
+
+      // Filter only sold cars
+      const soldCars = cars.filter((car: any) => 
+        (car?.status || '').toString().toLowerCase() === 'sold'
+      );
+
+      console.log('Total cars in batch:', cars.length);
+      console.log('Sold cars:', soldCars.length);
+      console.log('Sample car data:', soldCars[0]);
+
+      // Process Company Wise Data
+      const companyCount: { [key: string]: number } = {};
+      soldCars.forEach((car: any) => {
+        const company = car.company || 'Unknown';
+        companyCount[company] = (companyCount[company] || 0) + 1;
+      });
+
+      const companyWiseData = Object.entries(companyCount)
+        .map(([name, count]) => ({ name, count: count as number, color: '#10B981' }))
+        .sort((a, b) => b.count - a.count);
+
+      // Process Segment Wise Data
+      const segmentCount: { [key: string]: number } = {};
+      soldCars.forEach((car: any) => {
+        const segment = car.carSegment || 'Unknown';
+        segmentCount[segment] = (segmentCount[segment] || 0) + 1;
+      });
+
+      const segmentWiseData = Object.entries(segmentCount)
+        .map(([name, count]) => ({ name, count: count as number, color: '#F59E0B' }))
+        .sort((a, b) => b.count - a.count);
+
+      // If no sold cars, show sample data for testing
+      if (soldCars.length === 0) {
+        console.log('No sold cars found, showing sample data');
+        const sampleCompanyData = [
+          { name: 'Toyota', count: 8, color: '#10B981' },
+          { name: 'Suzuki', count: 5, color: '#10B981' },
+          { name: 'Honda', count: 3, color: '#10B981' },
+          { name: 'BMW', count: 2, color: '#10B981' }
+        ];
+        const sampleSegmentData = [
+          { name: 'SUV', count: 5, color: '#F59E0B' },
+          { name: 'Sedan', count: 3, color: '#F59E0B' },
+          { name: 'Hatchback', count: 2, color: '#F59E0B' },
+          { name: 'Truck', count: 1, color: '#F59E0B' }
+        ];
+        const sampleEngineData = [
+          { name: 'Petrol', count: 7, color: '#8B5CF6' },
+          { name: 'Diesel', count: 4, color: '#8B5CF6' },
+          { name: 'Hybrid', count: 2, color: '#8B5CF6' }
+        ];
+        
+        setAnalyticsData(prev => ({
+          ...prev,
+          companyWiseData: sampleCompanyData,
+          segmentWiseData: sampleSegmentData,
+          engineWiseData: sampleEngineData
+        }));
+        return;
+      }
+
+      // Process Engine Wise Data
+      const engineCount: { [key: string]: number } = {};
+      soldCars.forEach((car: any) => {
+        const engine = car.engineType || 'Unknown';
+        engineCount[engine] = (engineCount[engine] || 0) + 1;
+      });
+
+      const engineWiseData = Object.entries(engineCount)
+        .map(([name, count]) => ({ name, count: count as number, color: '#8B5CF6' }))
+        .sort((a, b) => b.count - a.count);
+
+      setAnalyticsData(prev => ({
+        ...prev,
+        companyWiseData,
+        segmentWiseData,
+        engineWiseData
+      }));
+
+    } catch (error) {
+      console.error('Error processing sold cars data:', error);
+    }
+  };
+
+  // Function to fetch payment data for a specific batch
+  const fetchPaymentDataForBatch = async (batch: any) => {
+    try {
+      const customersResponse = await fetch('/api/customers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (customersResponse.ok) {
+        const customersData = await customersResponse.json();
+        if (customersData.success && customersData.data) {
+          // Fetch cars for the selected batch to get chassis numbers
+          const carsResponse = await fetch('/api/cars', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+
+          if (carsResponse.ok) {
+            const carsData = await carsResponse.json();
+            if (carsData.success && carsData.data) {
+              // Get chassis numbers of cars in the selected batch
+              const batchChassisNumbers = carsData.data
+                .filter((car: any) => car.batchNo === batch.batchNo)
+                .map((car: any) => car.chasisNumber || car.chassisNumber)
+                .filter(Boolean); // Remove null/undefined values
+
+              console.log('Selected batch:', batch.batchNo);
+              console.log('Batch chassis numbers:', batchChassisNumbers);
+
+              // Filter customers whose cars belong to the selected batch
+              const batchCustomers = customersData.data.filter((customer: any) => {
+                const customerChassis = customer.vehicle?.chassisNumber || customer.vehicle?.chasisNumber;
+                return batchChassisNumbers.includes(customerChassis);
+              });
+
+              console.log('Filtered customers for batch:', batchCustomers.length);
+
+              // Extract customer payment data for the selected batch only
+              const customerPayments = batchCustomers
+                .filter((customer: any) => customer.sale && customer.sale.paidAmount > 0)
+                .map((customer: any) => {
+                  return {
+                    name: customer.customer?.name || 'Unknown Customer',
+                    amount: Number(customer.sale?.paidAmount) || 0,
+                    status: customer.sale?.paymentStatus || 'Pending',
+                    timestamp: new Date(customer.sale?.saleDate || new Date()),
+                    customerId: customer._id,
+                    vehicleModel: customer.vehicle?.model || 'Unknown Model'
+                  };
+                })
+                .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                .slice(0, 10); // Show only latest 10 customers
+
+              // Calculate total payment amount for selected batch only
+              const totalPaymentAmount = customerPayments.reduce((sum: number, payment: any) => {
+                return sum + payment.amount;
+              }, 0);
+
+              setAnalyticsData(prev => ({
+                ...prev,
+                payments: customerPayments || [],
+                totalPayment: totalPaymentAmount || 0
+              }));
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching payment data for batch:', error);
+    }
+  };
+
+  const computeBatchAnalytics = async (batch: any, allBatches: any[]) => {
     if (!batch) return;
     const totalCars = Array.isArray(batch.cars) ? batch.cars.length : 0;
     const soldCars = Array.isArray(batch.cars)
@@ -123,11 +388,34 @@ export default function AnalyticsPage() {
       newArrivalBatch: nextBatchNumbers,
       batchExpense: totalExpense,
     }));
+
+    // Process sold cars data for charts
+    processSoldCarsData(batch);
+
+    // Fetch payment data for the selected batch
+    await fetchPaymentDataForBatch(batch);
   };
 
   useEffect(() => {
     fetchAnalyticsData();
   }, []);
+
+  // Handle clicking outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isBatchMenuOpen) {
+        const target = event.target as Element;
+        if (!target.closest('[data-dropdown-container]')) {
+          setIsBatchMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isBatchMenuOpen]);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -152,11 +440,11 @@ export default function AnalyticsPage() {
         setBatches(batches);
         if (batches.length > 0 && !selectedBatch) {
           setSelectedBatch(batches[0]);
-          computeBatchAnalytics(batches[0], batches);
+          await computeBatchAnalytics(batches[0], batches);
         } else if (selectedBatch) {
           // Refresh metrics with possibly updated data
           const refreshed = batches.find((b: any) => b._id === selectedBatch._id) || selectedBatch;
-          computeBatchAnalytics(refreshed, batches);
+          await computeBatchAnalytics(refreshed, batches);
         }
         
         // Calculate totals using the updated batch data
@@ -172,50 +460,7 @@ export default function AnalyticsPage() {
         // Keep aggregate totals if needed in future; per-batch metrics set above
       }
 
-      // Fetch real customer payment data
-      try {
-        const customersResponse = await fetch('/api/customers', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (customersResponse.ok) {
-          const customersData = await customersResponse.json();
-          if (customersData.success && customersData.data) {
-            // Extract customer data with total spend
-            const customerPayments = customersData.data
-              .filter((customer: any) => customer.sale && customer.sale.paidAmount > 0)
-              .map((customer: any) => {
-                return {
-                  name: customer.customer?.name || 'Unknown Customer',
-                  amount: Number(customer.sale?.paidAmount) || 0,
-                  status: customer.sale?.paymentStatus || 'Pending',
-                  timestamp: new Date(customer.sale?.saleDate || new Date()),
-                  customerId: customer._id,
-                  vehicleModel: customer.vehicle?.model || 'Unknown Model'
-                };
-              })
-              .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-              .slice(0, 10); // Show only latest 10 customers
-
-            // Calculate total payment amount
-            const totalPaymentAmount = customersData.data.reduce((sum: number, customer: any) => {
-              return sum + (customer.sale?.paidAmount || 0);
-            }, 0);
-
-            setAnalyticsData(prev => ({
-              ...prev,
-              payments: customerPayments || [],
-              totalPayment: totalPaymentAmount || 0
-            }));
-          }
-        }
-      } catch (paymentError) {
-        console.error('Error fetching customer payments:', paymentError);
-      }
+      // Payment data will be fetched when a batch is selected in computeBatchAnalytics
     } catch (error) {
       console.error("Error fetching analytics data:", error);
     } finally {
@@ -238,6 +483,18 @@ export default function AnalyticsPage() {
 
   return (
     <MainLayout>
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -295,7 +552,7 @@ export default function AnalyticsPage() {
           lineHeight: "58px",
         }}
       >
-              PKR {analyticsData.batchProfit.toLocaleString()}
+              PKR {formatIndianCurrency(analyticsData.batchProfit)}
             </div>
           </div>
 
@@ -318,7 +575,7 @@ export default function AnalyticsPage() {
           fontWeight: "500",
         }}
       >
-              PKR {analyticsData.investmentAmount.toLocaleString()}
+              PKR {formatIndianCurrency(analyticsData.investmentAmount)}
             </div>
           </div>
 
@@ -327,7 +584,6 @@ export default function AnalyticsPage() {
       <div
         style={{
           color: "#7A7A7A",
-          
           fontSize: "14px",
           fontWeight: "600",
         }}
@@ -342,32 +598,60 @@ export default function AnalyticsPage() {
           fontWeight: "500",
         }}
       >
-              PKR {analyticsData.batchRevenue.toLocaleString()}
+              PKR {formatIndianCurrency(analyticsData.batchRevenue)}
       </div>
             </div>
           </div>
 
   {/* Batch Selector Dropdown (right side) */}
-  <div style={{ position: 'relative' }}>
+  <div style={{ position: 'relative' }} data-dropdown-container>
     <button
       type="button"
       onClick={() => setIsBatchMenuOpen(v => !v)}
       style={{
         display: "flex",
-        padding: "10px",
+        padding: "10px 16px",
         alignItems: "center",
         gap: "12px",
         borderRadius: "8px",
         border: "1px solid rgba(0, 0, 0, 0.24)",
         background: "#FFF",
+        minWidth: "140px",
+        whiteSpace: "nowrap",
+        fontSize: "14px",
+        fontWeight: "500",
+        color: "#000",
+        transition: "all 0.2s ease-in-out",
+        cursor: "pointer"
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0, 103, 79, 0.5)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0, 0, 0, 0.24)";
       }}
     >
       {(() => {
         const FlagComp = selectedBatch?.flagImage ? (FLAG_COMPONENTS as any)[selectedBatch.flagImage] : null;
         return FlagComp ? <FlagComp /> : <Flag className="w-4 h-4" />;
       })()}
-      <span>{selectedBatch ? `Batch ${selectedBatch.batchNo}` : 'Select Batch'}</span>
-      <ChevronDown className="w-4 h-4" />
+      <span style={{ 
+        whiteSpace: "nowrap", 
+        overflow: "hidden", 
+        textOverflow: "ellipsis",
+        flex: 1
+      }}>
+        {selectedBatch ? `Batch ${selectedBatch.batchNo}` : 'Select Batch'}
+      </span>
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        transition: "transform 0.2s ease-in-out",
+        transform: isBatchMenuOpen ? "rotate(180deg)" : "rotate(0deg)"
+      }}>
+        <ChevronDown className="w-4 h-4" style={{ flexShrink: 0 }} />
+      </div>
     </button>
 
     {isBatchMenuOpen && batches && batches.length > 0 && (
@@ -383,32 +667,45 @@ export default function AnalyticsPage() {
           zIndex: 20,
           minWidth: '180px',
           padding: '6px',
+          animation: 'slideDown 0.2s ease-out',
+          transformOrigin: 'top'
         }}
       >
         {batches.map((b: any) => (
           <div
             key={b._id}
-            onClick={() => {
+            onClick={async () => {
               setSelectedBatch(b);
               setIsBatchMenuOpen(false);
-              computeBatchAnalytics(b, batches);
+              await computeBatchAnalytics(b, batches);
             }}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '8px 10px',
+              padding: '8px 12px',
               borderRadius: '6px',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              minHeight: '36px',
+              transition: 'background-color 0.2s ease-in-out',
+              backgroundColor: 'transparent'
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.backgroundColor = '#F7F7F7')}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.backgroundColor = '#F0F9F4')}
             onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent')}
           >
             {(() => {
               const FlagComp = b.flagImage ? (FLAG_COMPONENTS as any)[b.flagImage] : null;
               return FlagComp ? <FlagComp /> : <Flag className="w-4 h-4" />;
             })()}
-            <span style={{ fontSize: '14px', color: '#111' }}>{`Batch ${b.batchNo}`}</span>
+            <span style={{ 
+              fontSize: '14px', 
+              color: '#111',
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
+            }}>
+              {`Batch ${b.batchNo}`}
+            </span>
           </div>
         ))}
       </div>
@@ -445,10 +742,10 @@ export default function AnalyticsPage() {
           />
           <SecureStatCard
             title="Batch Expenses"
-            value={`PKR ${analyticsData.batchExpense.toLocaleString()}`}
+            value={`PKR ${formatIndianCurrency(analyticsData.batchExpense)}`}
             icon={DollarSign}
             showEditButton={true}
-            onEdit={() => console.log('Edit batch expense')}
+            onEdit={handleExpenseEdit}
           />
         </div>
 
@@ -464,66 +761,58 @@ export default function AnalyticsPage() {
               padding: '28px',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: '29px',
+              gap: '10px',
               borderRadius: '16px',
               border: '1px solid rgba(0, 0, 0, 0.12)',
               background: '#FFF'
             }}>
-            <h3 style={{
-              color: '#000',
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0
+             <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%'
             }}>
-              Sold Cars Ratio
-            </h3>
-            
+              <h3 style={{
+                color: '#000',
+                fontSize: '18px',
+                fontWeight: '500',
+                margin: 0
+              }}>
+                Sold Cars Ratio
+              </h3>
+              <h3 style={{
+                color: '#000',
+                fontSize: '18px',
+                fontWeight: '500',
+                margin: 0
+              }}>
+                Company Wise
+              </h3>
+            </div>  
             <div className="flex items-center gap-8">
               {/* Pie Chart */}
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="139" height="140" viewBox="0 0 139 140" fill="none">
-                  <path d="M93.3796 135.297C110.188 129.137 123.968 116.723 131.843 100.647C139.717 84.5702 141.079 66.0735 135.643 49.0172C130.207 31.9609 118.393 17.6632 102.668 9.10832C86.9431 0.553456 68.5214 -1.59744 51.2484 3.10459L60.1811 35.9193C68.994 33.5203 78.3929 34.6177 86.416 38.9825C94.4392 43.3473 100.467 50.6421 103.24 59.3444C106.014 68.0466 105.319 77.4839 101.301 85.6862C97.2832 93.8886 90.2527 100.222 81.6769 103.365L93.3796 135.297Z" fill="#00674F" fillOpacity="0.2"/>
-                  <path d="M138.871 70.1021C138.871 83.8352 134.799 97.2598 127.169 108.678C119.539 120.097 108.695 128.997 96.0073 134.252C83.3196 139.508 69.3584 140.883 55.8893 138.203C42.4201 135.524 30.0479 128.911 20.3372 119.2L44.3851 95.1525C49.3396 100.107 55.652 103.481 62.5241 104.848C69.3962 106.215 76.5193 105.513 82.9927 102.832C89.466 100.151 94.9989 95.61 98.8916 89.7841C102.784 83.9582 104.862 77.1089 104.862 70.1021H138.871Z" fill="#00674F" fillOpacity="0.5"/>
-                  <path d="M69.4355 0.666656C53.0697 0.666656 37.2299 6.4474 24.7112 16.9888C12.1925 27.5302 3.79962 42.1547 1.01355 58.2816C-1.77252 74.4085 1.22731 91.0012 9.48368 105.132C17.7401 119.262 30.7223 130.022 46.1395 135.513L57.5496 103.475C49.6836 100.674 43.06 95.184 38.8475 87.9745C34.635 80.765 33.1045 72.2993 34.526 64.0712C35.9474 55.8431 40.2296 48.3815 46.6167 43.0032C53.0039 37.6249 61.0855 34.6755 69.4355 34.6755V0.666656Z" fill="#00674F"/>
-                  <path d="M138.922 70.1021C138.922 52.2005 132.008 34.9906 119.623 22.0646C107.238 9.13851 90.3394 1.49524 72.4541 0.730068C54.5689 -0.0351004 37.0792 6.13697 23.6356 17.958C10.192 29.7791 1.83343 46.3356 0.304494 64.1717L34.1891 67.0764C34.9691 57.9762 39.2338 49.5289 46.0928 43.4977C52.9519 37.4665 61.8753 34.3174 71.0005 34.7078C80.1257 35.0982 88.7476 38.9979 95.0664 45.5929C101.385 52.1879 104.913 60.9685 104.913 70.1021H138.922Z" fill="#00674F" fillOpacity="0.6"/>
-                </svg>
+                <SimplePieChart 
+                  data={analyticsData.companyWiseData} 
+                  colors={['#10B981', '#059669', '#047857', '#065f46', '#064e3b']} 
+                />
               </div>
 
               {/* Legend */}
               <div className="flex flex-col gap-2">
-                {/* 2 Column Layout */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  {/* Column 1 */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F' }}></div>
-                    <span className="text-sm">TOYOTA</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.6 }}></div>
-                    <span className="text-sm">BMW</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.5 }}></div>
-                    <span className="text-sm">TESLA</span>
-                  </div>
-                  
-                  {/* Column 2 */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.2 }}></div>
-                    <span className="text-sm">MERCEDES</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.8 }}></div>
-                    <span className="text-sm">AUDI</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00674F', opacity: 0.4 }}></div>
-                    <span className="text-sm">VOLKSWAGEN</span>
-                  </div>
+                  {analyticsData.companyWiseData.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: ['#10B981', '#059669', '#047857', '#065f46', '#064e3b'][index % 5] }}
+                      ></div>
+                      <span className="text-sm">{item.name} ({item.count})</span>
+                    </div>
+                  ))}
+                  {analyticsData.companyWiseData.length === 0 && (
+                    <div className="text-sm text-gray-500">No sold cars data</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -537,69 +826,61 @@ export default function AnalyticsPage() {
             padding: '28px',
             flexDirection: 'column',
             alignItems: 'flex-start',
-            gap: '29px',
+            gap: '10px',
             borderRadius: '16px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
             background: '#FFF'
           }}>
-            <div style={{
+           <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               width: '100%'
+          }}>
+            <h3 style={{
+              color: '#000',
+              fontSize: '18px',
+                fontWeight: '500',
+              margin: 0
             }}>
+              Sold Cars Ratio
+            </h3>
               <h3 style={{
                 color: '#000',
                 fontSize: '18px',
-                fontWeight: '600',
+                fontWeight: '500',
                 margin: 0
               }}>
-                Car Segment
+                Segment Wise
               </h3>
-              <span style={{
-                color: '#000',
-                fontSize: '14px',
-                fontWeight: '600'
-              }}>
-                Type-wise
-              </span>
-            </div>
+            </div> 
             
             <div className="flex items-center gap-8">
               {/* Pie Chart */}
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="139" height="140" viewBox="0 0 139 140" fill="none">
-                  <path d="M93.3796 135.297C110.188 129.137 123.968 116.723 131.843 100.647C139.717 84.5702 141.079 66.0735 135.643 49.0172C130.207 31.9609 118.393 17.6632 102.668 9.10832C86.9431 0.553456 68.5214 -1.59744 51.2484 3.10459L60.1811 35.9193C68.994 33.5203 78.3929 34.6177 86.416 38.9825C94.4392 43.3473 100.467 50.6421 103.24 59.3444C106.014 68.0466 105.319 77.4839 101.301 85.6862C97.2832 93.8886 90.2527 100.222 81.6769 103.365L93.3796 135.297Z" fill="#FF6B35" fillOpacity="0.2"/>
-                  <path d="M138.871 70.1021C138.871 83.8352 134.799 97.2598 127.169 108.678C119.539 120.097 108.695 128.997 96.0073 134.252C83.3196 139.508 69.3584 140.883 55.8893 138.203C42.4201 135.524 30.0479 128.911 20.3372 119.2L44.3851 95.1525C49.3396 100.107 55.652 103.481 62.5241 104.848C69.3962 106.215 76.5193 105.513 82.9927 102.832C89.466 100.151 94.9989 95.61 98.8916 89.7841C102.784 83.9582 104.862 77.1089 104.862 70.1021H138.871Z" fill="#FF6B35" fillOpacity="0.5"/>
-                  <path d="M69.4355 0.666656C53.0697 0.666656 37.2299 6.4474 24.7112 16.9888C12.1925 27.5302 3.79962 42.1547 1.01355 58.2816C-1.77252 74.4085 1.22731 91.0012 9.48368 105.132C17.7401 119.262 30.7223 130.022 46.1395 135.513L57.5496 103.475C49.6836 100.674 43.06 95.184 38.8475 87.9745C34.635 80.765 33.1045 72.2993 34.526 64.0712C35.9474 55.8431 40.2296 48.3815 46.6167 43.0032C53.0039 37.6249 61.0855 34.6755 69.4355 34.6755V0.666656Z" fill="#FF6B35"/>
-                  <path d="M138.922 70.1021C138.922 52.2005 132.008 34.9906 119.623 22.0646C107.238 9.13851 90.3394 1.49524 72.4541 0.730068C54.5689 -0.0351004 37.0792 6.13697 23.6356 17.958C10.192 29.7791 1.83343 46.3356 0.304494 64.1717L34.1891 67.0764C34.9691 57.9762 39.2338 49.5289 46.0928 43.4977C52.9519 37.4665 61.8753 34.3174 71.0005 34.7078C80.1257 35.0982 88.7476 38.9979 95.0664 45.5929C101.385 52.1879 104.913 60.9685 104.913 70.1021H138.922Z" fill="#FF6B35" fillOpacity="0.7"/>
-                </svg>
+                <SimplePieChart 
+                  data={analyticsData.segmentWiseData} 
+                  colors={['#F59E0B', '#D97706', '#B45309', '#92400E', '#78350F']} 
+                />
               </div>
 
               {/* Legend */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35' }}></div>
-                  <span className="text-sm">SEDAN</span>
+                {analyticsData.segmentWiseData.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: ['#F59E0B', '#D97706', '#B45309', '#92400E', '#78350F'][index % 5] }}
+                    ></div>
+                    <span className="text-sm">{item.name} ({item.count})</span>
+                  </div>
+                ))}
+                {analyticsData.segmentWiseData.length === 0 && (
+                  <div className="text-sm text-gray-500">No sold cars data</div>
+                )}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.7 }}></div>
-                  <span className="text-sm">SUV</span>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.5 }}></div>
-                  <span className="text-sm">HATCHBACK</span>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FF6B35', opacity: 0.3 }}></div>
-                  <span className="text-sm">COUPE</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Car Engine Type */}
           <div style={{
@@ -609,7 +890,7 @@ export default function AnalyticsPage() {
             padding: '28px',
             flexDirection: 'column',
             alignItems: 'flex-start',
-            gap: '29px',
+            gap: '10px',
             borderRadius: '16px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
             background: '#FFF'
@@ -623,68 +904,62 @@ export default function AnalyticsPage() {
               <h3 style={{
                 color: '#000',
                 fontSize: '18px',
-                fontWeight: '600',
+                fontWeight: '500',
                 margin: 0
               }}>
-                Car Engine Type
+                Sold Cars Ratio
               </h3>
-              <span style={{
+              <h3 style={{
                 color: '#000',
-                fontSize: '14px',
-                fontWeight: '600'
+                fontSize: '18px',
+                fontWeight: '500',
+                margin: 0
               }}>
-                Fuel-wise
-              </span>
-            </div>
+                Engine Wise
+              </h3>
+                </div>
             
             <div className="flex items-center gap-8">
               {/* Pie Chart */}
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="139" height="140" viewBox="0 0 139 140" fill="none">
-                  <path d="M93.3796 135.297C110.188 129.137 123.968 116.723 131.843 100.647C139.717 84.5702 141.079 66.0735 135.643 49.0172C130.207 31.9609 118.393 17.6632 102.668 9.10832C86.9431 0.553456 68.5214 -1.59744 51.2484 3.10459L60.1811 35.9193C68.994 33.5203 78.3929 34.6177 86.416 38.9825C94.4392 43.3473 100.467 50.6421 103.24 59.3444C106.014 68.0466 105.319 77.4839 101.301 85.6862C97.2832 93.8886 90.2527 100.222 81.6769 103.365L93.3796 135.297Z" fill="#4A90E2" fillOpacity="0.2"/>
-                  <path d="M138.871 70.1021C138.871 83.8352 134.799 97.2598 127.169 108.678C119.539 120.097 108.695 128.997 96.0073 134.252C83.3196 139.508 69.3584 140.883 55.8893 138.203C42.4201 135.524 30.0479 128.911 20.3372 119.2L44.3851 95.1525C49.3396 100.107 55.652 103.481 62.5241 104.848C69.3962 106.215 76.5193 105.513 82.9927 102.832C89.466 100.151 94.9989 95.61 98.8916 89.7841C102.784 83.9582 104.862 77.1089 104.862 70.1021H138.871Z" fill="#4A90E2" fillOpacity="0.5"/>
-                  <path d="M69.4355 0.666656C53.0697 0.666656 37.2299 6.4474 24.7112 16.9888C12.1925 27.5302 3.79962 42.1547 1.01355 58.2816C-1.77252 74.4085 1.22731 91.0012 9.48368 105.132C17.7401 119.262 30.7223 130.022 46.1395 135.513L57.5496 103.475C49.6836 100.674 43.06 95.184 38.8475 87.9745C34.635 80.765 33.1045 72.2993 34.526 64.0712C35.9474 55.8431 40.2296 48.3815 46.6167 43.0032C53.0039 37.6249 61.0855 34.6755 69.4355 34.6755V0.666656Z" fill="#4A90E2"/>
-                  <path d="M138.922 70.1021C138.922 52.2005 132.008 34.9906 119.623 22.0646C107.238 9.13851 90.3394 1.49524 72.4541 0.730068C54.5689 -0.0351004 37.0792 6.13697 23.6356 17.958C10.192 29.7791 1.83343 46.3356 0.304494 64.1717L34.1891 67.0764C34.9691 57.9762 39.2338 49.5289 46.0928 43.4977C52.9519 37.4665 61.8753 34.3174 71.0005 34.7078C80.1257 35.0982 88.7476 38.9979 95.0664 45.5929C101.385 52.1879 104.913 60.9685 104.913 70.1021H138.922Z" fill="#4A90E2" fillOpacity="0.7"/>
-                </svg>
-              </div>
+                <SimplePieChart 
+                  data={analyticsData.engineWiseData} 
+                  colors={['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95']} 
+                />
+                </div>
 
               {/* Legend */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2' }}></div>
-                  <span className="text-sm">PETROL</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.7 }}></div>
-                  <span className="text-sm">DIESEL</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.5 }}></div>
-                  <span className="text-sm">HYBRID</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4A90E2', opacity: 0.2 }}></div>
-                  <span className="text-sm">ELECTRIC</span>
+                {analyticsData.engineWiseData.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'][index % 5] }}
+                    ></div>
+                    <span className="text-sm">{item.name} ({item.count})</span>
+                  </div>
+                ))}
+                {analyticsData.engineWiseData.length === 0 && (
+                  <div className="text-sm text-gray-500">No sold cars data</div>
+                )}
                 </div>
               </div>
             </div>
-          </div>
           </div>
 
           {/* Right Side - Payments */}
           <div style={{
             display: 'flex',
-            width: '40%',
+            flex: '1 1 auto',
+            minWidth: '300px',
+            maxWidth: '500px',
             padding: '24px 28px',
             flexDirection: 'column',
-            alignItems: 'center',
             gap: '23px',
             borderRadius: '16px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
-            background: '#FFF'
+            background: '#FFF',
+            height: 'fit-content'
           }}>
             {/* Payment Header */}
             <div className="flex justify-between items-center w-full">
@@ -707,17 +982,18 @@ export default function AnalyticsPage() {
               color: '#000',
               fontSize: '24px',
               fontWeight: '600',
-              textAlign: 'center'
+              textAlign: 'left'
+            
             }}>
-              Rs {analyticsData.totalPayment.toLocaleString()}
+              Rs {formatIndianCurrency(analyticsData.totalPayment)}
             </div>
 
-            <p className="text-sm text-gray-600 text-center">
-              Track customer total spend and payment status.
+            <p className="text-sm text-gray-600 text-left">
+              Track all payments by amount and status.
             </p>
 
             {/* Payment List */}
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
               {analyticsData.payments.length > 0 ? (
                 analyticsData.payments
                   .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -726,25 +1002,41 @@ export default function AnalyticsPage() {
                   key={index}
                   style={{
                     display: 'flex',
-                    padding: '16px 24px',
+                    padding: '16px 20px',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    alignSelf: 'stretch',
                     borderRadius: '8px',
                     border: '1px solid #F2F2F2',
-                    background: '#FFF'
+                    background: '#FFF',
+                    minHeight: '60px',
+                    width: '100%'
                   }}
                 >
-                  <div>
-                    <div className="font-medium text-gray-900">{payment.name || 'Unknown Customer'}</div>
-                    <div className="text-sm text-gray-600">Rs {payment.amount ? payment.amount.toLocaleString() : '0'}</div>
-                  </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    payment.status === 'Completed' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {payment.status}
+                  <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '20px' }}>
+                    <div className="font-medium text-gray-900" style={{ 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      fontSize: '16px',
+                      flex: '1'
+                    }}>
+                      {payment.name || 'Unknown Customer'}
+                    </div>
+                    <div className="text-sm text-gray-600" style={{ fontSize: '16px', flex: '1', textAlign: 'center' }}>
+                      Rs {payment.amount ? payment.amount.toLocaleString() : '0'}
+                    </div>
+                    <div style={{
+                      borderRadius: '16px',
+                      textAlign: 'center',
+                      padding: '4px 8px',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      color: payment.status === 'Completed' ? '#10B981' : '#FA1A1B',
+                      flex: '1',
+                      backgroundColor: payment.status === 'completed' ? '#e0edea' : '#FEE4E4'
+                    }}>
+                      {payment.status}
+                    </div>
                   </div>
                 </div>
                   ))
@@ -756,13 +1048,21 @@ export default function AnalyticsPage() {
             </div>
 
             {/* View All Payments Button */}
-            <button className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors">
+            <button className="w-full bg-[#00674f] text-white py-3 px-4 rounded-lg font-medium transition-colors">
               View All Payments
             </button>
           </div>
         </div>
 
       </div>
+
+      {/* Expense Edit Modal */}
+      <ExpenseEditModal
+        isOpen={showExpenseModal}
+        onClose={() => setShowExpenseModal(false)}
+        onSave={handleSaveExpense}
+        currentAmount={currentExpense}
+      />
     </MainLayout>
   );
 }

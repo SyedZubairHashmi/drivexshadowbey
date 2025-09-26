@@ -155,6 +155,151 @@ export async function calculateAllBatchesTotalSalePrice(companyId?: string) {
 }
 
 /**
+ * Calculate total cost for all cars in a specific batch
+ * @param batchId - The batch ID to calculate for
+ * @returns Object with calculation results
+ */
+export async function calculateBatchTotalCost(batchId: string) {
+  try {
+    await connectDB();
+    
+    // Find batch by ID
+    const batch = await Batch.findById(batchId);
+    if (!batch) {
+      throw new Error('Batch not found');
+    }
+
+    // Get all cars in this batch
+    const cars = await Car.find({ 
+      companyId: batch.companyId,
+      batchNo: batch.batchNo 
+    });
+
+    if (cars.length === 0) {
+      return {
+        success: true,
+        batchId,
+        batchNo: batch.batchNo,
+        totalCost: 0,
+        carsCount: 0,
+        message: 'No cars found in batch'
+      };
+    }
+
+    // Calculate total cost using the same logic as the virtual field
+    const totalCost = cars.reduce((total, car) => {
+      const f = car.financing;
+      if (!f) return total;
+      
+      const carTotalCost = (
+        (f.auctionPrice?.totalAmount || 0) +
+        (f.auctionExpenses?.totalAmount || 0) +
+        (f.inlandCharges?.totalAmount || 0) +
+        (f.loadingCharges?.totalAmount || 0) +
+        (f.containerCharges?.totalAmount || 0) +
+        (f.freightSea?.totalAmount || 0) +
+        (f.variantDuty || 0) +
+        (f.passportCharges || 0) +
+        (f.servicesCharges || 0) +
+        (f.transportCharges || 0) +
+        (f.repairCharges || 0) +
+        (f.miscellaneousCharges || 0) +
+        (f.vehicleValueCif || 0) +
+        (f.landingCharges || 0) +
+        (f.customsDuty || 0) +
+        (f.salesTax || 0) +
+        (f.federalExciseDuty || 0) +
+        (f.incomeTax || 0) +
+        (f.freightAndStorageCharges || 0) +
+        (f.demurrage || 0) +
+        (f.ageOfVehicle || 0)
+      );
+      
+      return total + carTotalCost;
+    }, 0);
+
+    // Update batch with calculated total cost
+    const updatedBatch = await Batch.findByIdAndUpdate(
+      batchId,
+      { totalCost },
+      { new: true, runValidators: true }
+    );
+
+    return {
+      success: true,
+      batchId,
+      batchNo: batch.batchNo,
+      totalCost,
+      carsCount: cars.length,
+      batch: updatedBatch,
+      message: 'Batch total cost calculated and updated successfully'
+    };
+
+  } catch (error: any) {
+    console.error('Error calculating batch total cost:', error);
+    return {
+      success: false,
+      error: error.message || 'Internal server error'
+    };
+  }
+}
+
+/**
+ * Calculate total cost for all batches
+ * @param companyId - Optional company ID to filter by company
+ * @returns Object with calculation results for all batches
+ */
+export async function calculateAllBatchesTotalCost(companyId?: string) {
+  try {
+    await connectDB();
+    
+    // Find all batches
+    const query = companyId ? { companyId } : {};
+    const batches = await Batch.find(query);
+
+    if (batches.length === 0) {
+      return {
+        success: true,
+        totalBatches: 0,
+        results: [],
+        message: 'No batches found'
+      };
+    }
+
+    const results = [];
+
+    for (const batch of batches) {
+      const calculation = await calculateBatchTotalCost(batch._id.toString());
+      results.push({
+        batchId: batch._id,
+        batchNo: batch.batchNo,
+        ...calculation
+      });
+    }
+
+    // Calculate overall totals
+    const totalCars = results.reduce((sum, result) => sum + result.carsCount, 0);
+    const grandTotalCost = results.reduce((sum, result) => sum + (result.totalCost || 0), 0);
+
+    return {
+      success: true,
+      totalBatches: batches.length,
+      totalCars,
+      grandTotalCost,
+      results,
+      message: 'All batches total cost calculated successfully'
+    };
+
+  } catch (error: any) {
+    console.error('Error calculating all batches total cost:', error);
+    return {
+      success: false,
+      error: error.message || 'Internal server error'
+    };
+  }
+}
+
+/**
  * Get batch statistics including total sale price
  * @param batchId - The batch ID to get statistics for
  * @returns Object with batch statistics

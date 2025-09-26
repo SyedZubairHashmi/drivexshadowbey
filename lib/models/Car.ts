@@ -167,6 +167,97 @@ carSchema.virtual("totalCost").get(function () {
 //   }
 // });
 
+// Post-save middleware to recalculate batch total cost when car is created
+carSchema.post('save', async function(doc) {
+  try {
+    await recalculateBatchTotalCost(doc);
+  } catch (error) {
+    console.error('Error recalculating batch total cost after car save:', error);
+  }
+});
+
+// Post-update middleware to recalculate batch total cost when car is updated
+carSchema.post('findOneAndUpdate', async function(doc) {
+  if (doc) {
+    try {
+      await recalculateBatchTotalCost(doc);
+    } catch (error) {
+      console.error('Error recalculating batch total cost after car update:', error);
+    }
+  }
+});
+
+// Helper function to recalculate batch total cost
+async function recalculateBatchTotalCost(car: any) {
+  try {
+    const connectDB = (await import('@/lib/mongodb')).default;
+    await connectDB();
+
+    if (!car.batchNo || !car.companyId) {
+      return;
+    }
+
+    // Find the batch for this car
+    const Batch = (await import('@/lib/models/Batch')).default;
+    const batch = await Batch.findOne({
+      companyId: car.companyId,
+      batchNo: car.batchNo
+    });
+
+    if (batch) {
+      // Get all cars in this batch
+      const Car = (await import('@/lib/models/Car')).default;
+      const cars = await Car.find({ 
+        companyId: car.companyId,
+        batchNo: car.batchNo 
+      });
+
+      // Calculate total cost using the same logic as the virtual field
+      const totalCost = cars.reduce((total, car) => {
+        const f = car.financing;
+        if (!f) return total;
+        
+        const carTotalCost = (
+          (f.auctionPrice?.totalAmount || 0) +
+          (f.auctionExpenses?.totalAmount || 0) +
+          (f.inlandCharges?.totalAmount || 0) +
+          (f.loadingCharges?.totalAmount || 0) +
+          (f.containerCharges?.totalAmount || 0) +
+          (f.freightSea?.totalAmount || 0) +
+          (f.variantDuty || 0) +
+          (f.passportCharges || 0) +
+          (f.servicesCharges || 0) +
+          (f.transportCharges || 0) +
+          (f.repairCharges || 0) +
+          (f.miscellaneousCharges || 0) +
+          (f.vehicleValueCif || 0) +
+          (f.landingCharges || 0) +
+          (f.customsDuty || 0) +
+          (f.salesTax || 0) +
+          (f.federalExciseDuty || 0) +
+          (f.incomeTax || 0) +
+          (f.freightAndStorageCharges || 0) +
+          (f.demurrage || 0) +
+          (f.ageOfVehicle || 0)
+        );
+        
+        return total + carTotalCost;
+      }, 0);
+
+      // Update batch total cost
+      await Batch.findByIdAndUpdate(
+        batch._id,
+        { totalCost },
+        { new: true, runValidators: true }
+      );
+
+      console.log(`Updated batch ${batch.batchNo} total cost to ${totalCost}`);
+    }
+  } catch (error) {
+    console.error('Error in recalculateBatchTotalCost:', error);
+  }
+}
+
 // Compound unique index: chasisNumber must be unique within each company
 carSchema.index({ companyId: 1, chasisNumber: 1 }, { unique: true });
 
