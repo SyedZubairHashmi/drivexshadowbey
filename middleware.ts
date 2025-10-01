@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
   // Check if the route is an admin route
   if (pathname.startsWith('/admin')) {
     // Get user data from cookies or headers
-    const userCookie = request.cookies.get('user');
+    const userCookie = request.cookies.get('auth');
     
     if (!userCookie) {
       // No user data, redirect to login
@@ -41,7 +41,8 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   
   if (isProtectedRoute) {
-    const userCookie = request.cookies.get('user');
+    const userCookie = request.cookies.get('auth');
+    
     
     if (!userCookie) {
       // No user data, redirect to login
@@ -56,7 +57,7 @@ export function middleware(request: NextRequest) {
         // User is not authorized, redirect to login
         return NextResponse.redirect(new URL('/login', request.url));
       }
-
+      
       // If subuser, enforce per-route permissions using access flags
       if (user.role === 'subuser') {
         const accessCookie = request.cookies.get('subuser_access');
@@ -65,8 +66,8 @@ export function middleware(request: NextRequest) {
           access = accessCookie ? JSON.parse(accessCookie.value) : null;
         } catch {}
         // Fallback to access on user cookie when dedicated cookie is missing
-        if (!access && user.access) {
-          access = user.access;
+        if (!access && (user as any).access) {
+          access = (user as any).access;
         }
 
         // Special case for settings - only company and admin users can access
@@ -77,11 +78,11 @@ export function middleware(request: NextRequest) {
         // Map top-level routes to access flags
         const path = pathname;
         const routeToFlag: { [key: string]: string } = {
+          '/dashboard': 'dashboardUnits',
           '/cars': 'carManagement',
           '/analytics': 'analytics',
           '/investors': 'investors',
-          '/sales-and-payments': 'sales',
-          '/customers': 'customers', // in case of direct path usage
+          '/sales-and-payments': 'salesAndPayments',
         };
 
         const matchedKey = Object.keys(routeToFlag).find((key) => path.startsWith(key));

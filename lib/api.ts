@@ -8,6 +8,7 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
   
   const config: RequestInit = {
     ...options,
+    credentials: 'include', // Include cookies for authentication
   };
   
   // Only set Content-Type for JSON requests
@@ -495,84 +496,5 @@ export const companyAPI = {
 };
 
 // SubUser API
-export const subUserAPI = {
-  // Get all subusers for a company
-  getAll: async (companyId: string) => {
-    return apiRequest(`/subusers?companyId=${companyId}`);
-  },
-
-  // Get a specific subuser by ID
-  getById: async (id: string) => {
-    return apiRequest(`/subusers/${id}`);
-  },
-
-  // Create a new subuser
-  create: async (subUserData: {
-    companyId: string;
-    name: string;
-    email: string;
-    password: string;
-    role?: string;
-    branch?: string;
-    access?: {
-      carManagement?: boolean;
-      analytics?: boolean;
-      setting?: boolean;
-      sales?: boolean;
-      customers?: boolean;
-      investors?: boolean;
-      dashboardUnits?: boolean;
-    };
-  }) => {
-    return apiRequest('/subusers', {
-      method: 'POST',
-      body: JSON.stringify(subUserData),
-    });
-  },
-
-  // Update a subuser
-  update: async (id: string, subUserData: {
-    name?: string;
-    email?: string;
-    password?: string;
-    role?: string;
-    branch?: string;
-    access?: {
-      carManagement?: boolean;
-      analytics?: boolean;
-      setting?: boolean;
-      sales?: boolean;
-      customers?: boolean;
-      investors?: boolean;
-      dashboardUnits?: boolean;
-    };
-  }) => {
-    return apiRequest(`/subusers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(subUserData),
-    });
-  },
-
-  // Delete a subuser
-  delete: async (id: string) => {
-    return apiRequest(`/subusers/${id}`, {
-      method: 'DELETE',
-    });
-  },
-
-  // Format subuser data for display
-  formatSubUserData: (subUser: any) => {
-    return {
-      id: subUser._id,
-      companyId: subUser.companyId,
-      name: subUser.name,
-      email: subUser.email,
-      role: subUser.role,
-      branch: subUser.branch,
-      access: subUser.access,
-      createdAt: subUser.createdAt,
-      updatedAt: subUser.updatedAt,
-    };
-  },
-};
+// SubUser API removed
 

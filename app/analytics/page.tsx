@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { batchAPI } from "@/lib/api";
+import { SubuserProtectedRoute } from "@/components/SubuserProtectedRoute";
 
 // Function to format large numbers in Indian format (lacs, crores)
 const formatIndianCurrency = (amount: number): string => {
@@ -482,19 +483,20 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <MainLayout>
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
+    <SubuserProtectedRoute requiredAccess="analytics">
+      <MainLayout>
+        <style jsx>{`
+          @keyframes slideDown {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+        `}</style>
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -1063,7 +1065,8 @@ export default function AnalyticsPage() {
         onSave={handleSaveExpense}
         currentAmount={currentExpense}
       />
-    </MainLayout>
+      </MainLayout>
+    </SubuserProtectedRoute>
   );
 }
 

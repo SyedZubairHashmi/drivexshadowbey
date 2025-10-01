@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
     
     // Get company ID from authentication
     const companyId = getCompanyIdFromRequest(request);
+    console.log('Batches API: Company ID from auth:', companyId);
+    
     if (!companyId) {
+      console.log('Batches API: No company ID found');
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -46,6 +49,9 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination
     const total = await Batch.countDocuments(filter);
+    
+    console.log('Batches API: Found', batches.length, 'batches for company:', companyId);
+    console.log('Batches API: Filter used:', filter);
 
     return NextResponse.json({
       success: true,

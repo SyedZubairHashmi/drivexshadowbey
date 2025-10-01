@@ -9,6 +9,7 @@ import { customerAPI } from "@/lib/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
+import { SubuserProtectedRoute } from "@/components/SubuserProtectedRoute";
 
 interface Customer {
   _id: string;
@@ -156,106 +157,108 @@ export default function CustomersPage() {
   }
 
   return (
-    <MainLayout>
-      <div className="space-y-5 pt-6">
-        {/* Header with Customer heading and Add button - aligned with table */}
-        <div className="bg-white">
-          <div className="flex items-center justify-between">
-            <h1 className="text-gray-900 font-semibold" style={{
-              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-              fontWeight: 600,
-              fontStyle: 'normal',
-              fontSize: '22px',
-              lineHeight: '30px',
-              letterSpacing: '0%'
-            }}>
-              Customer Management
-            </h1>
-            <Button 
-              onClick={handleAddNewCustomer}
-              className="flex items-center  border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-              style={{
-                width: '160px',
-                height: '50px',
-                borderRadius: '50px',
-                paddingTop: '10px',
-                paddingRight: '12px',
-                paddingBottom: '10px',
-                paddingLeft: '10px',
-                gap: '10px',
-                borderWidth: '1px',
-                opacity: 1
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Add Customer
-            </Button>
-          </div>
-        </div>
-
-        {/* Customers Table with fixed height and pagination */}
-        <div className="bg-white">
-          <div style={{ overflow: 'hidden' }}>
-            <div className="[&_.relative]:overflow-hidden">
-              <CustomerTable 
-                customers={currentCustomers} 
-                onGenerateInvoice={handleGenerateInvoice}
-                onPaymentHistory={handlePaymentHistory}
-                onUpdatePayment={handleUpdatePayment}
-                onDelete={handleDeleteCustomer}
-                onView={handleViewCustomer}
-              />
+    <SubuserProtectedRoute requiredAccess="salesAndPayments">
+      <MainLayout>
+        <div className="space-y-5 pt-6">
+          {/* Header with Customer heading and Add button - aligned with table */}
+          <div className="bg-white">
+            <div className="flex items-center justify-between">
+              <h1 className="text-gray-900 font-semibold" style={{
+                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+                fontWeight: 600,
+                fontStyle: 'normal',
+                fontSize: '22px',
+                lineHeight: '30px',
+                letterSpacing: '0%'
+              }}>
+                Customer Management
+              </h1>
+              <Button 
+                onClick={handleAddNewCustomer}
+                className="flex items-center  border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                style={{
+                  width: '160px',
+                  height: '50px',
+                  borderRadius: '50px',
+                  paddingTop: '10px',
+                  paddingRight: '12px',
+                  paddingBottom: '10px',
+                  paddingLeft: '10px',
+                  gap: '10px',
+                  borderWidth: '1px',
+                  opacity: 1
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Add Customer
+              </Button>
             </div>
           </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col items-center justify-center  ">
-           
-            <div className="flex items-center gap-4 justify-center">
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
-              </button>
-              
-              {/* Page numbers */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {/* Customers Table with fixed height and pagination */}
+          <div className="bg-white">
+            <div style={{ overflow: 'hidden' }}>
+              <div className="[&_.relative]:overflow-hidden">
+                <CustomerTable 
+                  customers={currentCustomers} 
+                  onGenerateInvoice={handleGenerateInvoice}
+                  onPaymentHistory={handlePaymentHistory}
+                  onUpdatePayment={handleUpdatePayment}
+                  onDelete={handleDeleteCustomer}
+                  onView={handleViewCustomer}
+                />
+              </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col items-center justify-center  ">
+             
+              <div className="flex items-center gap-4 justify-center">
                 <button
-                  key={page}
-                  className={`text-sm ${
-                    currentPage === page
-                      ? 'bg-[#00674F] text-white'
-                      : 'text-black  bg-transparent'
-                  }`}
-                  style={{
-                    width: '26px',
-                    height: '25px',
-                    borderRadius: '1000px',
-                    opacity: 1,
-                    padding: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onClick={() => handlePageChange(page)}
+                  className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
                 >
-                  {page}
+                  <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
                 </button>
-              ))}
-              
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-              >
-                <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
-              </button>
+                
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    className={`text-sm ${
+                      currentPage === page
+                        ? 'bg-[#00674F] text-white'
+                        : 'text-black  bg-transparent'
+                    }`}
+                    style={{
+                      width: '26px',
+                      height: '25px',
+                      borderRadius: '1000px',
+                      opacity: 1,
+                      padding: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button
+                  className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </SubuserProtectedRoute>
   );
 }

@@ -6,21 +6,26 @@ import { NextRequest } from 'next/server';
  */
 export function getCompanyIdFromRequest(request: NextRequest): string | null {
   try {
-    const userCookie = request.cookies.get('user');
+    const userCookie = request.cookies.get('auth');
     
     if (!userCookie) {
+      console.log('Auth utils: No auth cookie found');
       return null;
     }
 
     const user = JSON.parse(userCookie.value);
+    console.log('Auth utils: Parsed user from cookie:', user);
     
     // Return companyId for company users (their own ID) or subusers (their companyId)
     if (user.role === 'company' && user._id) {
+      console.log('Auth utils: Company user, returning companyId:', user._id);
       return user._id;
     } else if (user.role === 'subuser' && user.companyId) {
+      console.log('Auth utils: Subuser, returning companyId:', user.companyId);
       return user.companyId;
     }
     
+    console.log('Auth utils: No valid companyId found for user:', user);
     return null;
   } catch (error) {
     console.error('Error parsing user cookie:', error);
@@ -34,7 +39,7 @@ export function getCompanyIdFromRequest(request: NextRequest): string | null {
  */
 export function getUserFromRequest(request: NextRequest): any | null {
   try {
-    const userCookie = request.cookies.get('user');
+    const userCookie = request.cookies.get('auth');
     
     if (!userCookie) {
       return null;

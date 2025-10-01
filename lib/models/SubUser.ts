@@ -31,8 +31,7 @@ const subUserSchema = new mongoose.Schema({
     carManagement: { type: Boolean, default: false },
     analytics: { type: Boolean, default: false },
     setting: { type: Boolean, default: false },
-    sales: { type: Boolean, default: false },
-    customers: { type: Boolean, default: false },
+    salesAndPayments: { type: Boolean, default: false },
     investors: { type: Boolean, default: false },
     dashboardUnits: { type: Boolean, default: false },
   },
@@ -40,3 +39,5 @@ const subUserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export default mongoose.models.SubUser || mongoose.model("SubUser", subUserSchema);
+
+

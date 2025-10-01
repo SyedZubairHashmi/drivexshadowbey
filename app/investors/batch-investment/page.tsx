@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +73,7 @@ interface InvestorFormData {
 }
 
 export default function InvestorsPage() {
+  const router = useRouter();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -427,39 +429,6 @@ export default function InvestorsPage() {
     }
   };
 
-  // Dynamic height function based on payment method and step
-  const getModalHeight = () => {
-    // If on step 2, reduce height by 100px
-    if (currentStep === 2) {
-      switch (formData.paymentMethod) {
-        case 'bank':
-          return '660px'; // 760px - 100px
-        case 'cash':
-          return '600px'; // 700px - 100px
-        case 'cheque':
-          return '660px'; // 760px - 100px
-        case 'bank_deposit':
-          return '660px'; // 760px - 100px
-        default:
-          return '600px'; // 700px - 100px
-      }
-    }
-    
-    // Step 1 heights
-    switch (formData.paymentMethod) {
-      case 'bank':
-        return '760px'; // Increased height for bank (extra fields)
-      case 'cash':
-        return '700px'; // Decreased height for cash (fewer fields)
-      case 'cheque':
-        return '760px'; // Standard height for cheque
-      case 'bank_deposit':
-        return '760px'; // Standard height for bank deposit
-      default:
-        return '700px'; // Default height
-    }
-  };
-
   // Dynamic width function based on step
   const getModalWidth = () => {
     return currentStep === 2 ? '480px' : '520px';
@@ -468,7 +437,7 @@ export default function InvestorsPage() {
   const renderStep1 = () => (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 flex-shrink-0">
         {/* Title */}
         <div>
           <h2 className="text-xl font-semibold text-black-900">Batch Investor</h2>
@@ -490,8 +459,19 @@ export default function InvestorsPage() {
         </Button>
       </div>
 
-      {/* Form */}
-      <div className={`${formData.paymentMethod === 'bank' || formData.paymentMethod === 'cheque' || formData.paymentMethod === 'bank_deposit' ? 'space-y-2' : 'space-y-3'}`}>
+      {/* Scrollable Form Content */}
+      <div 
+        className="flex-1 scrollbar-hide"
+        style={{
+          maxHeight: 'calc(100% - 80px)', // Account for header and buttons
+          overflowY: 'auto',
+          overflowX: 'hidden', // Prevent horizontal scrolling
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE and Edge
+          paddingRight: '8px', // Add right padding to prevent content from touching border
+        }}
+      >
+        <div className={`${formData.paymentMethod === 'bank' || formData.paymentMethod === 'cheque' || formData.paymentMethod === 'bank_deposit' ? 'space-y-3' : 'space-y-3'}`}>
         {/* Investor Details */}
         <div className="flex gap-4">
           <div className="space-y-1">
@@ -887,11 +867,11 @@ export default function InvestorsPage() {
             </div>
           </div>
         )}
-
+        </div>
       </div>
 
-      {/* Action Button */}
-      <div>
+      {/* Fixed Action Button at Bottom */}
+      <div className="flex-shrink-0">
         <Button
           onClick={handleNext}
           style={{
@@ -902,7 +882,6 @@ export default function InvestorsPage() {
             opacity: 1,
             gap: "15px",
             background: "#00674F",
-          
           }}
           className="text-white font-medium"
         >
@@ -1107,7 +1086,7 @@ export default function InvestorsPage() {
 
           <div >
 
-          {/* Search, Filter, and See All Button in one row */}
+          {/* Search and See All Button in one row */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <div 
@@ -1133,21 +1112,6 @@ export default function InvestorsPage() {
                   }}
                 />
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                style={{
-                  height: "41px",
-                  borderRadius: "12px",
-                  gap: "10px",
-                  padding: "12px",
-                  borderWidth: "1px",
-                  color: "#0000008F"
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
             </div>
             <Button
               className="flex items-center gap-2.5 border rounded-[12px]  border-gray-300 bg-white text-black-[#00000099] hover:bg-gray-50"
@@ -1202,6 +1166,7 @@ export default function InvestorsPage() {
                         borderWidth: '1px',
                         padding: '12px'
                       }}
+                      onClick={() => router.push(`/cars/inventory/${batch.batchNo}`)}
                     >
                       View Batch
                     </Button>
@@ -1289,12 +1254,14 @@ export default function InvestorsPage() {
             className="bg-white rounded-xl border border-gray-200 flex flex-col"
             style={{
               width: getModalWidth(),
-              height: getModalHeight(),
+              height: '600px', // Fixed height
+              maxHeight: '90vh', // Responsive max height
               top: '99px',
               left: '460px',
               borderWidth: '1px',
-              padding: '24px',
-              gap: '40px',
+              padding: '20px', // Reduced padding
+              gap: '16px', // Reduced gap
+              overflow: 'hidden', // Prevent modal from growing
             }}
           >
             {currentStep === 1 ? renderStep1() : renderStep2()}

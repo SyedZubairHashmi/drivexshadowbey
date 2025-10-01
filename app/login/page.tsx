@@ -31,6 +31,8 @@ export default function LoginPage() {
     setError("");
 
     try {
+      console.log('Attempting login with:', { email, password: '***' });
+      
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -39,20 +41,33 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Login response status:', response.status);
       const data = await response.json();
+      console.log('Login response data:', data);
 
       if (data.success) {
+        console.log('Login successful, user data:', data.data);
         // Use the auth hook to login
         login(data.data, rememberMe);
         
-        // Navigate to appropriate dashboard based on role
-        if (data.data.role === 'admin') {
-          router.push('/admin');
-        } else if (data.data.role === 'company') {
-          router.push('/dashboard');
-        } else {
-          router.push('/dashboard'); // fallback
-        }
+        // Wait a moment for the auth state to update, then navigate
+        setTimeout(() => {
+          console.log('About to navigate after login');
+          
+          // Debug: Check if cookies are set
+          console.log('Current cookies:', document.cookie);
+          
+          if (data.data.role === 'admin') {
+            console.log('Redirecting to admin dashboard');
+            router.replace('/admin');
+          } else if (data.data.role === 'company') {
+            console.log('Redirecting to company dashboard');
+            router.replace('/dashboard');
+          } else {
+            console.log('Redirecting to fallback dashboard');
+            router.replace('/dashboard'); // fallback
+          }
+        }, 100);
       } else {
         setError(data.error || 'Login failed');
       }

@@ -95,9 +95,47 @@ const navigation = [
 
 export function Sidebar() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, hasAccess, loading } = useAuth();
   const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
   const pathname = usePathname();
+
+  // Filter navigation based on user access
+  const getFilteredNavigation = () => {
+    if (!user || user.role === 'admin' || user.role === 'company') {
+      return navigation; // Admin and company see all items
+    }
+
+    if (user.role === 'subuser') {
+      return navigation.filter(item => {
+        // Map navigation items to access flags
+        switch (item.name) {
+          case 'Dashboard ':
+            return hasAccess('dashboardUnits');
+          case 'Cars Management':
+            return hasAccess('carManagement');
+          case 'Sales & Payments':
+            return hasAccess('salesAndPayments');
+          case 'Investors':
+            return hasAccess('investors');
+          case 'Analytics':
+            return hasAccess('analytics');
+          case 'Settings':
+            return hasAccess('setting');
+          default:
+            return false;
+        }
+      });
+    }
+
+    return navigation;
+  };
+
+  const filteredNavigation = getFilteredNavigation();
+
+  // Show minimal sidebar during loading - only dashboard and add sold car button
+  const getMinimalNavigation = () => {
+    return navigation.filter(item => item.name === 'Dashboard ');
+  };
 
   // Add hidden scrollbar styles with smooth scrolling
   const scrollbarStyles = `
@@ -259,19 +297,21 @@ export function Sidebar() {
           </div>
       </div>
 
-        {/* Add Sold Car Button */}
-        <div className="w-full" style={{ marginTop: '40px' }}>
-          <Link 
-            href="/cars/sold?modal=open"
-            className="w-full mx-auto flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-400 rounded-lg text-black-600 hover:bg-gray-100 transition-colors cursor-pointer"
-            onClick={() => {
-              console.log("Add Sold Car button clicked");
-            }}
-          >
-          <FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
-          Add Sold Car
-          </Link>
-      </div>
+        {/* Add Sold Car Button - show during loading or if user has car management access */}
+        {(loading || !user || user.role === 'admin' || user.role === 'company' || hasAccess('carManagement')) && (
+          <div className="w-full" style={{ marginTop: '40px' }}>
+            <Link 
+              href="/cars/sold?modal=open"
+              className="w-full mx-auto flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-400 rounded-lg text-black-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              onClick={() => {
+                console.log("Add Sold Car button clicked");
+              }}
+            >
+            <FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
+            Add Sold Car
+            </Link>
+        </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -285,7 +325,7 @@ export function Sidebar() {
             overflowX: 'hidden',
             padding: '0 12px'
           }}>
-        {navigation.map((item) => {
+        {(loading ? getMinimalNavigation() : filteredNavigation).map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
           const isSubmenuOpen = openSubmenus.includes(item.name);

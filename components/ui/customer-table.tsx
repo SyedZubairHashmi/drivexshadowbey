@@ -66,6 +66,7 @@ export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, 
   const [searchTerm, setSearchTerm] = useState('');
   const [companyFilter, setCompanyFilter] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
+  const [importYearFilter, setImportYearFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   // Filter customers based on search and filter criteria
@@ -78,13 +79,20 @@ export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, 
         customer.vehicle.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         customer.vehicle.model.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCompany = companyFilter === '' || companyFilter === 'all' || customer.vehicle.companyName === companyFilter;
+      const matchesCompany = companyFilter === '' || companyFilter === 'all' || customer.vehicle.companyName.toLowerCase() === companyFilter.toLowerCase();
       const matchesGrade = gradeFilter === '' || gradeFilter === 'all' || customer.vehicle.model.includes(gradeFilter);
+      
+      // Import year matching - extract year from sale date or vehicle import year
+      const derivedImportYear = (customer as any).vehicle?.importYear
+        ? String((customer as any).vehicle.importYear)
+        : (customer.sale?.saleDate ? String(new Date(customer.sale.saleDate).getFullYear()) : '');
+      const matchesImportYear = importYearFilter === '' || importYearFilter === 'all' || derivedImportYear === importYearFilter;
+      
       const matchesStatus = statusFilter === '' || statusFilter === 'all' || customer.sale.paymentStatus === statusFilter;
       
-      return matchesSearch && matchesCompany && matchesGrade && matchesStatus;
+      return matchesSearch && matchesCompany && matchesGrade && matchesImportYear && matchesStatus;
     });
-  }, [customers, searchTerm, companyFilter, gradeFilter, statusFilter]);
+  }, [customers, searchTerm, companyFilter, gradeFilter, importYearFilter, statusFilter]);
 
   return (
     <div className="space-y-3">
@@ -205,13 +213,18 @@ export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Grades</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="5.5">5.5</SelectItem>
               <SelectItem value="5">5</SelectItem>
+              <SelectItem value="4.5">4.5</SelectItem>
               <SelectItem value="4">4</SelectItem>
+              <SelectItem value="3.5">3.5</SelectItem>
               <SelectItem value="3">3</SelectItem>
+              <SelectItem value="2">2</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select>
+          <Select value={importYearFilter} onValueChange={setImportYearFilter}>
             <SelectTrigger 
               className="w-32"
               style={{
@@ -231,9 +244,13 @@ export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, 
               <SelectValue placeholder="Import Year" style={{ whiteSpace: "nowrap" }} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2026">2026</SelectItem>
+              <SelectItem value="all">All Years</SelectItem>
               <SelectItem value="2025">2025</SelectItem>
               <SelectItem value="2024">2024</SelectItem>
+              <SelectItem value="2023">2023</SelectItem>
+              <SelectItem value="2022">2022</SelectItem>
+              <SelectItem value="2021">2021</SelectItem>
+              <SelectItem value="2020">2020</SelectItem>
             </SelectContent>
           </Select>
 
@@ -260,7 +277,6 @@ export function CustomerTable({ customers, onGenerateInvoice, onPaymentHistory, 
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="Completed">Completed</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="inprogress">In Progress</SelectItem>
             </SelectContent>
           </Select>
         </div>

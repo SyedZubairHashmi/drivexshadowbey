@@ -5,7 +5,7 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { CompanyTable } from "@/components/admin/company-table";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, X } from "lucide-react";
+import { Plus, Search, Filter, X, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import {
@@ -38,10 +38,13 @@ export default function AdminDashboardPage() {
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: '',
     companyName: '',
@@ -55,27 +58,22 @@ export default function AdminDashboardPage() {
     fetchCompanies();
   }, []);
 
-  // Refetch companies when filters change
+  // Debounce search input to avoid unnecessary re-renders while typing
   useEffect(() => {
-    if (!loading) {
-      fetchCompanies();
-    }
-  }, [searchTerm, statusFilter, currentPage]);
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
 
   const fetchCompanies = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const filters = {
-        search: searchTerm || undefined,
-        status: statusFilter === 'all' ? undefined : statusFilter as 'active' | 'inactive',
-        limit: itemsPerPage,
-        page: currentPage
-      };
-
-      console.log("Fetching companies with filters:", filters);
-      const response = await companyAPI.getAll(filters);
+      console.log("Fetching companies (initial load or admin actions)");
+      // Fetch all companies once; filter and paginate on the client
+      const response = await companyAPI.getAll();
       
       console.log("API Response:", response);
       
@@ -116,6 +114,8 @@ export default function AdminDashboardPage() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setFormData({
       ownerName: '',
       companyName: '',
@@ -137,6 +137,19 @@ export default function AdminDashboardPage() {
       confirmPassword: '',
       status: 'active'
     });
+  };
+
+  const handleViewCompany = (company: Company) => {
+    // Populate form data with the selected company's details
+    setFormData({
+      ownerName: company.ownerName,
+      companyName: company.companyName,
+      companyEmail: company.companyEmail,
+      password: '', // Don't show password for security
+      confirmPassword: '',
+      status: company.status
+    });
+    setIsDetailsModalOpen(true);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -236,10 +249,10 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (client-side filtering)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [debouncedSearch, statusFilter]);
 
   if (loading) {
     return (
@@ -346,21 +359,6 @@ export default function AdminDashboardPage() {
                       />
                     </div>
 
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      style={{
-                        height: "41px",
-                        borderRadius: "12px",
-                        gap: "10px",
-                        padding: "12px",
-                        borderWidth: "1px",
-                        color: "#00000099"
-                      }}
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filter
-                    </Button>
                   </div>
 
                   <div className="flex gap-2">
@@ -399,7 +397,7 @@ export default function AdminDashboardPage() {
                   <CompanyTable 
                     companies={currentItems}
                     startIndex={startIndex}
-                    onView={(company) => console.log("View company:", company)}
+                    onView={handleViewCompany}
                     onEdit={(company) => console.log("Edit company:", company)}
                     onDelete={(company) => console.log("Delete company:", company)}
                     onStatusChange={handleStatusChange}
@@ -650,15 +648,16 @@ export default function AdminDashboardPage() {
                 }}>
                   Company Password
                 </label>
+                <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
+                    type={showPassword ? "text" : "password"}
                   placeholder="Enter-company-password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   style={{
                     display: 'flex',
                     height: '42px',
-                    padding: '10px 12px',
+                      padding: '10px 40px 10px 12px',
                     alignItems: 'center',
                     gap: '12px',
                     flexShrink: 0,
@@ -668,9 +667,34 @@ export default function AdminDashboardPage() {
                     background: '#FFF',
                     boxShadow: '0 1px 2px 0 rgba(16, 24, 40, 0.05)',
                     outline: 'none',
-                    fontSize: '14px'
-                  }}
-                />
+                      fontSize: '14px',
+                      width: '100%'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Confirm Password */}
@@ -683,15 +707,16 @@ export default function AdminDashboardPage() {
                 }}>
                   Confirm Password
                 </label>
+                <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                   placeholder="Enter-Confirm-password"
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   style={{
                     display: 'flex',
                     height: '42px',
-                    padding: '10px 12px',
+                      padding: '10px 40px 10px 12px',
                     alignItems: 'center',
                     gap: '12px',
                     flexShrink: 0,
@@ -701,9 +726,34 @@ export default function AdminDashboardPage() {
                     background: '#FFF',
                     boxShadow: '0 1px 2px 0 rgba(16, 24, 40, 0.05)',
                     outline: 'none',
-                    fontSize: '14px'
-                  }}
-                />
+                      fontSize: '14px',
+                      width: '100%'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </div>
 
 

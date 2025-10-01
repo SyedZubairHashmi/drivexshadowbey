@@ -2,7 +2,7 @@
 
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Plus,MoreHorizontal } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -481,73 +481,56 @@ export default function InvoicePage() {
                 <TableBody>
                   {currentItems.map((customer, index) => (
                     <TableRow key={customer._id} style={{ height: '40px' }}>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {startIndex + index + 1}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         INV-{customer._id.slice(-6).toUpperCase()}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {customer.customer.name || 'N/A'}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {customer.vehicle.companyName && customer.vehicle.model 
                           ? `${customer.vehicle.companyName} ${customer.vehicle.model} ${new Date(customer.sale.saleDate).getFullYear()}`
                           : 'N/A'
                         }
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {customer.sale.saleDate ? new Date(customer.sale.saleDate).toLocaleDateString() : 'N/A'}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {customer.sale.saleDate ? new Date(customer.sale.saleDate).toLocaleDateString() : 'N/A'}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         {customer.payments && customer.payments.length > 0 
                           ? customer.payments[customer.payments.length - 1].paymentMethod?.type || 'N/A'
                           : 'N/A'
                         }
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
                         Rs {(customer.sale.salePrice || 0).toLocaleString()}
                       </TableCell>
-                      <TableCell style={{ padding: '8px 16px' }}>
-                        <div className="flex items-center gap-4">
-                          <Button
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewInvoice(customer)}
-                            style={{
-                              display: 'flex',
-                              padding: '0px 10px',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              fontSize: '11px',
-                              height: '20px',
-                              borderRadius: '25px',
-                              background: 'rgba(0, 0, 0, 0.12)',
-                              color: '#000000',
-                              border: 'none'
-                            }}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            style={{
-                              display: 'flex',
-                              padding: '4px',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderRadius: '1000px',
-                              color: '#000000',
-                              border: 'none'
-                            }}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      <TableCell style={{ height: '40px', padding: '8px 16px' }}>
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewInvoice(customer)}
+                          style={{
+                            display: 'flex',
+                            padding: '0px 10px',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            fontSize: '11px',
+                            height: '20px',
+                            borderRadius: '25px',
+                            background: 'rgba(0, 0, 0, 0.12)',
+                            color: '#000000',
+                            border: 'none'
+                          }}
+                        >
+                          View
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

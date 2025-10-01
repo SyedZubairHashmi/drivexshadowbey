@@ -9,6 +9,7 @@ import BatchModal from "@/components/ui/batch-modal";
 import { useState, useEffect } from "react";
 import { batchAPI, carAPI } from "@/lib/api";
 import type { Car } from "@/types";
+import { SubuserProtectedRoute } from "@/components/SubuserProtectedRoute";
 
 interface Batch {
   _id: string;
@@ -122,77 +123,79 @@ export default function InventoryPage() {
   }
 
   return (
-    <MainLayout>
-      <div className="flex min-h-screen">
-        {/* Main Content fills all remaining space */}
-        <div className="flex-1 flex flex-col space-y-2 pt-4">
-          {/* Header Section with Page Name and Add Button */}
-          <div className="flex items-center justify-between">
-            <h1 
-              className="text-gray-900 font-semibold"
-              style={{
-                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                fontWeight: 600,  
-                fontStyle: 'normal',
-                fontSize: '22px',
-                lineHeight: '30px',
-                letterSpacing: '0%'
-              }}
-            >
-             All Inventory
-            </h1>
-            <Button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-              style={{
-                width: '150px',
-                height: '50px',
-                borderRadius: '50px',
-                paddingTop: '10px',
-                paddingRight: '18px',
-                paddingBottom: '10px',
-                paddingLeft: '18px',
-                gap: '10px',
-                borderWidth: '1px',
-                opacity: 1
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Create Batch
-            </Button>
-          </div>
-
-          {/* Batch Sections */}
-          {uniqueBatches.length > 0 ? (
-            uniqueBatches.map((batch, index) => {
-              const batchCars = getCarsForBatch(batch.batchNo);
-              console.log(`Rendering batch ${batch.batchNo} with ${batchCars.length} cars`);
-              
-              return (
-                <BatchCarsSection 
-                  key={batch._id}
-                  batchTitle={`Batch ${batch.batchNo}`} 
-                  batchNumber={batch.batchNo} 
-                  cars={batchCars}
-                  isLatestBatch={index === 0}
-                  batchData={batch}
-                />
-              );
-            })
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Batches Found</h3>
-              <p className="text-gray-600">Create your first batch to get started.</p>
+    <SubuserProtectedRoute requiredAccess="carManagement">
+      <MainLayout>
+        <div className="flex min-h-screen">
+          {/* Main Content fills all remaining space */}
+          <div className="flex-1 flex flex-col space-y-2 pt-4">
+            {/* Header Section with Page Name and Add Button */}
+            <div className="flex items-center justify-between">
+              <h1 
+                className="text-gray-900 font-semibold"
+                style={{
+                  fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+                  fontWeight: 600,  
+                  fontStyle: 'normal',
+                  fontSize: '22px',
+                  lineHeight: '30px',
+                  letterSpacing: '0%'
+                }}
+              >
+               All Inventory
+              </h1>
+              <Button 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                style={{
+                  width: '150px',
+                  height: '50px',
+                  borderRadius: '50px',
+                  paddingTop: '10px',
+                  paddingRight: '18px',
+                  paddingBottom: '10px',
+                  paddingLeft: '18px',
+                  gap: '10px',
+                  borderWidth: '1px',
+                  opacity: 1
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Create Batch
+              </Button>
             </div>
-          )}
+
+            {/* Batch Sections */}
+            {uniqueBatches.length > 0 ? (
+              uniqueBatches.map((batch, index) => {
+                const batchCars = getCarsForBatch(batch.batchNo);
+                console.log(`Rendering batch ${batch.batchNo} with ${batchCars.length} cars`);
+                
+                return (
+                  <BatchCarsSection 
+                    key={batch._id}
+                    batchTitle={`Batch ${batch.batchNo}`} 
+                    batchNumber={batch.batchNo} 
+                    cars={batchCars}
+                    isLatestBatch={index === 0}
+                    batchData={batch}
+                  />
+                );
+              })
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Batches Found</h3>
+                <p className="text-gray-600">Create your first batch to get started.</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      
-      {/* Batch Modal */}
-      <BatchModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
-    </MainLayout>
+        
+        {/* Batch Modal */}
+        <BatchModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+        />
+      </MainLayout>
+    </SubuserProtectedRoute>
   );
 }

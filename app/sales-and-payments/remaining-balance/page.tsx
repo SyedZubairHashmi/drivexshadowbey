@@ -2,7 +2,7 @@
 
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical } from "lucide-react";
+import { Plus, MoreVertical, FileText, CreditCard, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { customerAPI, batchAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { CustomerUpdatePaymentModal } from "@/components/ui/customer-update-payment-modal";
 
 interface Customer {
   _id: string;
@@ -52,6 +59,7 @@ interface Customer {
     note?: string;
     document?: string;
   };
+  payments?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -77,6 +85,29 @@ export default function RemainingBalancePage() {
   const [gradeFilter, setGradeFilter] = useState('');
   const [importYearFilter, setImportYearFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+
+  // Payment modal states
+  const [showUpdatePaymentModal, setShowUpdatePaymentModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  // Action handlers
+  const handleGenerateInvoice = (customer: Customer) => {
+    console.log("Generate invoice for customer:", customer);
+    // Navigate to invoice generation page or open modal
+    router.push(`/sales-and-payments/invoice?customerId=${customer._id}`);
+  };
+
+  const handleUpdatePayment = (customer: Customer) => {
+    console.log("Update payment for customer:", customer);
+    setSelectedCustomer(customer);
+    setShowUpdatePaymentModal(true);
+  };
+
+  const handleEdit = (customer: Customer) => {
+    console.log("Edit customer:", customer);
+    // Navigate to customer edit page
+    router.push(`/sales-and-payments/customers/${customer._id}?action=edit`);
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -498,21 +529,49 @@ export default function RemainingBalancePage() {
                           <span style={{ color: '#FF0000' }}>
                             Rs {(customer.sale.remainingAmount || 0).toLocaleString()}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            style={{
-                              display: 'flex',
-                              padding: '4px',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderRadius: '1000px',
-                              color: '#000000',
-                              border: 'none'
-                            }}
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                style={{
+                                  display: 'flex',
+                                  padding: '4px',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  borderRadius: '1000px',
+                                  color: '#000000',
+                                  border: 'none',
+                                  backgroundColor: 'transparent'
+                                }}
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem 
+                                onClick={() => handleGenerateInvoice(customer)}
+                                className="cursor-pointer hover:bg-gray-50"
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                Generate Invoice
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleUpdatePayment(customer)}
+                                className="cursor-pointer hover:bg-gray-50"
+                              >
+                                <CreditCard className="h-4 w-4 mr-2" />
+                                Update Payment
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleEdit(customer)}
+                                className="cursor-pointer hover:bg-gray-50"
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -569,6 +628,33 @@ export default function RemainingBalancePage() {
               </button>
         </div>
       </div>
+
+      {/* Customer Update Payment Modal */}
+      {selectedCustomer && (
+        <CustomerUpdatePaymentModal
+          isOpen={showUpdatePaymentModal}
+          onClose={() => {
+            setShowUpdatePaymentModal(false);
+            setSelectedCustomer(null);
+          }}
+          customer={{
+            _id: selectedCustomer._id,
+            vehicle: selectedCustomer.vehicle,
+            customer: selectedCustomer.customer,
+            sale: selectedCustomer.sale,
+            payments: selectedCustomer.payments || [],
+            createdAt: selectedCustomer.createdAt,
+            updatedAt: selectedCustomer.updatedAt
+          }}
+          onSubmit={(updatedCustomer) => {
+            console.log("Payment updated successfully");
+            setShowUpdatePaymentModal(false);
+            setSelectedCustomer(null);
+            // Refresh the customer data
+            fetchCustomers();
+          }}
+        />
+      )}
     </MainLayout>
   );
 }

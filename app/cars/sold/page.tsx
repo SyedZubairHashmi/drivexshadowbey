@@ -150,32 +150,38 @@ function SoldCarsContent() {
 
     // Apply company filter
     if (companyFilter && companyFilter !== 'all') {
-      filtered = filtered.filter((car: any) => 
-        car.company === companyFilter
-      );
+      filtered = filtered.filter((car: any) => {
+        console.log('Company filter:', companyFilter, 'Car company:', car.company);
+        // Case-insensitive comparison
+        return car.company?.toLowerCase() === companyFilter.toLowerCase();
+      });
     }
 
     // Apply grade filter
     if (gradeFilter && gradeFilter !== 'all') {
-      filtered = filtered.filter((car: any) => 
-        car.auctionGrade?.toString() === gradeFilter
-      );
+      filtered = filtered.filter((car: any) => {
+        console.log('Grade filter:', gradeFilter, 'Car grade:', car.auctionGrade);
+        return car.auctionGrade?.toString() === gradeFilter;
+      });
     }
 
     // Apply import year filter
     if (importYearFilter && importYearFilter !== 'all') {
-      filtered = filtered.filter((car: any) => 
-        car.importYear?.toString() === importYearFilter
-      );
+      filtered = filtered.filter((car: any) => {
+        console.log('Import year filter:', importYearFilter, 'Car year:', car.importYear);
+        return car.importYear?.toString() === importYearFilter;
+      });
     }
 
     // Apply payment status filter
     if (paymentStatusFilter && paymentStatusFilter !== 'all') {
-      filtered = filtered.filter((car: any) => 
-        car.saleInfo?.paymentStatus === paymentStatusFilter
-      );
+      filtered = filtered.filter((car: any) => {
+        console.log('Payment status filter:', paymentStatusFilter, 'Car status:', car.saleInfo?.paymentStatus);
+        return car.saleInfo?.paymentStatus === paymentStatusFilter;
+      });
     }
 
+    console.log('Filtered cars count:', filtered.length);
     setFilteredSoldCars(filtered);
   };
 
@@ -421,6 +427,12 @@ function SoldCarsContent() {
       salesAgreement: null,
       additionalDocuments: []
     });
+    
+    // Remove modal parameter from URL
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete('modal');
+    currentUrl.searchParams.delete('from');
+    router.replace(currentUrl.pathname + currentUrl.search);
     
     // Check if user came from customer page and navigate back
     const sourcePage = sessionStorage.getItem('soldCarFormSource');
@@ -1340,21 +1352,6 @@ function SoldCarsContent() {
                 />
               </div>
 
-              <Button 
-                variant="outline" 
-                size="sm"
-                style={{
-                  height: "41px",
-                  borderRadius: "12px",
-                  gap: "10px",
-                  padding: "12px",
-                  borderWidth: "1px",
-                  color: "#00000099"
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
             </div>
 
             <div className="flex gap-2">
@@ -1380,7 +1377,7 @@ function SoldCarsContent() {
                 <SelectContent>
                   <SelectItem value="all">All Companies</SelectItem>
                   {/* Japanese Brands */}
-                  <SelectItem value="TOYOTA">TOYOTA</SelectItem>
+                  <SelectItem value="Toyota">Toyota</SelectItem>
                   <SelectItem value="Honda">Honda</SelectItem>
                   <SelectItem value="Suzuki">Suzuki</SelectItem>
                   <SelectItem value="Daihatsu">Daihatsu</SelectItem>
@@ -1445,11 +1442,14 @@ function SoldCarsContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Grades</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
+                  <SelectItem value="5.5">5.5</SelectItem>
                   <SelectItem value="5">5</SelectItem>
                   <SelectItem value="4.5">4.5</SelectItem>
                   <SelectItem value="4">4</SelectItem>
                   <SelectItem value="3.5">3.5</SelectItem>
                   <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -1474,13 +1474,12 @@ function SoldCarsContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="2022">2022</SelectItem>
                   <SelectItem value="2021">2021</SelectItem>
                   <SelectItem value="2020">2020</SelectItem>
-                  <SelectItem value="2019">2019</SelectItem>
-                  <SelectItem value="2018">2018</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -1501,13 +1500,12 @@ function SoldCarsContent() {
                     textOverflow: "ellipsis"
                   }}
                 >
-                  <SelectValue placeholder="Payment Status" style={{ whiteSpace: "nowrap" }} />
+                  <SelectValue placeholder="All Status" style={{ whiteSpace: "nowrap" }} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1521,7 +1519,11 @@ function SoldCarsContent() {
 
       {/* Add Sold Car Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "#000000CC" }}>
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50" 
+          style={{ backgroundColor: "#000000CC" }}
+          onClick={handleCloseModal}
+        >
           <div 
             className="bg-white rounded-xl border border-gray-200 flex flex-col"
             style={{
@@ -1532,6 +1534,7 @@ function SoldCarsContent() {
               borderWidth: "1px",
               padding: "24px",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -1621,7 +1624,14 @@ function SoldCarsContent() {
         heading="Car Sold Successfully"
         message="The car has been marked as sold and customer data has been saved"
         isOpen={showSuccess}
-        onClose={() => setShowSuccess(false)}
+        onClose={() => {
+          setShowSuccess(false);
+          // Remove modal parameter from URL when success popup closes
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.delete('modal');
+          currentUrl.searchParams.delete('from');
+          router.replace(currentUrl.pathname + currentUrl.search);
+        }}
       />
     </MainLayout>
   );

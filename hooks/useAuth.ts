@@ -23,8 +23,7 @@ interface User {
     carManagement: boolean;
     analytics: boolean;
     setting: boolean;
-    sales: boolean;
-    customers: boolean;
+    salesAndPayments: boolean;
     investors: boolean;
     dashboardUnits: boolean;
   };
@@ -36,31 +35,92 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check for user data in localStorage or sessionStorage
-    const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
+    // First, check for cached user data to show immediately
+    const getCookieValue = (name: string) => {
+      if (typeof document === 'undefined') return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
     
-    if (userData) {
+    const storageUserData = localStorage.getItem('user') || sessionStorage.getItem('user');
+    let cookieUserData = getCookieValue('user_client');
+    if (cookieUserData) {
       try {
-        const parsedUser = JSON.parse(userData);
+        cookieUserData = decodeURIComponent(cookieUserData);
+      } catch {}
+    }
+    const cachedUserData = cookieUserData || storageUserData;
+    
+    // Set cached user immediately to reduce loading time
+    if (cachedUserData) {
+      try {
+        const parsedUser = JSON.parse(cachedUserData);
         setUser(parsedUser);
+        setLoading(false); // Stop loading immediately with cached data
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('Error parsing cached user data:', error);
         // Clear invalid data
         localStorage.removeItem('user');
         sessionStorage.removeItem('user');
+        if (typeof document !== 'undefined') {
+          document.cookie = 'user_client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
       }
     }
-    
-    setLoading(false);
+
+    // Then verify with server in background
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/me', { method: 'GET', credentials: 'include' });
+        const me = await res.json();
+        if (me && me.authenticated && me.auth) {
+          // If subuser, fetch live data from DB to reflect latest access flags
+          if (me.auth.role === 'subuser') {
+            try {
+              const live = await fetch('/api/subusers/me', { method: 'GET', credentials: 'include' });
+              const liveData = await live.json();
+              if (liveData?.success && liveData.data) {
+                setUser(liveData.data);
+                return;
+              }
+            } catch {}
+          }
+          // Update with server data if different from cached
+          const stored = localStorage.getItem('user') || sessionStorage.getItem('user');
+          if (stored) {
+            try { 
+              const parsedStored = JSON.parse(stored);
+              if (parsedStored._id !== me.auth._id) {
+                setUser({ _id: me.auth._id, role: me.auth.role } as any);
+              }
+            } catch {}
+          } else {
+            setUser({ _id: me.auth._id, role: me.auth.role } as any);
+          }
+          return;
+        }
+      } catch {}
+      
+      // If no cached data and server check failed, set loading to false
+      if (!cachedUserData) {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const login = (userData: User, rememberMe: boolean = false) => {
+    console.log('useAuth login called with:', userData);
     if (rememberMe) {
       localStorage.setItem('user', JSON.stringify(userData));
+      console.log('User data saved to localStorage');
     } else {
       sessionStorage.setItem('user', JSON.stringify(userData));
+      console.log('User data saved to sessionStorage');
     }
     setUser(userData);
+    console.log('User state updated');
   };
 
   const logout = async () => {
@@ -74,6 +134,12 @@ export function useAuth() {
     // Clear client-side storage
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    
+    // Clear client-readable cookie
+    if (typeof document !== 'undefined') {
+      document.cookie = 'user_client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+    
     setUser(null);
     router.push('/login');
   };
@@ -89,12 +155,12 @@ export function useAuth() {
     
     // Admin and company users have full access
     if (user.role === 'admin' || user.role === 'company') return true;
-    
+
     // Subusers have limited access based on their permissions
     if (user.role === 'subuser' && user.access) {
       return user.access[feature as keyof typeof user.access] === true;
     }
-    
+
     return false;
   };
 

@@ -44,13 +44,15 @@ export async function POST(request: NextRequest) {
 
       const response = NextResponse.json({ success: true, data: adminResponse, message: 'Login successful' });
       
-      // Set user data in cookie for middleware access
-      response.cookies.set('user', JSON.stringify(adminResponse), {
+      // Set minimal auth cookie for middleware/client validation (httpOnly)
+      response.cookies.set('auth', JSON.stringify({ _id: String(admin._id), role: 'admin' }), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/'
       });
+      
       
       return response;
     }
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
 
       const companyResponse = {
-        _id: company._id,
+        _id: company._id, 
         ownerName: company.ownerName,
         companyName: company.companyName,
         companyEmail: company.companyEmail,
@@ -87,14 +89,18 @@ export async function POST(request: NextRequest) {
 
       const response = NextResponse.json({ success: true, data: companyResponse, message: 'Login successful' });
       
-      // Set user data in cookie for middleware access
-      response.cookies.set('user', JSON.stringify(companyResponse), {
+      // Set minimal auth cookie for middleware/client validation (httpOnly)
+      const authCookie = JSON.stringify({ _id: String(company._id), role: 'company' });
+      console.log('Setting company auth cookie with value:', authCookie);
+      response.cookies.set('auth', authCookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/'
       });
       
+      console.log('Company login response created with auth cookie set');
       return response;
     }
 
@@ -108,8 +114,8 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Get company information
-      const company = await Company.findById(subuser.companyId);
+      // ✅ Company is already populated
+      const company = subuser.companyId as any;
       if (!company || company.status !== 'active') {
         return NextResponse.json(
           { success: false, error: 'Company account is inactive or not found' },
@@ -122,8 +128,8 @@ export async function POST(request: NextRequest) {
         name: subuser.name,
         email: subuser.email,
         role: 'subuser' as const,
-        userRole: subuser.role || 'Staff', // The role like Accountant, Staff, etc.
-        companyId: subuser.companyId,
+        userRole: subuser.role || 'Staff',
+        companyId: company._id || subuser.companyId,
         companyName: company.companyName,
         branch: subuser.branch,
         access: subuser.access,
@@ -133,12 +139,13 @@ export async function POST(request: NextRequest) {
 
       const response = NextResponse.json({ success: true, data: subuserResponse, message: 'Login successful' });
       
-      // Set user data in cookie for middleware access
-      response.cookies.set('user', JSON.stringify(subuserResponse), {
+      // Set minimal auth cookie for middleware/client validation (httpOnly)
+      response.cookies.set('auth', JSON.stringify({ _id: String(subuser._id), role: 'subuser', companyId: String(company._id || subuser.companyId) }), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/'
       });
       // Set subuser access cookie to allow route-level permissions in middleware
       if (subuser.access) {
@@ -156,7 +163,7 @@ export async function POST(request: NextRequest) {
     // If no user found
     return NextResponse.json(
       { success: false, error: 'Invalid email or password' },
-      { status: 401 }
+      { status: 401 } 
     );
 
   } catch (error: any) {

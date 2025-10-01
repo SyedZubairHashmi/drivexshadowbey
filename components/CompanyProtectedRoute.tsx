@@ -22,7 +22,7 @@ export function CompanyProtectedRoute({ children }: CompanyProtectedRouteProps) 
         router.push('/admin');
       }
     }
-  }, [loading, isAuthenticated, isCompany, isSubuser, router]);
+  }, [loading, isAuthenticated, isCompany, router]);
 
   // Show loading while checking authentication
   if (loading) {

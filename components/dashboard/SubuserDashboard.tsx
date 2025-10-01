@@ -34,8 +34,7 @@ export function SubuserDashboard() {
     if (user.access.carManagement) items.push({ name: "Car Management", icon: Car, color: "bg-blue-500" })
     if (user.access.analytics) items.push({ name: "Analytics", icon: BarChart3, color: "bg-green-500" })
     if (user.access.setting) items.push({ name: "Settings", icon: Settings, color: "bg-purple-500" })
-    if (user.access.sales) items.push({ name: "Sales & Payments", icon: ShoppingCart, color: "bg-orange-500" })
-    if (user.access.customers) items.push({ name: "Customers", icon: Users, color: "bg-pink-500" })
+    if ((user.access as any).salesAndPayments) items.push({ name: "Sales & Payments", icon: ShoppingCart, color: "bg-orange-500" })
     if (user.access.investors) items.push({ name: "Investors", icon: TrendingUp, color: "bg-indigo-500" })
     
     return items
@@ -163,7 +162,7 @@ export function SubuserDashboard() {
             </button>
           )}
           
-          {user.access?.sales && (
+          {(user.access as any)?.salesAndPayments && (
             <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-left transition-colors">
               <ShoppingCart className="w-6 h-6 text-orange-600 mb-2" />
               <p className="font-medium text-orange-900">Sales & Payments</p>
@@ -171,11 +170,11 @@ export function SubuserDashboard() {
             </button>
           )}
           
-          {user.access?.customers && (
-            <button className="p-4 bg-pink-50 hover:bg-pink-100 rounded-lg text-left transition-colors">
-              <Users className="w-6 h-6 text-pink-600 mb-2" />
-              <p className="font-medium text-pink-900">Customer Management</p>
-              <p className="text-sm text-pink-600">View customer data</p>
+          {user.access?.investors && (
+            <button className="p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-left transition-colors">
+              <TrendingUp className="w-6 h-6 text-indigo-600 mb-2" />
+              <p className="font-medium text-indigo-900">Investors</p>
+              <p className="text-sm text-indigo-600">View investor data</p>
             </button>
           )}
         </div>

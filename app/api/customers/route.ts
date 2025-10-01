@@ -10,12 +10,17 @@ export async function GET(request: NextRequest) {
     
     // Get company ID from authentication
     const companyId = getCompanyIdFromRequest(request);
+    console.log('Customers API: Company ID from auth:', companyId);
+    
     if (!companyId) {
+      console.log('Customers API: No company ID found');
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
+
+    // Subuser RBAC removed
     
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
@@ -50,6 +55,9 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination
     const total = await Customer.countDocuments(filter);
+    
+    console.log('Customers API: Found', customers.length, 'customers for company:', companyId);
+    console.log('Customers API: Filter used:', filter);
 
     return NextResponse.json({
       success: true,
@@ -84,6 +92,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Subuser RBAC removed
     
     const body = await request.json();
     

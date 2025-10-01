@@ -99,6 +99,7 @@ export function CustomerUpdatePaymentModal({ isOpen, onClose, customer, onSubmit
 
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
   const [modalKey, setModalKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form data when customer changes
   useEffect(() => {
@@ -211,6 +212,7 @@ export function CustomerUpdatePaymentModal({ isOpen, onClose, customer, onSubmit
         return;
       }
 
+    setIsLoading(true);
     try {
       // Prepare payment data for new customer model
       const paymentData = {
@@ -258,6 +260,8 @@ export function CustomerUpdatePaymentModal({ isOpen, onClose, customer, onSubmit
       }
     } catch (error) {
       alert('Failed to add payment. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -728,14 +732,24 @@ export function CustomerUpdatePaymentModal({ isOpen, onClose, customer, onSubmit
           <Button
             type="button"
             onClick={handleSubmit}
+            disabled={isLoading}
             className="text-white w-full"
             style={{
               height: '45px',
               borderRadius: '8px',
-              backgroundColor: '#00674F'
+              backgroundColor: isLoading ? '#9CA3AF' : '#00674F',
+              opacity: isLoading ? 0.7 : 1,
+              cursor: isLoading ? 'not-allowed' : 'pointer'
             }}
           >
-            Save & close
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Saving...
+              </div>
+            ) : (
+              'Save & close'
+            )}
           </Button>
         </div>
       </DialogContent>

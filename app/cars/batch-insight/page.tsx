@@ -20,14 +20,14 @@ import {
 
 // Flag SVG Components
 const FlagJP = () => (
-  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="Japan flag" role="img">
+  <svg viewBox="0 0 3 2" className="w-full h-full" aria-label="Japan flag" role="img">
     <path fill="#fff" d="M0 0h3v2H0z" />
     <circle cx="1.5" cy="1" r="0.5" fill="#bc002d" />
   </svg>
 );
 
 const FlagUS = () => (
-  <svg viewBox="0 0 7410 3900" className="h-4 w-6" aria-label="United States flag" role="img">
+  <svg viewBox="0 0 7410 3900" className="w-full h-full" aria-label="United States flag" role="img">
     <path fill="#b22234" d="M0 0h7410v3900H0z" />
     <path stroke="#fff" strokeWidth="300" d="M0 450h7410M0 1050h7410M0 1650h7410M0 2250h7410M0 2850h7410M0 3450h7410" />
     <path fill="#3c3b6e" d="M0 0h2964v2100H0z" />
@@ -35,7 +35,7 @@ const FlagUS = () => (
 );
 
 const FlagGB = () => (
-  <svg viewBox="0 0 60 30" className="h-4 w-6" aria-label="United Kingdom flag" role="img">
+  <svg viewBox="0 0 60 30" className="w-full h-full" aria-label="United Kingdom flag" role="img">
     <clipPath id="s"><path d="M0 0v30h60V0z"/></clipPath>
     <clipPath id="t"><path d="M30 15h30v15zM0 0h30V0zM0 15H0v15zM30 0h30v15z"/></clipPath>
     <g clipPath="url(#s)">
@@ -49,7 +49,7 @@ const FlagGB = () => (
 );
 
 const FlagAU = () => (
-  <svg viewBox="0 0 60 30" className="h-4 w-6" aria-label="Australia flag" role="img">
+  <svg viewBox="0 0 60 30" className="w-full h-full" aria-label="Australia flag" role="img">
     <path fill="#00247d" d="M0 0h60v30H0z"/>
     <g transform="scale(0.5)">
       <clipPath id="a"><path d="M0 0h30v15H0z"/></clipPath>
@@ -73,7 +73,7 @@ const FlagAU = () => (
 );
 
 const FlagKR = () => (
-  <svg viewBox="0 0 3 2" className="h-4 w-6" aria-label="South Korea flag" role="img">
+  <svg viewBox="0 0 3 2" className="w-full h-full" aria-label="South Korea flag" role="img">
     <path fill="#fff" d="M0 0h3v2H0z"/>
     <g transform="translate(1.5 1)">
       <circle r="0.5" fill="#cd2e3a"/>
@@ -141,9 +141,11 @@ function BatchInsightHeader({ batch, isExpanded, onToggle }: BatchInsightHeaderP
             style={{
               width: "35px",
               height: "20px",
-              borderRadius: "4px",
+              borderRadius: "5px",
               opacity: 1,
+              overflow: "hidden",
             }}
+            className="bg-white"
           >
             <FlagComponent />
           </div>
@@ -278,15 +280,22 @@ function BatchInsightHeader({ batch, isExpanded, onToggle }: BatchInsightHeaderP
                 <SelectValue placeholder="Grade" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Grades</SelectItem>
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="5.5">5.5</SelectItem>
                 <SelectItem value="5">5</SelectItem>
+                <SelectItem value="4.5">4.5</SelectItem>
                 <SelectItem value="4">4</SelectItem>
+                <SelectItem value="3.5">3.5</SelectItem>
                 <SelectItem value="3">3</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+             
               </SelectContent>
             </Select>
 
             <Select>
               <SelectTrigger 
-                className="w-32"
+                className="w-36"
                 style={{
                   display: "flex",
                   padding: "12px",
@@ -301,9 +310,13 @@ function BatchInsightHeader({ batch, isExpanded, onToggle }: BatchInsightHeaderP
                 <SelectValue placeholder="Import Year" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
                 <SelectItem value="2023">2023</SelectItem>
                 <SelectItem value="2022">2022</SelectItem>
                 <SelectItem value="2021">2021</SelectItem>
+                <SelectItem value="2020">2020</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -388,6 +401,7 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
         borderColor: "#E5E7EB",
         gap: "12px",
         opacity: 1,
+        overflow: "hidden", // Ensure inner backgrounds don't hide rounded corners
       }}
     >
       <table className="w-full border-collapse" style={{
@@ -417,25 +431,31 @@ function HorizontalCarTable({ cars, batchNumber }: HorizontalCarTableProps) {
                 paddingLeft: "10px",
                 width: "200px",
                 minWidth: "200px",
+                borderTopLeftRadius: "12px",
               }}
             >
               S.No
             </th>
-            {cars.map((car, index) => (
-              <th 
-                key={car._id || index} 
-                style={{
-                  backgroundColor: "#F5F7F9",
-                  color: "#00000099",
-                  textAlign: "left",
-                  fontWeight: "500",
-                  fontSize: "14px",
-                  ...columnStyle,
-                }}
-              >
-                Car {(index + 1).toString().padStart(2, '0')}
-              </th>
-            ))}
+            {cars.map((car, index) => {
+              const isLast = index === cars.length - 1;
+              const headerStyle: React.CSSProperties = {
+                backgroundColor: "#F5F7F9",
+                color: "#00000099",
+                textAlign: "left",
+                fontWeight: "500",
+                fontSize: "14px",
+                ...(columnStyle as any),
+                ...(isLast ? { borderTopRightRadius: "12px" } : {}),
+              };
+              return (
+                <th 
+                  key={car._id || index} 
+                  style={headerStyle}
+                >
+                  Car {(index + 1).toString().padStart(2, '0')}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -605,7 +625,7 @@ export default function BatchInsightPage() {
         
         // Set all batches as expanded by default
         const expandedState: { [key: string]: boolean } = {};
-        sortedBatches.forEach(batch => {
+        sortedBatches.forEach((batch: Batch) => {
           expandedState[batch.batchNo] = true;
         });
         setExpandedBatches(expandedState);
@@ -721,7 +741,7 @@ export default function BatchInsightPage() {
 
           {/* Batch Sections */}
           {currentBatches.length > 0 ? (
-            currentBatches.map((batch) => {
+            currentBatches.map((batch: Batch) => {
               const batchCars = getCarsForBatch(batch.batchNo);
               const isExpanded = expandedBatches[batch.batchNo] || false;
               

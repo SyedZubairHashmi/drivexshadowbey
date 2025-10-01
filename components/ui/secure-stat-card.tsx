@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,16 +71,33 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
 
+  // Clear PIN when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPin("");
+      setShowPin(false);
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onPinSubmit(pin);
     setPin("");
   };
 
+  const handleClose = () => {
+    setPin(""); // Clear PIN when closing
+    setShowPin(false); // Reset show pin state
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleClose}
+    >
              <div 
          className="bg-white rounded-xl border border-gray-300 flex flex-col gap-5"
                    style={{
@@ -94,6 +111,7 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
             borderRadius: "12px",
             padding: "20px"
           }}
+          onClick={(e) => e.stopPropagation()}
        >
          <div className="flex justify-between items-center ">
            <h2 
@@ -110,7 +128,7 @@ function PinModal({ isOpen, onClose, onPinSubmit }: PinModalProps) {
              Safety Alert
            </h2>
            <button
-             onClick={onClose}
+             onClick={handleClose}
              className="text-black-500 hover:text-gray-700 flex items-center justify-center"
              style={{
                width: "35px",
@@ -268,22 +286,12 @@ export function SecureStatCard({
   return (
     <>
       <div 
-        style={{
-          display: 'flex',
-          width: '290px',
-          minWidth: '166.667px',
-          padding: '16.667px 20px',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: '6.667px',
-          borderRadius: '13.333px',
-          border: '1px solid rgba(0, 0, 0, 0.12)',
-          position: 'relative',
-        }}
-        className={className}
+        className={`relative flex flex-col items-start gap-2 rounded-[13.333px] border border-black/10 transition-all 
+        2xl:w-[290px] xl:w-[260px] lg:w-[220px] w-[220px]
+        2xl:px-5 2xl:py-4 xl:px-5 xl:py-4 lg:px-4 lg:py-3 px-4 py-3 ${className || ''}`}
       >
         <div className="flex justify-between items-start w-full">
-          <div className="text-sm text-black-500">{title}</div>
+          <div className="text-black-500 2xl:text-sm xl:text-[13px] lg:text-xs text-xs">{title}</div>
           <button
             onClick={handleEyeClick}
             className="transition-colors"
@@ -307,7 +315,8 @@ export function SecureStatCard({
         <div className="flex justify-between items-end w-full">
           <div className="flex items-center gap-2">
             <div 
-              className={`text-2xl font-bold transition-all duration-300 ${
+              className={`font-bold transition-all duration-300 
+                2xl:text-2xl xl:text-2xl lg:text-xl text-xl ${
                 !isUnlocked ? 'blur-sm' : ''
               }`}
               style={{ color: "#141414" }}
@@ -344,7 +353,8 @@ export function SecureStatCard({
             )}
           </div>
           {subtitle && (
-            <p className={`text-[10px] text-gray-500 transition-all duration-300 ${
+            <p className={`text-gray-500 transition-all duration-300 
+              2xl:text-[10px] xl:text-[10px] lg:text-[9px] text-[9px] ${
               !isUnlocked ? 'blur-sm' : ''
             }`}>
               {subtitle}

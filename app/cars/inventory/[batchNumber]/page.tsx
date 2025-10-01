@@ -271,6 +271,7 @@ export default function BatchDetailPage({ params }: BatchDetailPageProps) {
             isExpanded={true}
             batchNumber={batchNumber}
             isLatestBatch={isLatestBatch()}
+            showSeeDetail={false}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             companyFilter={companyFilter}

@@ -5,8 +5,10 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ChevronRight, Eye, MoreVertical, Plus, Users, DollarSign, Car, TrendingUp, Calendar } from "lucide-react";
+import { Search, ChevronRight, Eye, MoreVertical, Plus, Users, DollarSign, Car, TrendingUp, Calendar, FileText } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UpdatePaymentModal } from "@/components/ui/update-payment-modal";
+import { InvestorDetailsModal } from "@/components/ui/investor-details-modal";
 import { investorAPI, batchAPI } from "@/lib/api";
 import { SecureStatCard } from "@/components/ui/secure-stat-card";
 import { HeaderStatCard } from "@/components/ui/header-stat-card";
@@ -51,6 +53,8 @@ export default function PaymentHistoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showUpdatePaymentModal, setShowUpdatePaymentModal] = useState(false);
+  const [showInvestorDetailsModal, setShowInvestorDetailsModal] = useState(false);
+  const [selectedInvestor, setSelectedInvestor] = useState<PaymentHistory | null>(null);
   const [payments, setPayments] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +188,35 @@ export default function PaymentHistoryPage() {
     } catch (error) {
       console.error("Error updating expense:", error);
       throw error;
+    }
+  };
+
+  const handleViewDetails = (payment: PaymentHistory) => {
+    setSelectedInvestor(payment);
+    setShowInvestorDetailsModal(true);
+  };
+
+  const handleEditInvestor = async (updatedInvestor: PaymentHistory) => {
+    try {
+      // Here you would typically call an API to update the investor
+      console.log("Updating investor:", updatedInvestor);
+      
+      // For now, just update the local state
+      setPayments(prevPayments => 
+        prevPayments.map(payment => 
+          payment._id === updatedInvestor._id ? updatedInvestor : payment
+        )
+      );
+      
+      // Close the modal
+      setShowInvestorDetailsModal(false);
+      setSelectedInvestor(null);
+      
+      // Show success message
+      alert("Investor details updated successfully!");
+    } catch (error) {
+      console.error("Error updating investor:", error);
+      alert("Error updating investor details. Please try again.");
     }
   };
 
@@ -380,18 +413,31 @@ export default function PaymentHistoryPage() {
                       <TableCell className="text-black-500">PKR {payment.amountPaid.toLocaleString()}</TableCell>
                       <TableCell className="text-black-500">PKR {payment.remainingAmount.toLocaleString()}</TableCell>
                     <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.paymentMethod.type)}`}>
-                          {payment.paymentMethod.type.charAt(0).toUpperCase() + payment.paymentMethod.type.slice(1)}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.paymentMethod?.type || 'pending')}`}>
+                          {payment.paymentMethod?.type ? payment.paymentMethod.type.charAt(0).toUpperCase() + payment.paymentMethod.type.slice(1) : 'Pending'}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem 
+                            onClick={() => handleViewDetails(payment)}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <FileText className="h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                   ))
@@ -407,6 +453,17 @@ export default function PaymentHistoryPage() {
         isOpen={showUpdatePaymentModal}
         onClose={() => setShowUpdatePaymentModal(false)}
         onSubmit={handleUpdatePayment}
+      />
+
+      {/* Investor Details Modal */}
+      <InvestorDetailsModal
+        isOpen={showInvestorDetailsModal}
+        onClose={() => {
+          setShowInvestorDetailsModal(false);
+          setSelectedInvestor(null);
+        }}
+        investor={selectedInvestor}
+        onEdit={handleEditInvestor}
       />
 
       {/* Expense Edit Modal */}

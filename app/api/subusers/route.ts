@@ -1,112 +1,88 @@
-import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import SubUser from "@/lib/models/SubUser";
-import { getUserFromRequest } from "@/lib/auth-utils";
+import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import SubUser from '@/lib/models/SubUser';
+import { getCompanyIdFromRequest, getUserFromRequest } from '@/lib/auth-utils';
 
-// GET all subusers for a company
+// GET /api/subusers - list team members for current company
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    
-    const user = getUserFromRequest(request);
-    if (!user || (user.role !== 'company' && user.role !== 'subuser')) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
 
-    const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('companyId');
-
+    const companyId = getCompanyIdFromRequest(request);
     if (!companyId) {
-      return NextResponse.json({ success: false, error: "Company ID is required" }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
     }
 
-    const subUsers = await SubUser.find({ companyId }).populate('companyId');
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: subUsers 
-    });
+    const user = getUserFromRequest(request);
+    // Only company or admin can list subusers
+    if (user?.role !== 'company' && user?.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+
+    const members = await SubUser.find({ companyId }).sort({ createdAt: -1 }).lean();
+    return NextResponse.json({ success: true, data: members });
   } catch (error: any) {
-    console.error("Error fetching subusers:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || "Failed to fetch team members" 
-    }, { status: 500 });
+    console.error('Error fetching subusers:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch subusers' }, { status: 500 });
   }
 }
 
-// POST create a new subuser
+// POST /api/subusers - create a new team member for current company
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
-    
+
+    const companyId = getCompanyIdFromRequest(request);
+    if (!companyId) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
+
     const user = getUserFromRequest(request);
-    if (!user || user.role !== 'company') {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    // Only company or admin can create subusers
+    if (user?.role !== 'company' && user?.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await request.json();
-    const { name, email, password, role, branch, access } = body;
-    
-    console.log("=== SUBUSER CREATE API DEBUG ===");
-    console.log("Request body:", body);
-    console.log("User:", user);
-    console.log("Extracted fields:", { name, email, password, role, branch, access });
+    const { name, email, password, role, branch, access } = body || {};
 
-    // Validate required fields
+    // Basic validation
     if (!name || !email || !password) {
-      console.log("Validation failed - missing required fields:", { name: !!name, email: !!email, password: !!password });
-      return NextResponse.json({ 
-        success: false, 
-        error: "Name, email, and password are required" 
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Name, email and password are required' }, { status: 400 });
     }
 
-    // Check if email already exists
-    const existingSubUser = await SubUser.findOne({ email });
-    if (existingSubUser) {
-      console.log("Email already exists:", email);
-      return NextResponse.json({ 
-        success: false, 
-        error: "Email already exists" 
-      }, { status: 400 });
+    // Enforce unique email per system
+    const existing = await SubUser.findOne({ email });
+    if (existing) {
+      return NextResponse.json({ success: false, error: 'A user with this email already exists' }, { status: 409 });
     }
 
-    const subUserData = {
-      companyId: user._id,
+    const subUserDoc = new SubUser({
+      companyId,
       name,
       email,
-      password, // In production, hash this
-      role: role || undefined,
-      branch: branch || undefined,
+      password,
+      role,
+      branch,
       access: {
-        carManagement: access?.carManagement || false,
-        analytics: access?.analytics || false,
-        setting: access?.setting || false,
-        sales: access?.sales || false,
-        customers: access?.customers || false,
-        investors: access?.investors || false,
-        dashboardUnits: access?.dashboardUnits || false,
+        carManagement: access?.carManagement === true,
+        analytics: access?.analytics === true,
+        setting: access?.setting === true,
+        salesAndPayments: access?.salesAndPayments === true,
+        investors: access?.investors === true,
+        dashboardUnits: access?.dashboardUnits === true,
       },
-    };
+    });
 
-    console.log("Creating SubUser with data:", subUserData);
-    
-    const subUser = new SubUser(subUserData);
-    await subUser.save();
-    
-    console.log("SubUser created successfully:", subUser);
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: subUser,
-      message: "Team member created successfully" 
-    }, { status: 201 });
+    const saved = await subUserDoc.save();
+    return NextResponse.json({ success: true, data: saved, message: 'Subuser created successfully' }, { status: 201 });
   } catch (error: any) {
-    console.error("Error creating subuser:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || "Failed to create team member" 
-    }, { status: 500 });
+    console.error('Error creating subuser:', error);
+    if (error?.code === 11000) {
+      return NextResponse.json({ success: false, error: 'Duplicate email' }, { status: 409 });
+    }
+    return NextResponse.json({ success: false, error: 'Failed to create subuser' }, { status: 500 });
   }
 }
+
+

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -48,36 +48,46 @@ export default function ProfileSettings() {
   });
   const [teamAccess, setTeamAccess] = useState({
     analytics: true,
-    sales: false,
-    customers: true,
+    salesAndPayments: true,
     carManagement: true,
     investors: false,
-    dashboardUnits: false,
+    dashboardUnits: true,
   });
 
-  // Function to fetch team members
+  // Guard to avoid double-fetch in StrictMode
+  const didInit = useRef(false);
+
+  // Function to fetch team members (subusers) for the current company
   const fetchTeamMembers = async () => {
     try {
-      if (!user) return;
+      if (!user) {
+        console.log('fetchTeamMembers: No user found');
+        return;
+      }
       
-      const companyId = user.role === 'subuser' ? user.companyId : user._id;
+      console.log('fetchTeamMembers: Fetching subusers for user:', user.role, user._id);
       
-      if (!companyId) return;
-      
-      const response = await fetch('/api/users/team-members', {
+      // Backend infers company from auth; no need to pass header
+      const response = await fetch('/api/subusers', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-company-id': companyId,
-        } as HeadersInit,
         credentials: 'include',
       });
 
+      console.log('fetchTeamMembers: Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('fetchTeamMembers: Response data:', data);
         if (data.success) {
-          setTeamMembers(data.data || []);
+          const members = Array.isArray(data.data) ? data.data : [];
+          console.log('fetchTeamMembers: Setting team members:', members);
+          setTeamMembers(members);
+        } else {
+          console.log('fetchTeamMembers: API returned error:', data.error);
         }
+      } else {
+        const errorData = await response.json();
+        console.log('fetchTeamMembers: HTTP error:', response.status, errorData);
       }
     } catch (error) {
       console.error('Error fetching team members:', error);
@@ -494,6 +504,10 @@ export default function ProfileSettings() {
 
   // Load company data on component mount (skip for subusers)
   useEffect(() => {
+    // Prevent double run in React Strict Mode (dev) and route transitions
+    if (didInit.current) return;
+    didInit.current = true;
+
     if (user?.role === 'subuser') {
       setLoading(false);
       return;
@@ -573,7 +587,7 @@ export default function ProfileSettings() {
         });
     setIsAddTeamOpen(false);
         setTeamForm({ fullName: "", email: "", password: "", role: "", branch: "" });
-        setTeamAccess({ analytics: true, sales: false, customers: true, carManagement: true, investors: false, dashboardUnits: false });
+        setTeamAccess({ analytics: true, salesAndPayments: true, carManagement: true, investors: false, dashboardUnits: false });
       } else {
         toast({
           title: "Error",
@@ -1214,8 +1228,7 @@ export default function ProfileSettings() {
 
                 {[
                   { key: "analytics", label: "Analytics" },
-                  { key: "sales", label: "Sales and receipts" },
-                  { key: "customers", label: "Customers" },
+                  { key: "salesAndPayments", label: "Sales & Payments" },
                   { key: "carManagement", label: "Car Management" },
                   { key: "investors", label: "Investors" },
                   { key: "dashboardUnits", label: "Dashboard Units" },
@@ -1376,13 +1389,32 @@ export default function ProfileSettings() {
 
       {/* Team Members Section */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Team</h2>
-        <div className="space-y-4">
-          {teamMembers.length > 0 ? (
-            teamMembers.map((member) => (
-              <div key={member._id} className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+        <div className="flex max-w-full items-start gap-5 mr-8">
+          {/* Left Profile Section - Empty to match settings layout */}
+          <div className="w-80 pl-3 pr-3 bg-white">
+            {/* Empty space to match settings form layout */}
+          </div>
+          
+          {/* Right Team Members Section */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Team</h2>
+              <Button 
+                onClick={fetchTeamMembers}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                Refresh
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {console.log('Rendering team members:', teamMembers.length, teamMembers)}
+              {teamMembers.length > 0 ? (
+                teamMembers.map((member) => (
+                  <div key={member._id} className="flex items-center gap-4 p-2 pl-4 pr-4 bg-white rounded-lg border border-gray-200">
                 {/* Profile Circle */}
-                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#00674F' }}>
                   <span className="text-white font-semibold text-lg">
                     {getInitials(member.name || 'Unknown')}
                   </span>
@@ -1419,7 +1451,18 @@ export default function ProfileSettings() {
                 </div>
                 
                 {/* Edit Button */}
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                <button 
+                  className="font-medium transition-colors"
+                  style={{ 
+                    width: '76px',
+                    height: '37px',
+                    borderRadius: '12px', 
+                    backgroundColor: '#FFFFFF', 
+                    color: 'rgba(0, 0, 0, 0.6)', 
+                    fontSize: '14px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)'
+                  }}
+                >
                   Edit now
                 </button>
               </div>
@@ -1429,6 +1472,8 @@ export default function ProfileSettings() {
               <p>No team members found</p>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>
